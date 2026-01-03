@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Play, Trophy, Target, TrendingUp, Flame, Zap, Star, Clock } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { WORLDS } from '../../data/worlds';
+import { getAssetPath } from '../../utils/assetPath';
 
 // Animated Counter Component
 const AnimatedCounter = ({ value, duration = 1000 }) => {
@@ -164,7 +165,7 @@ const Dashboard = ({ setActiveTab }) => {
                 transition={{ duration: 0.8 }}
             >
                 <div className="hero-background">
-                    <img src="/images/dashboard-hero.png" alt="Hero" />
+                    <img src={getAssetPath('/images/dashboard-hero.png')} alt="Hero" />
                     <div className="hero-overlay"></div>
                 </div>
                 <div className="hero-content">

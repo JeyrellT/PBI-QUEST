@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Sparkles, Zap, Shield, Brain, ZoomIn, Image } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { HERO_CARDS, VILLAIN_CARDS, SPECIAL_CARDS, COVER_CARD, getUnlockedCards } from '../../data/pdfCards';
+import { getAssetPath } from '../../utils/assetPath';
 import '../../styles/CardDeck.css';
 
 const CardDeck = ({ isOpen, onClose }) => {
@@ -164,7 +165,7 @@ const CardDeck = ({ isOpen, onClose }) => {
                                         {hasImage ? (
                                             <>
                                                 <img 
-                                                    src={card.image} 
+                                                    src={getAssetPath(card.image)} 
                                                     alt={card.name}
                                                     className="card-pdf-image"
                                                     onError={() => handleImageError(card.id)}
@@ -257,7 +258,7 @@ const CardDeck = ({ isOpen, onClose }) => {
                                     <div className="detail-image-area">
                                         {selectedCard.image && !imageErrors[selectedCard.id] ? (
                                             <img 
-                                                src={selectedCard.image} 
+                                                src={getAssetPath(selectedCard.image)} 
                                                 alt={selectedCard.name}
                                                 className="detail-card-image"
                                                 onError={() => handleImageError(selectedCard.id)}
@@ -374,7 +375,7 @@ const CardDeck = ({ isOpen, onClose }) => {
                                 
                                 <div className="pdf-image-wrapper">
                                     <img 
-                                        src={viewingImage.image} 
+                                        src={getAssetPath(viewingImage.image)} 
                                         alt={`Carta ${viewingImage.name}`}
                                         className="pdf-full-image"
                                         onError={() => handleImageError(viewingImage.id)}

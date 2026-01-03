@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Medal, Star, TrendingUp, Users, Activity, Zap, Lock, Clock, CheckCircle, XCircle, Crown, Flame, Target, Award, Sparkles } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { WEEKLY_CHALLENGES } from '../../data/weeklyChallenges';
+import { getAssetPath } from '../../utils/assetPath';
 import '../../styles/Leaderboard.css';
 
 const Leaderboard = () => {
@@ -47,10 +48,10 @@ const Leaderboard = () => {
 
     // Simulated Rivals with Premium Avatars
     const rivals = [
-        { name: 'Dax Master', xp: 25400, level: 26, avatar: '/images/avatars/dax-master.png', isImage: true },
-        { name: 'Viz Queen', xp: 21200, level: 22, avatar: '/images/avatars/viz-queen.png', isImage: true },
-        { name: 'Power User 404', xp: 18500, level: 19, avatar: '/images/avatars/power-user.png', isImage: true },
-        { name: 'Data Dragon', xp: 15600, level: 16, avatar: '/images/avatars/data-dragon.png', isImage: true },
+        { name: 'Dax Master', xp: 25400, level: 26, avatar: getAssetPath('/images/avatars/dax-master.png'), isImage: true },
+        { name: 'Viz Queen', xp: 21200, level: 22, avatar: getAssetPath('/images/avatars/viz-queen.png'), isImage: true },
+        { name: 'Power User 404', xp: 18500, level: 19, avatar: getAssetPath('/images/avatars/power-user.png'), isImage: true },
+        { name: 'Data Dragon', xp: 15600, level: 16, avatar: getAssetPath('/images/avatars/data-dragon.png'), isImage: true },
         { name: 'Insight Hunter', xp: 12400, level: 13, avatar: '🏹', isImage: false },
         { name: 'Chart Wizard', xp: 9800, level: 10, avatar: '🔮', isImage: false },
         { name: 'Query King', xp: 7500, level: 8, avatar: '👑', isImage: false },
@@ -475,7 +476,7 @@ const Leaderboard = () => {
                             <span>Velocista DAX</span>
                         </div>
                         <div className="legend-avatar gold-glow">
-                            <img src="/images/avatars/dax-master.png" alt="Dax Master" />
+                            <img src={getAssetPath('/images/avatars/dax-master.png')} alt="Dax Master" />
                         </div>
                         <h3>Dax Master</h3>
                         <p className="legend-achievement">Completó 50 fórmulas DAX en tiempo récord</p>
@@ -495,7 +496,7 @@ const Leaderboard = () => {
                             <span>Maestra Visual</span>
                         </div>
                         <div className="legend-avatar silver-glow">
-                            <img src="/images/avatars/viz-queen.png" alt="Viz Queen" />
+                            <img src={getAssetPath('/images/avatars/viz-queen.png')} alt="Viz Queen" />
                         </div>
                         <h3>Viz Queen</h3>
                         <p className="legend-achievement">Creó los dashboards más impactantes</p>
@@ -515,7 +516,7 @@ const Leaderboard = () => {
                             <span>Racha Imparable</span>
                         </div>
                         <div className="legend-avatar bronze-glow">
-                            <img src="/images/avatars/power-user.png" alt="Power User" />
+                            <img src={getAssetPath('/images/avatars/power-user.png')} alt="Power User" />
                         </div>
                         <h3>Power User 404</h3>
                         <p className="legend-achievement">30 días consecutivos de práctica</p>

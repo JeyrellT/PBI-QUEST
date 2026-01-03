@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Lock, CheckCircle2, Download, Play, Coins, Layers } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { WORLDS } from '../../data/worlds';
+import { getAssetPath } from '../../utils/assetPath';
 import { useDataGenerator } from '../../hooks/useDataGenerator';
 import { getCardsForMission, MISSION_REQUIRED_CARDS } from '../../data/pdfCards';
 import MissionCardSelector from './MissionCardSelector';
@@ -334,7 +335,7 @@ const WorldMap = () => {
                                                                 boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
                                                             }}>
                                                                 <img
-                                                                    src={selectedMission.winImage}
+                                                                    src={getAssetPath(selectedMission.winImage)}
                                                                     alt="Success"
                                                                     style={{ width: '100%', height: 'auto', display: 'block' }}
                                                                 />
@@ -471,7 +472,7 @@ const WorldMap = () => {
                                             >
                                                 <div className="world-card-image">
                                                     <motion.img
-                                                        src={world.image}
+                                                        src={getAssetPath(world.image)}
                                                         alt={world.name}
                                                         whileHover={{ scale: 1.1 }}
                                                         transition={{ duration: 0.8 }}
@@ -531,7 +532,7 @@ const WorldMap = () => {
 
                                     <div className="world-hero-modern glass">
                                         <div className="world-hero-image">
-                                            <img src={selectedWorld.image} alt={selectedWorld.name} />
+                                            <img src={getAssetPath(selectedWorld.image)} alt={selectedWorld.name} />
                                             <div className="world-hero-overlay"></div>
                                         </div>
                                         <div className="world-hero-content">

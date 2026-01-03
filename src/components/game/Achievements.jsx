@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Trophy, Lock, Star, Filter } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { ACHIEVEMENTS } from '../../data/achievements';
+import { getAssetPath } from '../../utils/assetPath';
 import '../../styles/Achievements.css';
 
 const AchievementImage = ({ src, alt, icon }) => {
@@ -23,7 +24,7 @@ const AchievementImage = ({ src, alt, icon }) => {
             </div>
         );
     }
-    return <img src={src} alt={alt} className="achievement-art" onError={() => setError(true)} />;
+    return <img src={getAssetPath(src)} alt={alt} className="achievement-art" onError={() => setError(true)} />;
 };
 
 const Achievements = () => {
