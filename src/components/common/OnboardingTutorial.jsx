@@ -5,6 +5,7 @@ import {
     Coins, Map, BookOpen, Sparkles, CheckCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import useResponsive from '../../hooks/useResponsive';
 
 // Import images
 import welcomeImg from '../../assets/tutorial/welcome.png';
@@ -109,6 +110,7 @@ const ONBOARDING_STEPS = [
 const OnboardingTutorial = ({ onComplete, onSkip }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState([]);
+    const { isMobile, isSmallMobile } = useResponsive();
 
     const step = ONBOARDING_STEPS[currentStep];
     const Icon = step.icon;
@@ -179,7 +181,8 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '20px'
+                padding: isMobile ? '10px' : '20px',
+                overflowY: 'auto'
             }}
         >
             <motion.div
@@ -187,12 +190,14 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 style={{
                     display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
                     width: '100%',
-                    maxWidth: '1000px',
-                    height: '600px',
+                    maxWidth: isMobile ? '100%' : '1000px',
+                    height: isMobile ? 'auto' : '600px',
+                    maxHeight: isMobile ? '95vh' : 'none',
                     background: '#0f172a',
-                    borderRadius: '24px',
-                    overflow: 'hidden',
+                    borderRadius: isMobile ? '16px' : '24px',
+                    overflow: isMobile ? 'auto' : 'hidden',
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
                     position: 'relative'
                 }}
@@ -202,18 +207,18 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                     onClick={handleSkip}
                     style={{
                         position: 'absolute',
-                        top: '20px',
-                        right: '20px',
+                        top: isMobile ? '10px' : '20px',
+                        right: isMobile ? '10px' : '20px',
                         background: 'rgba(0, 0, 0, 0.3)',
                         border: '1px solid rgba(255, 255, 255, 0.1)',
                         borderRadius: '8px',
-                        padding: '8px 16px',
+                        padding: isMobile ? '6px 12px' : '8px 16px',
                         color: 'rgba(255, 255, 255, 0.6)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        fontSize: '0.9rem',
+                        fontSize: isMobile ? '0.8rem' : '0.9rem',
                         zIndex: 10,
                         transition: 'all 0.2s ease'
                     }}
@@ -229,9 +234,11 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                     Saltar <X size={16} />
                 </button>
 
-                {/* Left Side - Image */}
+                {/* Left Side - Image (hidden on small mobile) */}
+                {!isSmallMobile && (
                 <div style={{
-                    flex: '1',
+                    flex: isMobile ? 'none' : '1',
+                    height: isMobile ? '180px' : 'auto',
                     background: `linear-gradient(to bottom right, ${step.color}20, #000000)`,
                     position: 'relative',
                     overflow: 'hidden',
@@ -262,7 +269,9 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                     <div style={{
                         position: 'absolute',
                         inset: 0,
-                        background: `linear-gradient(to right, transparent, #0f172a)`
+                        background: isMobile 
+                            ? `linear-gradient(to bottom, transparent, #0f172a)` 
+                            : `linear-gradient(to right, transparent, #0f172a)`
                     }} />
 
                     {/* Glowing orb effect behind image */}
@@ -271,29 +280,33 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        width: '300px',
-                        height: '300px',
+                        width: isMobile ? '150px' : '300px',
+                        height: isMobile ? '150px' : '300px',
                         background: step.color,
                         filter: 'blur(100px)',
                         opacity: 0.3,
                         zIndex: -1
                     }} />
                 </div>
+                )}
 
                 {/* Right Side - Content */}
                 <div style={{
                     flex: '1',
-                    padding: '3rem',
+                    padding: isMobile ? '1.5rem' : '3rem',
+                    paddingTop: isMobile ? '2.5rem' : '3rem',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    position: 'relative'
+                    position: 'relative',
+                    minHeight: isMobile ? 'auto' : 'none'
                 }}>
                     {/* Progress Dots */}
                     <div style={{
                         display: 'flex',
-                        gap: '8px',
-                        marginBottom: '2rem'
+                        gap: isMobile ? '6px' : '8px',
+                        marginBottom: isMobile ? '1.25rem' : '2rem',
+                        flexWrap: 'wrap'
                     }}>
                         {ONBOARDING_STEPS.map((s, idx) => (
                             <motion.div
@@ -340,9 +353,9 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
 
                             <motion.h1
                                 style={{
-                                    fontSize: '2.5rem',
+                                    fontSize: isMobile ? '1.5rem' : '2.5rem',
                                     fontWeight: 800,
-                                    marginBottom: '1rem',
+                                    marginBottom: isMobile ? '0.75rem' : '1rem',
                                     color: 'white',
                                     lineHeight: 1.2
                                 }}
@@ -352,9 +365,9 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
 
                             <motion.p
                                 style={{
-                                    fontSize: '1.1rem',
+                                    fontSize: isMobile ? '0.95rem' : '1.1rem',
                                     color: 'var(--text-muted)',
-                                    marginBottom: '2rem',
+                                    marginBottom: isMobile ? '1.25rem' : '2rem',
                                     lineHeight: 1.6
                                 }}
                             >
@@ -364,8 +377,8 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                             <div style={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '1rem',
-                                marginBottom: '3rem'
+                                gap: isMobile ? '0.75rem' : '1rem',
+                                marginBottom: isMobile ? '1.5rem' : '3rem'
                             }}>
                                 {step.tips.map((tip, idx) => (
                                     <motion.div
@@ -402,8 +415,11 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                     <div style={{
                         marginTop: 'auto',
                         display: 'flex',
+                        flexDirection: isSmallMobile ? 'column-reverse' : 'row',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: isSmallMobile ? 'stretch' : 'center',
+                        gap: isSmallMobile ? '0.75rem' : '1rem',
+                        paddingTop: isMobile ? '1rem' : '0'
                     }}>
                         <button
                             onClick={handlePrev}
@@ -415,9 +431,10 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                                 cursor: isFirstStep ? 'default' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
+                                justifyContent: 'center',
                                 gap: '8px',
-                                fontSize: '1rem',
-                                padding: '10px'
+                                fontSize: isMobile ? '0.9rem' : '1rem',
+                                padding: isMobile ? '12px' : '10px'
                             }}
                         >
                             <ChevronLeft size={20} /> Anterior
@@ -431,15 +448,17 @@ const OnboardingTutorial = ({ onComplete, onSkip }) => {
                                 background: `linear-gradient(135deg, ${step.color}, ${step.color}dd)`,
                                 border: 'none',
                                 borderRadius: '12px',
-                                padding: '14px 36px',
+                                padding: isMobile ? '12px 24px' : '14px 36px',
                                 color: 'white',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
+                                justifyContent: 'center',
                                 gap: '8px',
-                                fontSize: '1.1rem',
+                                fontSize: isMobile ? '1rem' : '1.1rem',
                                 fontWeight: 700,
-                                boxShadow: `0 4px 15px ${step.color}30`
+                                boxShadow: `0 4px 15px ${step.color}30`,
+                                width: isSmallMobile ? '100%' : 'auto'
                             }}
                         >
                             {isLastStep ? (
