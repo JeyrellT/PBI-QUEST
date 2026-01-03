@@ -1,0 +1,582 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    CheckCircle, XCircle, AlertTriangle, HelpCircle,
+    Target, Lightbulb, RotateCcw, Trophy, Sparkles,
+    ChevronDown, ChevronUp, Calculator
+} from 'lucide-react';
+import confetti from 'canvas-confetti';
+import StepValidator from './StepValidator';
+
+// eslint sometimes misses JSX member usage (<motion.div>)
+void motion;
+
+/**
+ * MissionValidator - Componente para validar respuestas de misiones
+ * Permite al usuario ingresar sus respuestas y compara con el answer key
+ */
+const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => {
+    const [userAnswers, setUserAnswers] = useState({});
+    const [validationResult, setValidationResult] = useState(null);
+    const [showHints, setShowHints] = useState(false);
+    const [hintsUsed, setHintsUsed] = useState(0);
+    const [attempts, setAttempts] = useState(0);
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [stepsPassed, setStepsPassed] = useState(false);
+
+    const validation = mission?.validation;
+    const verification = mission?.verification;
+    const missionSteps = mission?.missionSteps;
+
+    const getByPath = (obj, path) => {
+        if (!path) return undefined;
+        const parts = path.split('.').filter(Boolean);
+        let cur = obj;
+        for (const p of parts) {
+            if (cur == null) return undefined;
+            cur = cur[p];
+        }
+        return cur;
+    };
+
+    const resolveExpected = (expectedFrom, fallback) => {
+        if (!expectedFrom) return fallback;
+        if (expectedFrom.startsWith('answerKey.')) {
+            const v = getByPath(datasetSession?.answerKey, expectedFrom.replace(/^answerKey\./, ''));
+            return v !== undefined ? v : fallback;
+        }
+        if (expectedFrom.startsWith('stepKey.')) {
+            const v = getByPath(datasetSession?.stepKey, expectedFrom.replace(/^stepKey\./, ''));
+            return v !== undefined ? v : fallback;
+        }
+        return fallback;
+    };
+
+    // Si no hay validación ni verificación definida, mostrar mensaje
+    if (!validation && !verification) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '16px',
+                    padding: '24px',
+                    marginTop: '20px'
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <AlertTriangle size={24} color="var(--accent-gold)" />
+                    <div>
+                        <h3 style={{ margin: 0, color: 'var(--text-main)' }}>
+                            Validación Manual
+                        </h3>
+                        <p style={{ margin: '8px 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                            Esta misión requiere revisión manual. Compara tu trabajo con el resultado esperado
+                            y marca como completada cuando estés satisfecho.
+                        </p>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    }
+
+    // Obtener campos de validación según el tipo
+    const getValidationFields = () => {
+        if (verification) {
+            return verification.map((v, index) => ({
+                id: `q_${index}`,
+                label: v.question,
+                type: v.type === 'number' ? 'number' : 'text',
+                expected: v.answer,
+                tolerance: v.type === 'number' ? 0.05 : 0, // Default 5% tolerance for numbers
+                hint: v.hint
+            }));
+        }
+
+        switch (validation.type) {
+            case 'numeric':
+                return [{
+                    id: validation.measureId,
+                    label: validation.measureId.replace(/([A-Z])/g, ' $1').trim(),
+                    type: 'number',
+                    expected: resolveExpected(validation.expectedFrom, validation.expectedValue),
+                    tolerance: validation.tolerance
+                }];
+            case 'composite':
+                return validation.measures.map(m => ({
+                    id: m.id,
+                    label: m.id.replace(/([A-Z])/g, ' $1').trim(),
+                    type: 'number',
+                    expected: resolveExpected(m.expectedFrom, m.expectedValue),
+                    tolerance: m.tolerance
+                }));
+            case 'setMatch':
+                return [{
+                    id: validation.measureId,
+                    label: 'Códigos detectados (separados por coma)',
+                    type: 'text',
+                    expected: resolveExpected(validation.expectedSetFrom, validation.expectedSet)
+                }];
+            case 'confusionMatrix':
+                return [{
+                    id: validation.measureId,
+                    label: validation.measureId.replace(/([A-Z])/g, ' $1').trim(),
+                    type: 'number',
+                    expected: resolveExpected(validation.expectedFrom, validation.expectedValue),
+                    tolerance: validation.tolerance
+                }];
+            default:
+                return [];
+        }
+    };
+
+    const fields = getValidationFields();
+
+    // Manejar cambio en inputs
+    const handleInputChange = (fieldId, value) => {
+        setUserAnswers(prev => ({
+            ...prev,
+            [fieldId]: value
+        }));
+        setValidationResult(null);
+    };
+
+    // Validar respuestas
+    const validateAnswers = () => {
+        if (missionSteps?.length && !stepsPassed) {
+            setValidationResult({
+                results: {},
+                allCorrect: false,
+                error: 'Completa la verificación por pasos antes de validar.'
+            });
+            return;
+        }
+
+        setAttempts(prev => prev + 1);
+        const results = {};
+        let allCorrect = true;
+
+        fields.forEach(field => {
+            const userValue = userAnswers[field.id];
+            let isCorrect = false;
+
+            if (field.type === 'number') {
+                const numValue = parseFloat(userValue);
+                if (!isNaN(numValue)) {
+                    const tolerance = field.tolerance || 0;
+                    const lowerBound = field.expected * (1 - tolerance);
+                    const upperBound = field.expected * (1 + tolerance);
+                    isCorrect = numValue >= lowerBound && numValue <= upperBound;
+                }
+            } else if (field.type === 'text') {
+                if (Array.isArray(field.expected)) {
+                    // Para setMatch antiguo
+                    const userCodes = userValue?.split(',').map(c => c.trim().toUpperCase()) || [];
+                    const expectedCodes = field.expected.map(c => c.toUpperCase());
+                    isCorrect = expectedCodes.every(code => userCodes.includes(code));
+                } else {
+                    // Para verificación simple de texto (case insensitive)
+                    isCorrect = userValue?.trim().toLowerCase() === field.expected.toString().toLowerCase();
+                }
+            }
+
+            results[field.id] = {
+                userValue,
+                expected: field.expected,
+                isCorrect,
+                tolerance: field.tolerance
+            };
+
+            if (!isCorrect) allCorrect = false;
+        });
+
+        setValidationResult({ results, allCorrect });
+
+        if (allCorrect) {
+            // Celebración!
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // Calcular bonus basado en intentos y hints
+            const baseXP = mission.xp;
+            const hintPenalty = hintsUsed * 0.1; // -10% por cada hint usado
+            const attemptPenalty = Math.max(0, (attempts - 1) * 0.05); // -5% por cada intento extra
+            const bonusMultiplier = Math.max(0.5, 1 - hintPenalty - attemptPenalty);
+            const finalXP = Math.round(baseXP * bonusMultiplier);
+
+            if (onValidationComplete) {
+                onValidationComplete({
+                    success: true,
+                    attempts,
+                    hintsUsed,
+                    xpEarned: finalXP,
+                    bonusMultiplier
+                });
+            }
+        }
+    };
+
+    // Obtener hint progresivo
+    const getHint = () => {
+        setShowHints(true);
+        setHintsUsed(prev => prev + 1);
+    };
+
+    // Reset
+    const resetValidation = () => {
+        setUserAnswers({});
+        setValidationResult(null);
+        setShowHints(false);
+        setStepsPassed(false);
+    };
+
+    // Generar hints basados en los tips de la misión
+    const hints = mission?.tips || [];
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                marginTop: '20px',
+                overflow: 'hidden'
+            }}
+        >
+            {/* Header */}
+            <div
+                onClick={() => setIsExpanded(!isExpanded)}
+                style={{
+                    padding: '16px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    background: validationResult?.allCorrect
+                        ? 'linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent)'
+                        : 'transparent',
+                    borderBottom: isExpanded ? '1px solid var(--border)' : 'none'
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                        background: validationResult?.allCorrect
+                            ? 'rgba(34, 197, 94, 0.2)'
+                            : 'rgba(168, 85, 247, 0.2)',
+                        borderRadius: '10px',
+                        padding: '10px'
+                    }}>
+                        {validationResult?.allCorrect
+                            ? <Trophy size={20} color="#22c55e" />
+                            : <Target size={20} color="#a855f7" />
+                        }
+                    </div>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)' }}>
+                            Validación de Respuestas
+                        </h3>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            {validationResult?.allCorrect
+                                ? '¡Todas las respuestas son correctas!'
+                                : `${fields.length} campo(s) a validar • Intento ${attempts || 0}`
+                            }
+                        </p>
+                    </div>
+                </div>
+                {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </div>
+
+            {/* Content */}
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: 'auto' }}
+                        exit={{ height: 0 }}
+                        style={{ overflow: 'hidden' }}
+                    >
+                        <div style={{ padding: '24px' }}>
+                            {/* Step-based verification (progressive) */}
+                            {missionSteps?.length > 0 && (
+                                <StepValidator
+                                    steps={missionSteps}
+                                    datasetSession={datasetSession}
+                                    onComplete={() => setStepsPassed(true)}
+                                />
+                            )}
+
+                            {/* Required Cards */}
+                            {validation?.requiredCards && (
+                                <div style={{ marginBottom: '20px' }}>
+                                    <p style={{
+                                        fontSize: '0.85rem',
+                                        color: 'var(--text-muted)',
+                                        marginBottom: '8px'
+                                    }}>
+                                        Funciones DAX requeridas:
+                                    </p>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {validation.requiredCards.map(card => (
+                                            <span
+                                                key={card}
+                                                style={{
+                                                    background: 'rgba(168, 85, 247, 0.2)',
+                                                    border: '1px solid rgba(168, 85, 247, 0.3)',
+                                                    borderRadius: '6px',
+                                                    padding: '4px 10px',
+                                                    fontSize: '0.8rem',
+                                                    color: '#a855f7',
+                                                    fontFamily: 'monospace'
+                                                }}
+                                            >
+                                                {card}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Input Fields */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {fields.map(field => {
+                                    const result = validationResult?.results?.[field.id];
+                                    const isCorrect = result?.isCorrect;
+                                    const hasResult = result !== undefined;
+
+                                    return (
+                                        <div key={field.id}>
+                                            <label style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                marginBottom: '8px',
+                                                fontSize: '0.9rem',
+                                                color: 'var(--text-main)'
+                                            }}>
+                                                <Calculator size={16} color="var(--text-muted)" />
+                                                {field.label}
+                                                {field.tolerance > 0 && (
+                                                    <span style={{
+                                                        fontSize: '0.75rem',
+                                                        color: 'var(--text-muted)'
+                                                    }}>
+                                                        (±{field.tolerance * 100}% tolerancia)
+                                                    </span>
+                                                )}
+                                            </label>
+                                            <div style={{ position: 'relative' }}>
+                                                <input
+                                                    type={field.type === 'number' ? 'number' : 'text'}
+                                                    value={userAnswers[field.id] || ''}
+                                                    onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                                    placeholder={field.type === 'number'
+                                                        ? 'Ingresa el valor calculado...'
+                                                        : 'Ingresa los valores separados por coma...'}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '12px 40px 12px 16px',
+                                                        background: 'var(--bg-main)',
+                                                        border: `2px solid ${hasResult
+                                                            ? (isCorrect ? '#22c55e' : '#ef4444')
+                                                            : 'var(--border)'
+                                                            }`,
+                                                        borderRadius: '10px',
+                                                        color: 'var(--text-main)',
+                                                        fontSize: '1rem',
+                                                        outline: 'none',
+                                                        transition: 'border-color 0.2s'
+                                                    }}
+                                                />
+                                                {hasResult && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        right: '12px',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)'
+                                                    }}>
+                                                        {isCorrect
+                                                            ? <CheckCircle size={20} color="#22c55e" />
+                                                            : <XCircle size={20} color="#ef4444" />
+                                                        }
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {hasResult && !isCorrect && (
+                                                <p style={{
+                                                    margin: '8px 0 0 0',
+                                                    fontSize: '0.8rem',
+                                                    color: '#ef4444'
+                                                }}>
+                                                    Valor esperado: {Array.isArray(result.expected)
+                                                        ? result.expected.join(', ')
+                                                        : result.expected.toLocaleString()
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Hints Section */}
+                            <AnimatePresence>
+                                {showHints && hintsUsed > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        style={{
+                                            marginTop: '20px',
+                                            padding: '16px',
+                                            background: 'rgba(255, 184, 0, 0.1)',
+                                            border: '1px solid rgba(255, 184, 0, 0.3)',
+                                            borderRadius: '10px'
+                                        }}
+                                    >
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            marginBottom: '12px'
+                                        }}>
+                                            <Lightbulb size={18} color="#ffb800" />
+                                            <span style={{
+                                                fontWeight: 600,
+                                                color: '#ffb800',
+                                                fontSize: '0.9rem'
+                                            }}>
+                                                Pista {hintsUsed} de {hints.length}
+                                            </span>
+                                        </div>
+                                        {hints.slice(0, hintsUsed).map((hint, idx) => (
+                                            <p
+                                                key={idx}
+                                                style={{
+                                                    margin: idx === 0 ? 0 : '8px 0 0 0',
+                                                    fontSize: '0.85rem',
+                                                    color: 'var(--text-main)'
+                                                }}
+                                            >
+                                                • {hint}
+                                            </p>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Action Buttons */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '12px',
+                                marginTop: '24px',
+                                flexWrap: 'wrap'
+                            }}>
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={validateAnswers}
+                                    disabled={Object.keys(userAnswers).length === 0}
+                                    style={{
+                                        flex: 1,
+                                        padding: '14px 24px',
+                                        background: validationResult?.allCorrect
+                                            ? 'linear-gradient(135deg, #22c55e, #16a34a)'
+                                            : 'linear-gradient(135deg, #a855f7, #7c3aed)',
+                                        border: 'none',
+                                        borderRadius: '10px',
+                                        color: 'white',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        opacity: Object.keys(userAnswers).length === 0 ? 0.5 : 1
+                                    }}
+                                >
+                                    {validationResult?.allCorrect ? (
+                                        <>
+                                            <Sparkles size={18} />
+                                            ¡Completado!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Target size={18} />
+                                            Validar Respuestas
+                                        </>
+                                    )}
+                                </motion.button>
+
+                                {!validationResult?.allCorrect && hintsUsed < hints.length && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={getHint}
+                                        style={{
+                                            padding: '14px 20px',
+                                            background: 'rgba(255, 184, 0, 0.1)',
+                                            border: '1px solid rgba(255, 184, 0, 0.3)',
+                                            borderRadius: '10px',
+                                            color: '#ffb800',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        <HelpCircle size={18} />
+                                        Pista (-10% XP)
+                                    </motion.button>
+                                )}
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={resetValidation}
+                                    style={{
+                                        padding: '14px 20px',
+                                        background: 'transparent',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '10px',
+                                        color: 'var(--text-muted)',
+                                        fontWeight: 500,
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <RotateCcw size={18} />
+                                    Reset
+                                </motion.button>
+                            </div>
+
+                            {/* Attempt Info */}
+                            {attempts > 0 && !validationResult?.allCorrect && (
+                                <p style={{
+                                    marginTop: '16px',
+                                    fontSize: '0.8rem',
+                                    color: 'var(--text-muted)',
+                                    textAlign: 'center'
+                                }}>
+                                    Intentos: {attempts} • Pistas usadas: {hintsUsed} •
+                                    XP potencial: {Math.round(mission.xp * Math.max(0.5, 1 - hintsUsed * 0.1 - Math.max(0, (attempts - 1) * 0.05)))}
+                                </p>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
+    );
+};
+
+export default MissionValidator;

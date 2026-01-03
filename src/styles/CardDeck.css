@@ -1,0 +1,1127 @@
+/* ==========================================================================
+   CARD DECK STYLES - Sistema de Cartas DataRescue HQ
+   ========================================================================== */
+
+/* Overlay del Modal */
+.card-deck-overlay,
+.card-selector-overlay,
+.card-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.card-detail-overlay {
+    z-index: 1100;
+}
+
+/* Modal Principal del Deck */
+.card-deck-modal,
+.card-selector-modal {
+    width: 100%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 24px;
+    padding: 2rem;
+    background: linear-gradient(145deg, rgba(30, 30, 50, 0.95), rgba(20, 20, 35, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Header del Deck */
+.card-deck-header,
+.selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.deck-title-section h2,
+.battle-intro h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.deck-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+
+.progress-bar-mini {
+    width: 150px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill-mini {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #10b981);
+    border-radius: 3px;
+}
+
+.close-btn,
+.cancel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 12px;
+    padding: 0.5rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover,
+.cancel-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+/* Filtros */
+.card-filters {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-color: transparent;
+    color: white;
+}
+
+/* Grid de Cartas */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+/* Carta Individual del Deck */
+.game-card {
+    position: relative;
+    background: linear-gradient(145deg, rgba(40, 40, 60, 0.9), rgba(25, 25, 40, 0.95));
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.game-card.unlocked:hover {
+    border-color: var(--card-color);
+    transform: translateY(-8px) rotateX(5deg);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px var(--card-color, rgba(255, 255, 255, 0.2));
+}
+
+.game-card.locked {
+    opacity: 0.5;
+    filter: grayscale(0.8);
+}
+
+.game-card.villain {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.game-card.villain:hover {
+    border-color: #ef4444;
+    box-shadow: 0 25px 50px rgba(239, 68, 68, 0.3);
+}
+
+/* Área de imagen/icono de la carta */
+.card-image-area {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-icon-large {
+    font-size: 3.5rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+}
+
+.lock-overlay span {
+    font-size: 0.8rem;
+}
+
+/* Contenido de la carta */
+.card-content {
+    padding: 1rem;
+}
+
+.card-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.card-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.card-superpower {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.card-dax {
+    display: block;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    color: #fbbf24;
+    font-family: 'Fira Code', 'Monaco', monospace;
+}
+
+/* Badge de Poder */
+.card-power-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Sección de Portada */
+.cover-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cover-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border-left: 4px solid var(--accent-red, #e63946);
+}
+
+.cover-image-placeholder {
+    width: 100px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(230, 57, 70, 0.2), rgba(255, 100, 100, 0.1));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.cover-info h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.cover-info p {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+/* ==========================================================================
+   CARD DETAIL MODAL (Vista expandida de carta)
+   ========================================================================== */
+
+.card-detail-modal {
+    width: 100%;
+    max-width: 400px;
+    background: linear-gradient(145deg, rgba(30, 30, 50, 0.98), rgba(20, 20, 35, 0.99));
+    border-radius: 24px;
+    overflow: hidden;
+    border: 2px solid var(--card-color);
+    box-shadow: 0 0 60px var(--card-color, rgba(255, 255, 255, 0.2));
+}
+
+.detail-card-front {
+    padding: 0;
+}
+
+/* Área de imagen en el modal de detalle */
+.detail-image-area {
+    width: 100%;
+    max-height: 280px;
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+}
+
+.detail-card-image {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    object-position: top center;
+}
+
+.detail-icon-fallback {
+    width: 100%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detail-icon-area {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detail-icon {
+    font-size: 5rem;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+}
+
+.detail-content {
+    padding: 1.5rem;
+}
+
+.detail-type-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.detail-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.detail-superpower {
+    font-size: 1rem;
+    color: var(--card-color);
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.detail-description {
+    margin-bottom: 1rem;
+}
+
+.detail-description p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.detail-syntax,
+.detail-effect,
+.detail-weakness {
+    margin-bottom: 1rem;
+}
+
+.detail-syntax h4,
+.detail-effect h4,
+.detail-weakness h4 {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-syntax code {
+    display: block;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: #fbbf24;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+}
+
+.detail-effect p,
+.detail-weakness p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.detail-weakness {
+    padding: 0.75rem;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 10px;
+    border-left: 3px solid #22c55e;
+}
+
+.detail-stats {
+    display: flex;
+    gap: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.close-detail-btn {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-detail-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   MISSION CARD SELECTOR
+   ========================================================================== */
+
+.card-selector-modal {
+    max-width: 900px;
+}
+
+.battle-intro {
+    flex: 1;
+}
+
+.boss-battle-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 20px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    animation: pulse 2s infinite;
+}
+
+.villain-warning {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(245, 158, 11, 0.2);
+    border-radius: 12px;
+    color: #fbbf24;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+
+.selector-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+}
+
+/* Villano Display */
+.villain-card-display {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.villain-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #ef4444;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.villain-mini-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.villain-icon {
+    font-size: 2.5rem;
+}
+
+.villain-info strong {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.villain-info span {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+/* Área de Slots Seleccionados */
+.selected-slots-area {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.slots-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.slots-header h3 {
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.clear-btn {
+    padding: 0.3rem 0.8rem;
+    background: rgba(239, 68, 68, 0.2);
+    border: none;
+    border-radius: 8px;
+    color: #ef4444;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.card-slots {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.card-slot {
+    position: relative;
+    width: 100px;
+    height: 80px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.card-slot.empty {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.card-slot.filled {
+    background: linear-gradient(145deg, rgba(var(--card-color-rgb, 100, 100, 100), 0.2), rgba(0, 0, 0, 0.3));
+    border: 2px solid var(--card-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 0 20px var(--card-color, rgba(255, 255, 255, 0.1));
+}
+
+.slot-placeholder {
+    font-size: 1.5rem;
+    color: var(--text-dim);
+}
+
+.slot-icon {
+    font-size: 1.5rem;
+}
+
+.slot-name {
+    font-size: 0.7rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.remove-card-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.card-slot.filled:hover .remove-card-btn {
+    opacity: 1;
+}
+
+/* Cartas Disponibles */
+.available-cards-section {
+    margin-bottom: 1.5rem;
+}
+
+.available-cards-section h3 {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.available-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+.selectable-card {
+    position: relative;
+    padding: 1rem 0.75rem;
+    background: linear-gradient(145deg, rgba(40, 40, 60, 0.8), rgba(25, 25, 40, 0.9));
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.selectable-card:hover {
+    border-color: var(--card-color);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.selectable-card.selected {
+    border-color: var(--card-color);
+    background: linear-gradient(145deg, rgba(var(--card-color-rgb, 100, 100, 100), 0.2), rgba(25, 25, 40, 0.9));
+    box-shadow: 0 0 20px var(--card-color, rgba(255, 255, 255, 0.2));
+}
+
+.selectable-card.hint-required {
+    animation: hintPulse 1.5s infinite;
+}
+
+@keyframes hintPulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+    }
+}
+
+.selected-checkmark {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.hint-badge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    font-size: 1.2rem;
+}
+
+.selectable-icon {
+    display: block;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.selectable-name {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.selectable-dax {
+    font-size: 0.7rem;
+    color: #fbbf24;
+    font-family: 'Fira Code', monospace;
+}
+
+/* Resultado de Validación */
+.validation-result {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.validation-result.success {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #22c55e;
+}
+
+.validation-result.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+}
+
+/* Acciones del Selector */
+.selector-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hint-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    border-radius: 10px;
+    color: #fbbf24;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: auto;
+}
+
+.hint-btn:hover:not(:disabled) {
+    background: rgba(251, 191, 36, 0.3);
+}
+
+.hint-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.validate-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 150px;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-deck-modal,
+    .card-selector-modal {
+        padding: 1.25rem;
+        max-height: 95vh;
+    }
+    
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .card-slots {
+        justify-content: center;
+    }
+    
+    .card-slot {
+        width: 80px;
+        height: 70px;
+    }
+    
+    .available-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .selector-actions {
+        flex-wrap: wrap;
+    }
+    
+    .hint-btn {
+        margin-right: 0;
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+}
+
+/* Animación de pulso */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+    }
+}
+
+/* ==========================================================================
+   BOTÓN FLOTANTE PARA VER MAZO
+   ========================================================================== */
+
+.floating-deck-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+}
+
+.floating-deck-btn:hover {
+    background: linear-gradient(145deg, rgba(99, 102, 241, 1), rgba(139, 92, 246, 1));
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.6);
+}
+
+.floating-deck-btn span {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Indicador de cartas con requisitos en misión */
+.mission-card-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: #fbbf24;
+    margin-left: 0.5rem;
+}
+
+/* ==========================================================================
+   ESTILOS PARA IMÁGENES PDF DE CARTAS
+   ========================================================================== */
+
+/* Imagen de carta en el grid */
+.card-pdf-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.game-card:hover .card-pdf-image {
+    transform: scale(1.05);
+}
+
+/* Botón para ampliar imagen en la carta del grid */
+.view-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.game-card:hover .view-image-btn {
+    opacity: 1;
+}
+
+.view-image-btn:hover {
+    background: rgba(99, 102, 241, 0.9);
+    border-color: #6366f1;
+    transform: scale(1.1);
+}
+
+/* Botón en modal de detalle para ver PDF */
+.view-pdf-card-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+    border: 1px solid rgba(99, 102, 241, 0.5);
+    border-radius: 12px;
+    color: #a5b4fc;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-pdf-card-btn:hover {
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.5));
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+/* ==========================================================================
+   MODAL DE IMAGEN PDF A PANTALLA COMPLETA
+   ========================================================================== */
+
+.pdf-image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 1rem;
+}
+
+.pdf-image-container {
+    max-width: 90vw;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(145deg, rgba(30, 30, 50, 0.95), rgba(20, 20, 35, 0.98));
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
+}
+
+.pdf-image-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pdf-image-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.close-pdf-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-pdf-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    transform: rotate(90deg);
+}
+
+.pdf-image-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow: auto;
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.5), rgba(10, 10, 20, 0.5));
+}
+
+.pdf-full-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.pdf-full-image:hover {
+    transform: scale(1.02);
+}
+
+.pdf-image-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pdf-card-type {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pdf-card-power {
+    color: #fbbf24;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Responsive para visor PDF */
+@media (max-width: 768px) {
+    .pdf-image-container {
+        max-width: 95vw;
+        max-height: 90vh;
+    }
+    
+    .pdf-image-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .pdf-full-image {
+        max-height: 60vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .floating-deck-btn {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.75rem 1rem;
+    }
+}

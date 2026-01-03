@@ -1,0 +1,495 @@
+/* ============================================ */
+/* Interactive Elements Styles                  */
+/* Premium Edition                              */
+/* ============================================ */
+
+/* Tooltip Animations - Premium */
+.tooltip-trigger {
+    position: relative;
+    display: inline-flex;
+}
+
+/* Progress Indicator Styles - Enhanced */
+.progress-ring {
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.08);
+}
+
+.progress-ring-fill {
+    fill: none;
+    stroke: var(--accent-primary, #a855f7);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Pulse Button Effect - Premium */
+.pulse-button {
+    position: relative;
+    overflow: visible;
+}
+
+.pulse-button::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: inherit;
+    border-radius: inherit;
+    opacity: 0.4;
+    animation: pulse-ring-premium 2.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+    z-index: -1;
+    filter: blur(2px);
+}
+
+.pulse-button::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    background: inherit;
+    border-radius: inherit;
+    opacity: 0.2;
+    animation: pulse-ring-premium 2.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite 0.3s;
+    z-index: -2;
+    filter: blur(4px);
+}
+
+@keyframes pulse-ring-premium {
+    0% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* Floating Action Button - Premium */
+.floating-action-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+}
+
+.floating-action-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary, #a855f7), var(--accent-secondary, #3b82f6));
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 
+        0 8px 25px rgba(168, 85, 247, 0.5),
+        0 0 0 0 rgba(168, 85, 247, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.floating-action-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+.floating-action-btn:hover {
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 
+        0 12px 35px rgba(168, 85, 247, 0.6),
+        0 0 50px rgba(168, 85, 247, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.floating-action-btn:hover::before {
+    transform: translateX(100%);
+}
+
+.floating-action-btn:active {
+    transform: scale(1.05) rotate(0deg);
+}
+
+/* Confetti Button Styles - Premium */
+.confetti-button {
+    position: relative;
+    overflow: visible;
+}
+
+.confetti-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%) skewX(-15deg);
+    transition: transform 0.6s ease;
+}
+
+.confetti-button:hover::before {
+    transform: translateX(200%) skewX(-15deg);
+}
+
+/* Help Bubble Styles - Premium */
+.help-bubble {
+    animation: bubble-appear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+@keyframes bubble-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(15px);
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* Onboarding Overlay */
+.onboarding-overlay {
+    backdrop-filter: blur(8px);
+}
+
+.onboarding-step-indicator {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.onboarding-step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Onboarding Overlay - Premium */
+.onboarding-overlay {
+    backdrop-filter: blur(12px) saturate(150%);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.onboarding-step-indicator {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.onboarding-step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+
+.onboarding-step-dot:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.2);
+}
+
+.onboarding-step-dot.active {
+    background: linear-gradient(135deg, var(--accent-primary, #a855f7), var(--accent-secondary, #3b82f6));
+    width: 32px;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+}
+
+.onboarding-step-dot.completed {
+    background: linear-gradient(135deg, var(--accent-green, #22c55e), #00c853);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+}
+
+/* Daily Tip Banner - Premium */
+.daily-tip-banner {
+    animation: banner-slide-premium 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(20px);
+}
+
+@keyframes banner-slide-premium {
+    from {
+        opacity: 0;
+        transform: translateY(-100%) scale(0.95);
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* Motivational Popup - Premium */
+.motivational-popup {
+    animation: popup-premium 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(168, 85, 247, 0.15);
+}
+
+@keyframes popup-premium {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.4) translateY(80px);
+        filter: blur(15px);
+    }
+    60% {
+        transform: translateX(-50%) scale(1.08) translateY(-15px);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1) translateY(0);
+    }
+}
+
+/* Interactive Card Hover Effects - Premium */
+.interactive-card {
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.interactive-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.interactive-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 210, 255, 0.06),
+        transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.interactive-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(0, 210, 255, 0.08);
+}
+
+.interactive-card:hover::before,
+.interactive-card:hover::after {
+    opacity: 1;
+}
+
+/* Skeleton Loading - Premium */
+.skeleton {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    overflow: hidden;
+}
+
+.skeleton::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.03) 20%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.03) 80%,
+        transparent 100%
+    );
+    animation: skeleton-premium 1.8s ease-in-out infinite;
+}
+
+.skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: translateX(-100%);
+    animation: skeleton-shine 2.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-premium {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+@keyframes skeleton-shine {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+/* Focus States for Accessibility - Premium */
+.interactive-focus:focus-visible {
+    outline: none;
+    box-shadow: 
+        0 0 0 2px var(--bg-main),
+        0 0 0 4px var(--accent-primary, #a855f7),
+        0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+/* Ripple Effect - Premium */
+.ripple-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent 70%);
+    transform: scale(0);
+    animation: ripple-premium 0.8s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes ripple-premium {
+    0% {
+        transform: scale(0);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Premium Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toggle-switch.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-switch.active::after {
+    left: calc(100% - 24px);
+}
+
+/* Premium Chip/Tag */
+.chip-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.chip-premium:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.chip-premium.active {
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.2), rgba(157, 80, 187, 0.2));
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Premium Dropdown Menu */
+.dropdown-premium {
+    background: rgba(22, 27, 34, 0.95);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(0, 210, 255, 0.05);
+    animation: dropdown-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+@keyframes dropdown-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dropdown-item {
+    padding: 0.875rem 1.25rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    padding-left: 1.5rem;
+}

@@ -1,0 +1,136 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Trophy, Lock, Star, Filter } from 'lucide-react';
+import { useGame } from '../../context/GameContext';
+import { ACHIEVEMENTS } from '../../data/achievements';
+import '../../styles/Achievements.css';
+
+const AchievementImage = ({ src, alt, icon }) => {
+    const [error, setError] = useState(false);
+
+    if (error || !src) {
+        return (
+            <div className="achievement-art" style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '4rem',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))'
+            }}>
+                {icon}
+            </div>
+        );
+    }
+    return <img src={src} alt={alt} className="achievement-art" onError={() => setError(true)} />;
+};
+
+const Achievements = () => {
+    const { user } = useGame();
+    const [filter, setFilter] = useState('all'); // all, unlocked, locked
+
+    const filteredAchievements = ACHIEVEMENTS.filter(achievement => {
+        const isUnlocked = user.achievements.includes(achievement.id);
+        if (filter === 'unlocked') return isUnlocked;
+        if (filter === 'locked') return !isUnlocked;
+        return true;
+    });
+
+    return (
+        <div className="achievements-page animate-fade-in">
+            <div className="achievements-header">
+                <div className="header-content">
+                    <Trophy size={48} className="trophy-icon animate-bounce" />
+                    <h1 className="font-heading">Galería de Logros</h1>
+                    <p>Colecciona medallas y demuestra tu maestría</p>
+                </div>
+
+                <div className="achievements-stats">
+                    <div className="stat-pill">
+                        <span className="label">Desbloqueados</span>
+                        <span className="value">{user.achievements.length} / {ACHIEVEMENTS.length}</span>
+                    </div>
+                    <div className="filter-group glass">
+                        <Filter size={16} />
+                        <button
+                            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                            onClick={() => setFilter('all')}
+                        >
+                            Todos
+                        </button>
+                        <button
+                            className={`filter-btn ${filter === 'unlocked' ? 'active' : ''}`}
+                            onClick={() => setFilter('unlocked')}
+                        >
+                            Desbloqueados
+                        </button>
+                        <button
+                            className={`filter-btn ${filter === 'locked' ? 'active' : ''}`}
+                            onClick={() => setFilter('locked')}
+                        >
+                            Bloqueados
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <motion.div
+                className="achievements-grid-3d"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                        opacity: 1,
+                        transition: { staggerChildren: 0.1 }
+                    }
+                }}
+            >
+                {filteredAchievements.map((achievement, index) => {
+                    const isUnlocked = user.achievements.includes(achievement.id);
+
+                    return (
+                        <div key={achievement.id} className="achievement-card-container">
+                            <motion.div
+                                className={`achievement-card-3d ${isUnlocked ? 'unlocked' : 'locked'}`}
+                                variants={{
+                                    hidden: { opacity: 0, scale: 0.8, rotateY: 90 },
+                                    visible: { opacity: 1, scale: 1, rotateY: 0 }
+                                }}
+                                whileHover={{ y: -10, scale: 1.05 }}
+                            >
+                                <div className="card-face card-front">
+                                    <div className="card-image-wrapper">
+                                        <AchievementImage src={achievement.image} alt={achievement.title} icon={achievement.icon} />
+                                        {!isUnlocked && <div className="locked-overlay"><Lock size={32} /></div>}
+                                    </div>
+                                    <div className={`rarity-badge ${achievement.rarity}`}>
+                                        {achievement.rarity === 'legendary' && <Star size={12} fill="currentColor" />}
+                                        {achievement.rarity}
+                                    </div>
+                                    <div className="card-content-front">
+                                        <h3>{achievement.title}</h3>
+                                        <div className="xp-pill">+{achievement.xp} XP</div>
+                                    </div>
+                                </div>
+                                <div className="card-face card-back">
+                                    <div className="back-content">
+                                        <div className="achievement-icon-large">{achievement.icon}</div>
+                                        <h3>{achievement.title}</h3>
+                                        <p>{achievement.description}</p>
+                                        <div className={`status-badge ${isUnlocked ? 'completed' : 'pending'}`}>
+                                            {isUnlocked ? '¡Completado!' : 'En Progreso'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    );
+                })}
+            </motion.div>
+        </div>
+    );
+};
+
+export default Achievements;
