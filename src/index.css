@@ -2879,3 +2879,236 @@ h4 {
   box-shadow: 0 0 10px var(--accent-gold-glow);
   animation: pulse 2s infinite;
 }
+
+/* ========================================
+   RESPONSIVE - MOBILE & TABLET
+   ======================================== */
+
+/* Overlay para sidebar móvil */
+.sidebar-overlay {
+  display: none;
+}
+
+.app-container.mobile .sidebar-overlay,
+.app-container.tablet .sidebar-overlay {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Sidebar móvil */
+.sidebar.mobile {
+  position: fixed;
+  left: -280px;
+  top: 0;
+  height: 100vh;
+  width: 260px;
+  z-index: 1000;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.mobile.open {
+  left: 0;
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.5rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .dashboard-content {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .stats-grid-modern {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .dashboard {
+    gap: 1rem;
+  }
+  
+  .dashboard-hero-modern {
+    padding: 1.25rem;
+  }
+  
+  .dashboard-hero-modern .hero-content {
+    padding: 1rem;
+  }
+  
+  .hero-content h1,
+  .hero-welcome {
+    font-size: 1.4rem !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .stats-grid-modern {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  
+  .stat-modern-card {
+    padding: 1rem;
+  }
+  
+  .stat-modern-card .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .world-card {
+    min-height: auto;
+  }
+  
+  .worlds-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .world-card-image {
+    height: 140px;
+  }
+  
+  .achievements-grid-3d {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  .mission-detail,
+  .world-detail {
+    padding: 1rem;
+  }
+  
+  .missions-timeline {
+    gap: 1rem;
+  }
+  
+  .content-area {
+    padding: 0;
+  }
+}
+
+/* Mobile pequeño (< 480px) */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0.75rem;
+  }
+  
+  .dashboard {
+    padding: 0;
+    gap: 0.75rem;
+  }
+  
+  .stat-modern-card {
+    padding: 0.875rem;
+  }
+  
+  .stat-modern-card .stat-value {
+    font-size: 1.25rem;
+  }
+  
+  .stat-modern-card .stat-label {
+    font-size: 0.7rem;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .hero-badges {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .rank-badge,
+  .tier-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+  }
+  
+  .achievements-grid-3d {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .leaderboard-table {
+    font-size: 0.85rem;
+  }
+  
+  .academy-container {
+    padding: 0;
+  }
+  
+  .lessons-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .footer-stat .stat-value {
+    font-size: 1.25rem;
+  }
+  
+  /* Modals responsive */
+  .card-deck-modal,
+  .mission-validator-modal {
+    padding: 1rem !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+  }
+  
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+}

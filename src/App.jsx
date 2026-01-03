@@ -10,6 +10,7 @@ import Leaderboard from './components/game/Leaderboard';
 import LevelUpModal from './components/common/LevelUpModal';
 import OnboardingTutorial from './components/common/OnboardingTutorial';
 import { useOnboarding } from './hooks/useOnboarding';
+import useResponsive from './hooks/useResponsive';
 import { DailyTipBanner, MotivationalPopup } from './components/common/MotivationalMessages';
 import { getRandomMessage } from './utils/motivationalMessages';
 import { ToastProvider } from './context/ToastContext';
@@ -17,15 +18,25 @@ import { GameProvider, useGame } from './context/GameContext';
 
 const AppContent = () => {
   const { user } = useGame();
+  const { isMobile, isTablet } = useResponsive();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [prevLevel, setPrevLevel] = useState(user.level);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Onboarding state
   const { showOnboarding, completeOnboarding, isLoaded } = useOnboarding();
   
   // Motivational popup state
   const [motivationalPopup, setMotivationalPopup] = useState({ show: false, message: null });
+
+  // Cerrar sidebar al cambiar de tab en móvil
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (isMobile || isTablet) {
+      setSidebarOpen(false);
+    }
+  };
 
   // Check for level up
   useEffect(() => {
@@ -77,7 +88,12 @@ const AppContent = () => {
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${isMobile ? 'mobile' : ''} ${isTablet ? 'tablet' : ''}`}>
+      {/* Overlay para cerrar sidebar en móvil */}
+      {(isMobile || isTablet) && sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* Onboarding Tutorial for new users */}
       {isLoaded && showOnboarding && (
         <OnboardingTutorial onComplete={completeOnboarding} />
@@ -96,9 +112,18 @@ const AppContent = () => {
         level={user.level}
       />
 
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={handleTabChange}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isMobile={isMobile || isTablet}
+      />
       <main className="main-content">
-        <Header />
+        <Header 
+          onMenuClick={() => setSidebarOpen(true)} 
+          isMobile={isMobile || isTablet} 
+        />
         {/* Daily Tip Banner */}
         <DailyTipBanner onAction={() => setActiveTab('academy')} />
         <div className="content-area" style={{ position: 'relative' }}>

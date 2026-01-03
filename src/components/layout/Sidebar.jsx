@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Globe, Award, Users, BookOpen, Settings, Zap } from 'lucide-react';
+import { LayoutDashboard, Globe, Award, Users, BookOpen, Settings, Zap, X } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 
-const Sidebar = ({ activeTab, setActiveTab }) => {
+const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose, isMobile }) => {
     const { user } = useGame();
 
     const menuItems = [
@@ -15,7 +15,12 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     ];
 
     return (
-        <aside className="sidebar glass">
+        <aside className={`sidebar glass ${isMobile ? 'mobile' : ''} ${isOpen ? 'open' : ''}`}>
+            {isMobile && (
+                <button className="sidebar-close-btn" onClick={onClose} aria-label="Cerrar menú">
+                    <X size={24} />
+                </button>
+            )}
             <div className="sidebar-logo">
                 <Zap size={32} color="var(--primary)" fill="var(--primary)" />
                 <span className="font-heading">PBI QUEST</span>

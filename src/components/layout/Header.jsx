@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Search, Bell, Coins, Flame, HelpCircle, Trophy, Target, BookOpen } from 'lucide-react';
+import { Menu, Search, Bell, Coins, Flame, HelpCircle, Trophy, Target, BookOpen } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../../context/GameContext';
 import { Tooltip, HelpBubble } from '../common/InteractiveElements';
 import '../../styles/Header.css';
 
-const Header = () => {
+const Header = ({ onMenuClick, isMobile }) => {
     const { user, levelStats } = useGame();
     const { xpInCurrentLevel, xpNeededForLevel, progress } = levelStats;
     const [showNotifications, setShowNotifications] = useState(false);
@@ -21,10 +21,18 @@ const Header = () => {
 
     return (
         <header className="header">
-            <div className="search-bar">
-                <Search size={16} color="var(--text-muted)" />
-                <input type="text" placeholder="Buscar misiones, mundos..." />
-            </div>
+            {isMobile && (
+                <button className="menu-toggle" onClick={onMenuClick} aria-label="Abrir menú">
+                    <Menu size={24} />
+                </button>
+            )}
+
+            {!isMobile && (
+                <div className="search-bar">
+                    <Search size={16} color="var(--text-muted)" />
+                    <input type="text" placeholder="Buscar misiones, mundos..." />
+                </div>
+            )}
 
             <div className="header-stats">
                 <div className="stat-group">
