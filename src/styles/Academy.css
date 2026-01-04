@@ -3,6 +3,8 @@
     padding: 2rem;
     animation: academy-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     color: #e2e8f0;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 @keyframes academy-reveal {
@@ -20,20 +22,19 @@
 
 .academy-header {
     margin-bottom: 2.5rem;
-    text-align: center;
     position: relative;
 }
 
-.academy-header::after {
-    content: '';
-    position: absolute;
-    bottom: -1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
-    border-radius: 2px;
+.academy-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.academy-title-row > div:first-child {
+    text-align: left;
 }
 
 .academy-header h1 {
@@ -44,7 +45,7 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     animation: gradient-shift 4s ease infinite;
 }
 
@@ -57,6 +58,71 @@
     color: #94a3b8;
     font-size: 1.15rem;
     letter-spacing: 0.3px;
+}
+
+/* Neuroaprendizaje: Estadísticas de Progreso */
+.progress-stats-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    min-width: 220px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.progress-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-stat-item .stat-icon {
+    color: #fbbf24;
+}
+
+.progress-stat-item .stat-icon.gold {
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
+.progress-stat-item .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.progress-stat-item .stat-label {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+    background-size: 200% auto;
+    border-radius: 4px;
+    animation: progress-shimmer 3s ease infinite;
+}
+
+@keyframes progress-shimmer {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+}
+
+.progress-percentage {
+    font-size: 0.85rem;
+    color: #10b981;
+    font-weight: 600;
 }
 
 /* Tips Box - Cuadro de Tips Rápidos */
@@ -347,11 +413,46 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Indicador de lección completada */
+.lesson-completed-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.15);
+    border-radius: 50%;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+    animation: pulse-green 2s ease-in-out infinite;
+    z-index: 2;
+}
+
+@keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+}
+
+.lesson-card.completed {
+    border-color: rgba(16, 185, 129, 0.25);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), rgba(255, 255, 255, 0.02));
+}
+
+.lesson-card.completed::before {
+    background: linear-gradient(90deg, #10b981, #059669);
+    transform: scaleX(1);
 }
 
 /* Lesson Detail - Premium */
 .lesson-detail {
-    max-width: 850px;
+    max-width: 900px;
     margin: 0 auto;
     animation: detail-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -367,6 +468,28 @@
         transform: translateY(0) scale(1);
         filter: blur(0);
     }
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: rgba(96, 165, 250, 0.1);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    color: #60a5fa;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.back-button:hover {
+    transform: translateX(-6px);
+    background: rgba(96, 165, 250, 0.15);
+    border-color: rgba(96, 165, 250, 0.4);
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.15);
 }
 
 .back-btn {
@@ -426,12 +549,91 @@
 .detail-content h2 {
     font-size: 2.5rem;
     font-weight: 800;
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.25rem;
     background: linear-gradient(135deg, #fff 0%, #e2e8f0 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
+}
+
+/* Neuroaprendizaje: Indicador de categoría */
+.lesson-category-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Neuroaprendizaje: Meta información mejorada */
+.detail-meta-header.enhanced {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lesson-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lesson-meta-item.difficulty {
+    color: #fbbf24;
+}
+
+.lesson-meta-item.completed {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Neuroaprendizaje: Caja de resumen */
+.lesson-summary-box {
+    display: flex;
+    gap: 1rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.05));
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    align-items: flex-start;
+}
+
+.lesson-summary-box svg {
+    color: #a78bfa;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.lesson-summary-box strong {
+    display: block;
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.lesson-summary-box p {
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.6;
 }
 
 .detail-meta-header {
@@ -886,6 +1088,23 @@
 }
 
 /* Responsive - Premium */
+@media (max-width: 1024px) {
+    .academy-title-row {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .academy-title-row > div:first-child {
+        text-align: center;
+    }
+    
+    .progress-stats-container {
+        width: 100%;
+        max-width: 350px;
+        align-items: center;
+    }
+}
+
 @media (max-width: 768px) {
     .academy-container {
         padding: 1.25rem;
@@ -910,5 +1129,34 @@
     
     .related-lessons-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .categories-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        scrollbar-width: thin;
+    }
+    
+    .category-tab {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    .lesson-summary-box {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .detail-meta-header.enhanced {
+        justify-content: center;
+    }
+    
+    .progress-stats-container {
+        min-width: auto;
     }
 }

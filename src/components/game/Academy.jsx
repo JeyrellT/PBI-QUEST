@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, BookOpen, Zap, Target } from 'lucide-react';
+import { Lightbulb, BookOpen, Zap, Target, Brain, Sparkles, Clock, TrendingUp, CheckCircle2, Star } from 'lucide-react';
 import { academyCategories, academyLessons } from '../../data/academyData';
 import '../../styles/Academy.css';
 
@@ -33,13 +33,57 @@ const ACADEMY_IMAGES = {
     'slicers': slicersImg
 };
 
+// Neuroaprendizaje: Estimación de tiempo de lectura
+const getReadingTime = (content) => {
+    const wordsPerMinute = 200;
+    const words = content.split(/\s+/).length;
+    return Math.ceil(words / wordsPerMinute);
+};
+
+// Neuroaprendizaje: Nivel de dificultad numérico
+const getDifficultyScore = (level) => {
+    const levels = { 'Principiante': 1, 'Intermedio': 2, 'Avanzado': 3, 'Todos': 1 };
+    return levels[level] || 1;
+};
+
 const Academy = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedLesson, setSelectedLesson] = useState(null);
+    const [readLessons, setReadLessons] = useState(() => {
+        const saved = localStorage.getItem('academy_read_lessons');
+        return saved ? JSON.parse(saved) : [];
+    });
 
     const filteredLessons = selectedCategory === 'all'
         ? academyLessons
         : academyLessons.filter(lesson => lesson.categoryId === selectedCategory);
+
+    // Estadísticas de progreso
+    const stats = useMemo(() => {
+        const totalLessons = academyLessons.length;
+        const completedLessons = readLessons.length;
+        const progress = Math.round((completedLessons / totalLessons) * 100);
+        const totalMinutes = academyLessons.reduce((acc, l) => acc + parseInt(l.duration) || 0, 0);
+        const completedMinutes = academyLessons
+            .filter(l => readLessons.includes(l.id))
+            .reduce((acc, l) => acc + parseInt(l.duration) || 0, 0);
+        return { totalLessons, completedLessons, progress, totalMinutes, completedMinutes };
+    }, [readLessons]);
+
+    // Marcar lección como leída
+    const markAsRead = (lessonId) => {
+        if (!readLessons.includes(lessonId)) {
+            const updated = [...readLessons, lessonId];
+            setReadLessons(updated);
+            localStorage.setItem('academy_read_lessons', JSON.stringify(updated));
+        }
+    };
+
+    // Al abrir una lección, marcarla como leída
+    const handleSelectLesson = (lesson) => {
+        setSelectedLesson(lesson);
+        markAsRead(lesson.id);
+    };
 
     return (
         <div className="academy-container">
@@ -53,7 +97,7 @@ const Academy = () => {
                         exit={{ opacity: 0, x: 50 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <button className="btn btn-ghost" onClick={() => setSelectedLesson(null)}>
+                        <button className="btn btn-ghost back-button" onClick={() => setSelectedLesson(null)}>
                             ← Volver a la Academia
                         </button>
 
@@ -62,11 +106,46 @@ const Academy = () => {
                                 background: academyCategories.find(c => c.id === selectedLesson.categoryId)?.gradient,
                                 position: 'absolute', top: 0, left: 0, right: 0, height: '120px', opacity: 0.2, zIndex: 0
                             }}></div>
+                            
+                            {/* Neuroaprendizaje: Indicador de categoría */}
+                            <div className="lesson-category-indicator" style={{ position: 'relative', zIndex: 1 }}>
+                                {academyCategories.find(c => c.id === selectedLesson.categoryId)?.icon}{' '}
+                                {academyCategories.find(c => c.id === selectedLesson.categoryId)?.title}
+                            </div>
+
                             <div style={{ position: 'relative', zIndex: 1 }}>
                                 <h2>{selectedLesson.title}</h2>
-                                <div className="detail-meta-header">
-                                    <span className="lesson-duration">⏱️ {selectedLesson.duration}</span>
-                                    <span className="lesson-level">📈 {selectedLesson.level}</span>
+                                
+                                {/* Neuroaprendizaje: Meta información mejorada */}
+                                <div className="detail-meta-header enhanced">
+                                    <span className="lesson-meta-item">
+                                        <Clock size={16} />
+                                        {selectedLesson.duration}
+                                    </span>
+                                    <span className="lesson-meta-item">
+                                        <TrendingUp size={16} />
+                                        {selectedLesson.level}
+                                    </span>
+                                    <span className="lesson-meta-item difficulty">
+                                        {[...Array(getDifficultyScore(selectedLesson.level))].map((_, i) => (
+                                            <Star key={i} size={14} fill="currentColor" />
+                                        ))}
+                                    </span>
+                                    {readLessons.includes(selectedLesson.id) && (
+                                        <span className="lesson-meta-item completed">
+                                            <CheckCircle2 size={16} />
+                                            Leído
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Neuroaprendizaje: Resumen antes del contenido */}
+                                <div className="lesson-summary-box">
+                                    <Brain size={20} />
+                                    <div>
+                                        <strong>Lo que aprenderás:</strong>
+                                        <p>{selectedLesson.description}</p>
+                                    </div>
                                 </div>
 
                                 {/* Hero Image */}
@@ -277,8 +356,29 @@ const Academy = () => {
                         transition={{ duration: 0.3 }}
                     >
                         <header className="academy-header">
-                            <h1>Academia Power BI</h1>
-                            <p>Aprende paso a paso con la guía oficial de Microsoft</p>
+                            <div className="academy-title-row">
+                                <div>
+                                    <h1>Academia Power BI</h1>
+                                    <p>Aprende paso a paso con la guía oficial de Microsoft</p>
+                                </div>
+                                {/* Neuroaprendizaje: Barra de progreso global */}
+                                <div className="progress-stats-container">
+                                    <div className="progress-stat-item">
+                                        <Sparkles size={18} className="stat-icon gold" />
+                                        <span className="stat-value">{stats.completedLessons}</span>
+                                        <span className="stat-label">/ {stats.totalLessons} lecciones</span>
+                                    </div>
+                                    <div className="progress-bar-container">
+                                        <motion.div 
+                                            className="progress-bar-fill"
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${stats.progress}%` }}
+                                            transition={{ duration: 0.8, ease: "easeOut" }}
+                                        />
+                                    </div>
+                                    <span className="progress-percentage">{stats.progress}% completado</span>
+                                </div>
+                            </div>
                         </header>
 
                         {/* Cuadro de Tips Rápidos */}
@@ -360,11 +460,12 @@ const Academy = () => {
                         >
                             {filteredLessons.map(lesson => {
                                 const category = academyCategories.find(c => c.id === lesson.categoryId);
+                                const isCompleted = readLessons.includes(lesson.id);
                                 return (
                                     <motion.div
                                         key={lesson.id}
-                                        className={`lesson-card glass ${lesson.isVideo ? 'is-video' : ''}`}
-                                        onClick={() => setSelectedLesson(lesson)}
+                                        className={`lesson-card glass ${lesson.isVideo ? 'is-video' : ''} ${isCompleted ? 'completed' : ''}`}
+                                        onClick={() => handleSelectLesson(lesson)}
                                         variants={{
                                             hidden: { opacity: 0, y: 20 },
                                             visible: { opacity: 1, y: 0 }
@@ -373,13 +474,23 @@ const Academy = () => {
                                         whileTap={{ scale: 0.98 }}
                                     >
                                         <div className="lesson-card-header" style={{ background: category?.gradient, height: '6px', width: '100%', position: 'absolute', top: 0, left: 0 }}></div>
+                                        {isCompleted && (
+                                            <div className="lesson-completed-badge" title="Ya leíste esta lección">
+                                                <CheckCircle2 size={20} />
+                                            </div>
+                                        )}
                                         <div style={{ marginTop: '10px' }}>
                                             <h3>{lesson.isVideo && '🎬 '}{lesson.title}</h3>
                                             <p>{lesson.description}</p>
                                         </div>
                                         <div className="lesson-meta">
                                             <span className="lesson-duration">{lesson.isVideo ? '▶️' : '⏱️'} {lesson.duration}</span>
-                                            <span className="lesson-level-badge lesson-badge" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>{lesson.level}</span>
+                                            <span className={`lesson-level-badge lesson-badge ${lesson.level.toLowerCase()}`} style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>
+                                                {[...Array(getDifficultyScore(lesson.level))].map((_, i) => (
+                                                    <Star key={i} size={10} fill="currentColor" style={{ marginRight: '2px' }} />
+                                                ))}
+                                                {lesson.level}
+                                            </span>
                                         </div>
                                     </motion.div>
                                 );
