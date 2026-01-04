@@ -204,6 +204,38 @@ const Academy = () => {
                                     </div>
                                 )}
 
+                                {/* Related Lessons Section */}
+                                {selectedLesson.relatedLessons && selectedLesson.relatedLessons.length > 0 && (
+                                    <div className="related-lessons-section">
+                                        <span className="relevance-label">📚 Lecciones relacionadas:</span>
+                                        <div className="related-lessons-grid">
+                                            {selectedLesson.relatedLessons.map(lessonId => {
+                                                const relatedLesson = academyLessons.find(l => l.id === lessonId);
+                                                if (!relatedLesson) return null;
+                                                const category = academyCategories.find(c => c.id === relatedLesson.categoryId);
+                                                return (
+                                                    <motion.button
+                                                        key={lessonId}
+                                                        className="related-lesson-card"
+                                                        onClick={() => setSelectedLesson(relatedLesson)}
+                                                        whileHover={{ scale: 1.02, y: -2 }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                        style={{
+                                                            '--card-gradient': category?.gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                                        }}
+                                                    >
+                                                        <span className="related-lesson-icon">
+                                                            {relatedLesson.isVideo ? '🎬' : category?.icon || '📄'}
+                                                        </span>
+                                                        <span className="related-lesson-title">{relatedLesson.title}</span>
+                                                        <span className="related-lesson-duration">{relatedLesson.duration}</span>
+                                                    </motion.button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="official-link-box">
                                     <motion.a
                                         href={selectedLesson.officialLink}

@@ -54,6 +54,7 @@ export const academyLessons = [
     duration: '5 min',
     level: 'Principiante',
     description: 'La herramienta que te convertirá en héroe de datos.',
+    relatedLessons: ['pbi-interface', 'first-report', 'video-pbi-estrategia', 'get-data'],
     content: `
 ### ¿Por qué Power BI?
 
@@ -70,11 +71,22 @@ Power BI es la herramienta #1 de Business Intelligence. Con ella puedes:
 2. **Power BI Service** (web): Donde los publicas y compartes.
 3. **Power BI Mobile**: Para ver tus datos en cualquier lugar.
 
+### Diferencias con Excel
+
+| Característica | Excel | Power BI |
+|----------------|-------|----------|
+| **Límite de filas** | ~1 millón | Millones sin problema |
+| **Actualización** | Manual (copiar/pegar) | Automática con un click |
+| **Interactividad** | Limitada | Filtrado cruzado dinámico |
+| **Colaboración** | Enviar archivo | Publicar dashboard en web |
+
 ### 🎮 Tip para el Juego
 
 En DataRescue HQ y otros mundos, trabajarás principalmente con **Power BI Desktop**. Asegúrate de tenerlo instalado antes de comenzar las misiones.
 
 **Descarga gratuita:** https://powerbi.microsoft.com/es-es/desktop/
+
+📺 **Aprende más:** Mira el video "La Propuesta de Valor de Power BI frente a Excel" en la sección de Videos.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/fundamentals/power-bi-overview',
     gameRelevance: ['office', 'datarescue', 'stark'],
@@ -87,6 +99,7 @@ En DataRescue HQ y otros mundos, trabajarás principalmente con **Power BI Deskt
     duration: '8 min',
     level: 'Principiante',
     description: 'Domina las 3 vistas esenciales de Power BI Desktop.',
+    relatedLessons: ['pbi-intro', 'first-report', 'get-data', 'power-query-basics'],
     content: `
 ### Las 3 Vistas de Power BI Desktop
 
@@ -103,11 +116,21 @@ En la barra lateral izquierda encontrarás:
 - **Panel de Filtros** (derecha): Controla qué datos se muestran.
 - **Barra de Fórmulas** (arriba): Para escribir medidas DAX.
 
+### Atajos de Teclado Esenciales
+
+| Atajo | Acción |
+|-------|--------|
+| Ctrl + Enter | Ejecutar medida DAX |
+| Ctrl + S | Guardar archivo |
+| F5 | Actualizar datos |
+| Ctrl + Z | Deshacer |
+| Delete | Eliminar elemento seleccionado |
+
 ### 🎮 Tip para el Juego
 
 En las misiones de **Dunder Mifflin**, usarás principalmente la **Vista de Reporte** para crear gráficos. En **DataRescue HQ**, pasarás mucho tiempo en **Power Query** (Transformar datos) limpiando corrupción.
 
-**Atajo útil:** Presiona Ctrl + Enter para ejecutar una medida DAX después de escribirla.
+📚 **Siguiente paso:** Aprende a crear tu primer reporte en la lección "Tu Primer Reporte en 5 Pasos".
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/fundamentals/desktop-getting-started',
     gameRelevance: ['office', 'datarescue'],
@@ -120,32 +143,40 @@ En las misiones de **Dunder Mifflin**, usarás principalmente la **Vista de Repo
     duration: '10 min',
     level: 'Principiante',
     description: 'De cero a dashboard en minutos.',
+    relatedLessons: ['pbi-intro', 'pbi-interface', 'get-data', 'dax-intro', 'chart-types', 'video-etl-conectores'],
     content: `
 ### El Flujo Completo
 
 **Paso 1: Obtener Datos**
 - Inicio → Obtener datos → Excel (o CSV)
 - Selecciona tu archivo y las tablas
+- Power BI soporta más de 100 conectores diferentes
 
 **Paso 2: Revisar en Power Query**
 - Click en "Transformar datos" para abrir Power Query
 - Verifica que los tipos de datos sean correctos
-- Cierra y aplica
+- Elimina columnas innecesarias para optimizar
+- Cierra y aplica cuando termines
 
 **Paso 3: Crear una Medida**
 - En la pestaña Modelado → Nueva medida
 - Escribe: TotalVentas = SUM(Ventas[Monto])
+- Presiona Enter o Ctrl+Enter para confirmar
 
 **Paso 4: Agregar Visualización**
 - Arrastra la medida al lienzo
-- Selecciona el tipo de gráfico en el panel
+- Selecciona el tipo de gráfico en el panel de Visualizaciones
+- Usa una Tarjeta (Card) para mostrar un solo número
 
 **Paso 5: Guardar**
 - Ctrl + S → Guarda como .pbix
+- Nombra el archivo de forma descriptiva (ej: "Ventas-Enero-2024.pbix")
 
 ### 🎮 Tip para el Juego
 
 Este flujo exacto es lo que harás en la **Misión 1 de Dunder Mifflin**. La medida COUNTROWS(Tabla) te dará el total de filas para verificar que importaste todo correctamente.
+
+📺 **Video recomendado:** "Dominando la Ingesta y Transformación de Datos" explica este proceso en detalle.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/fundamentals/desktop-getting-started',
     gameRelevance: ['office'],
@@ -162,29 +193,41 @@ Este flujo exacto es lo que harás en la **Misión 1 de Dunder Mifflin**. La med
     duration: '8 min',
     level: 'Principiante',
     description: 'Excel, CSV, bases de datos y más.',
+    relatedLessons: ['power-query-basics', 'first-report', 'video-etl-conectores', 'pbi-intro'],
     content: `
 ### Fuentes Más Comunes
 
-Power BI puede conectarse a **cientos** de fuentes. Las más usadas:
+Power BI puede conectarse a **más de 100 fuentes** diferentes. Las más usadas:
 
 - **Excel** (.xlsx): El más común en empresas
-- **CSV/Texto**: Archivos delimitados por comas
+- **CSV/Texto**: Archivos delimitados por comas o tabuladores
 - **SQL Server**: Bases de datos empresariales
 - **Web**: APIs y páginas web
 - **Carpeta**: Múltiples archivos a la vez
+- **SharePoint**: Archivos en la nube de Microsoft
+- **Azure**: Servicios en la nube
 
 ### Importar vs DirectQuery
 
-| Método | Cuándo Usarlo |
-|--------|--------------|
-| **Importar** | Archivos pequeños/medianos. Más rápido. |
-| **DirectQuery** | Datos masivos en tiempo real. Más lento. |
+| Método | Cuándo Usarlo | Ventajas | Desventajas |
+|--------|--------------|----------|-------------|
+| **Importar** | Archivos pequeños/medianos | Muy rápido | Datos pueden estar desactualizados |
+| **DirectQuery** | Datos masivos en tiempo real | Siempre actualizado | Más lento, depende de conexión |
+
+### El Concepto del "Puente Vivo"
+
+Power BI no solo copia los datos - crea un **puente** con la fuente:
+- Si el archivo Excel origen cambia, solo necesitas "Actualizar" (F5)
+- No tienes que reconstruir el reporte cada vez
+- Garantiza la **integridad de los datos**
 
 ### 🎮 Tip para el Juego
 
 Para las misiones de **DataRescue HQ**, siempre usarás **Importar**. Los datasets del juego son CSV que descargas y cargas en Power BI.
 
 **Atajo:** Arrastra un archivo CSV directamente a Power BI Desktop para importarlo.
+
+📺 **Video relacionado:** "Dominando la Ingesta y Transformación de Datos (ETL)" explica todos los conectores.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/connect-data/desktop-data-sources',
     gameRelevance: ['datarescue', 'office', 'stark'],
@@ -197,10 +240,11 @@ Para las misiones de **DataRescue HQ**, siempre usarás **Importar**. Los datase
     duration: '15 min',
     level: 'Intermedio',
     description: 'El arma secreta contra datos corruptos.',
+    relatedLessons: ['get-data', 'column-from-examples', 'handle-errors', 'datarescue-survival', 'video-etl-conectores'],
     content: `
 ### ¿Qué es Power Query?
 
-Es el **motor de transformación** de Power BI. Aquí limpias, filtras y preparas tus datos ANTES de analizarlos.
+Es el **motor de transformación** de Power BI. Aquí limpias, filtras y preparas tus datos ANTES de analizarlos. Funciona como una "aduana" que decide qué datos entran y en qué formato.
 
 ### Cómo Abrirlo
 
@@ -217,6 +261,16 @@ Es el **motor de transformación** de Power BI. Aquí limpias, filtras y prepara
 | Reemplazar valores | Click derecho → Reemplazar valores |
 | Dividir columna | Click derecho → Dividir columna |
 | Quitar filas vacías | Inicio → Quitar filas → Quitar en blanco |
+| Filtrar valores | Click en flecha del encabezado → Filtros |
+| Mayúsculas/Minúsculas | Transformar → Formato → MAYÚSCULAS |
+
+### Pasos Aplicados: Tu Historial de Cambios
+
+El panel **"Pasos aplicados"** (derecha) te muestra todo lo que has hecho:
+- Puedes hacer click en cualquier paso para volver atrás
+- Puedes eliminar un paso con la X
+- El orden de los pasos importa
+- Es como un historial de "deshacer" permanente
 
 ### 🎮 Tip para DataRescue HQ
 
@@ -225,7 +279,7 @@ En las misiones de DataRescue, el villano **Corruptex** ha inyectado:
 - **Texto en números**: Usa "Tipo" → Número decimal
 - **Formatos raros** como "(1234)": Usa "Reemplazar valores" para quitar paréntesis
 
-**Súper Tip:** El panel "Pasos aplicados" (derecha) te muestra todo lo que has hecho. ¡Puedes deshacer cualquier paso!
+📚 **Aprende más:** Ve las lecciones "Columna desde Ejemplos" y "Manejo de Errores" para técnicas avanzadas.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-query/power-query-what-is-power-query',
     gameRelevance: ['datarescue'],
@@ -238,6 +292,7 @@ En las misiones de DataRescue, el villano **Corruptex** ha inyectado:
     duration: '5 min',
     level: 'Intermedio',
     description: 'Deja que Power BI adivine qué quieres hacer.',
+    relatedLessons: ['power-query-basics', 'handle-errors', 'datarescue-survival'],
     content: `
 ### La Función Más Mágica de Power Query
 
@@ -250,16 +305,27 @@ En las misiones de DataRescue, el villano **Corruptex** ha inyectado:
 
 ### Funciona Para
 
-- Extraer partes de texto
-- Combinar columnas
-- Formatear fechas
-- ¡Casi cualquier transformación!
+- **Extraer partes de texto:** "Juan Pérez" → "Juan"
+- **Combinar columnas:** "Juan" + "Pérez" → "Juan Pérez"
+- **Formatear fechas:** "2024-01-15" → "15 de Enero, 2024"
+- **Quitar caracteres:** "1234.5 kg" → "1234.5"
+- **Extraer dominios:** "usuario@empresa.com" → "empresa.com"
+
+### Cómo Usarlo Efectivamente
+
+1. Proporciona 2-3 ejemplos para mayor precisión
+2. Revisa la fórmula M generada (aparece arriba)
+3. Verifica algunas filas antes de aplicar
+4. Si el patrón no es correcto, corrige un ejemplo más
 
 ### 🎮 Tip para el Juego
 
 En DataRescue Misión 2, la columna PESO_KG tiene valores como "1111.6 kg" (con texto). Usa **Columna a partir de ejemplos**:
 1. En la primera fila con "1111.6 kg", escribe "1111.6"
 2. Power Query creará una columna numérica automáticamente
+3. No olvides cambiar el tipo a **Número decimal** después
+
+📚 **Prerequisito:** Conoce primero los "Fundamentos de Power Query" antes de usar esta técnica avanzada.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-query/column-from-example',
     gameRelevance: ['datarescue'],
@@ -272,12 +338,15 @@ En DataRescue Misión 2, la columna PESO_KG tiene valores como "1111.6 kg" (con 
     duration: '10 min',
     level: 'Intermedio',
     description: 'Cuando los datos no cooperan.',
+    relatedLessons: ['power-query-basics', 'column-from-examples', 'datarescue-survival', 'common-mistakes'],
     content: `
 ### Tipos de Problemas
 
-1. **Valores nulos (null)**: Celdas vacías
+1. **Valores nulos (null)**: Celdas vacías - el dato simplemente no existe
 2. **Errores de conversión**: Intentar convertir "abc" a número
 3. **Valores inválidos**: Fechas imposibles como 30/02/2024
+4. **Espacios invisibles**: Caracteres que no ves pero causan errores
+5. **Formatos mixtos**: Una columna con números y texto mezclados
 
 ### Soluciones en Power Query
 
@@ -290,8 +359,19 @@ Reemplazar por: 0 (o lo que corresponda)
 Click derecho → Reemplazar errores
 Reemplazar por: null (o valor por defecto)
 
+**Para espacios invisibles:**
+Transformar → Formato → Recortar (Trim)
+O usa: Text.Clean([Columna]) para quitar caracteres especiales
+
 **Con código M (avanzado):**
 = try [Columna] otherwise 0
+
+### Orden de Operaciones
+
+1. Primero limpia espacios con Text.Trim y Text.Clean
+2. Luego reemplaza valores específicos
+3. Después cambia el tipo de dato
+4. Finalmente crea columnas calculadas
 
 ### 🎮 Tip para DataRescue
 
@@ -301,6 +381,8 @@ GANANCIA = PRECIO_VENTA - PRECIO_COSTO
 
 Crea una columna personalizada en Power Query:
 = if [GANANCIA] = null then [PRECIO_VENTA] - [PRECIO_COSTO] else [GANANCIA]
+
+📚 **Ver también:** "Guía de Supervivencia DataRescue" tiene todas las fórmulas para cada tipo de corrupción.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-query/dealing-with-errors',
     gameRelevance: ['datarescue']
@@ -316,17 +398,20 @@ Crea una columna personalizada en Power Query:
     duration: '10 min',
     level: 'Intermedio',
     description: 'Las fórmulas que dan vida a tus datos.',
+    relatedLessons: ['sum-average-count', 'calculate-filter', 'formula-cheatsheet', 'card-kpi'],
     content: `
 ### ¿Qué es DAX?
 
-DAX (Data Analysis Expressions) es el lenguaje de fórmulas de Power BI. Si conoces Excel, ya tienes ventaja.
+DAX (Data Analysis Expressions) es el lenguaje de fórmulas de Power BI. Si conoces Excel, ya tienes ventaja - muchas funciones son similares.
 
 ### Medidas vs Columnas Calculadas
 
-| Tipo | Cuándo Usar | Ejemplo |
-|------|------------|---------|
-| **Medida** | Cálculos que cambian con filtros | Total de ventas |
-| **Columna** | Valor fijo por fila | Categoría de precio |
+| Tipo | Cuándo Usar | Ejemplo | Se calcula... |
+|------|------------|---------|---------------|
+| **Medida** | Cálculos que cambian con filtros | Total de ventas | Al visualizar |
+| **Columna** | Valor fijo por fila | Categoría de precio | Al cargar datos |
+
+**Regla de oro:** Si el valor debe cambiar cuando el usuario filtra, usa una **medida**. Si es un dato fijo por fila, usa **columna calculada**.
 
 ### Tu Primera Medida
 
@@ -336,7 +421,14 @@ TotalVentas = SUM(Ventas[Monto])
 1. Click en la tabla en el panel de Campos
 2. Modelado → Nueva medida
 3. Escribe la fórmula
-4. Presiona Enter
+4. Presiona Enter (o Ctrl+Enter)
+
+### Sintaxis Básica
+
+Tabla[Columna] ← Siempre necesitas especificar la tabla y columna
+
+- ✅ Correcto: SUM(Sales[Amount])
+- ❌ Incorrecto: SUM(Amount)
 
 ### 🎮 Tip para el Juego
 
@@ -345,6 +437,8 @@ En **Dunder Mifflin**, las medidas más usadas son:
 - AVERAGE(Tabla[Columna]) - Promedio
 - COUNTROWS(Tabla) - Contar filas
 - DISTINCTCOUNT(Tabla[Columna]) - Contar valores únicos
+
+📚 **Siguiente paso:** Aprende las funciones básicas en "SUM, AVERAGE, COUNT" y luego domina "CALCULATE: El Rey del DAX".
     `,
     officialLink: 'https://learn.microsoft.com/es-es/dax/dax-overview',
     gameRelevance: ['office', 'stark', 'datarescue'],
@@ -357,6 +451,7 @@ En **Dunder Mifflin**, las medidas más usadas son:
     duration: '8 min',
     level: 'Principiante',
     description: 'Las 3 funciones que usarás el 80% del tiempo.',
+    relatedLessons: ['dax-intro', 'calculate-filter', 'divide-safe', 'card-kpi', 'common-mistakes'],
     content: `
 ### Las Funciones Básicas
 
@@ -375,6 +470,22 @@ TotalTransacciones = COUNTROWS(Sales)
 **DISTINCTCOUNT** - Cuenta valores únicos
 ClientesUnicos = DISTINCTCOUNT(Sales[ClienteID])
 
+### Diferencia Importante: COUNT vs COUNTROWS
+
+| Función | Qué cuenta | Ignora nulos |
+|---------|------------|--------------|
+| COUNT(Tabla[Columna]) | Celdas con números en esa columna | Sí |
+| COUNTROWS(Tabla) | TODAS las filas de la tabla | No |
+
+**Ejemplo:** Si tienes 100 filas pero 5 tienen el monto vacío:
+- COUNTROWS(Sales) = 100
+- COUNT(Sales[Amount]) = 95
+
+### MIN y MAX
+
+Minimo = MIN(Sales[Amount])
+Maximo = MAX(Sales[Amount])
+
 ### 🎮 Respuestas del Juego
 
 **Dunder Mifflin Misión 1:**
@@ -385,6 +496,8 @@ TicketPromedio = AVERAGE(Sales[Amount]) → Aproximadamente $1,695
 
 **DataRescue Misión 5:**
 ClientesUnicos = DISTINCTCOUNT(Tabla[CLIENTE_LIMPIO]) → Varía según dataset
+
+📚 **Para filtrar estos cálculos:** Aprende CALCULATE para calcular solo para ciertos vendedores o fechas.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/dax/sum-function-dax',
     gameRelevance: ['office', 'datarescue'],
@@ -397,6 +510,7 @@ ClientesUnicos = DISTINCTCOUNT(Tabla[CLIENTE_LIMPIO]) → Varía según dataset
     duration: '15 min',
     level: 'Intermedio',
     description: 'La función más poderosa que debes dominar.',
+    relatedLessons: ['dax-intro', 'sum-average-count', 'if-switch', 'filters-slicers'],
     content: `
 ### ¿Qué hace CALCULATE?
 
@@ -426,6 +540,22 @@ VentasEsteAño = CALCULATE(
     YEAR(Sales[Fecha]) = YEAR(TODAY())
 )
 
+**Múltiples filtros (AND implícito):**
+VentasDwightEnero = CALCULATE(
+    SUM(Sales[Amount]),
+    Sales[Salesperson] = "Dwight Schrute",
+    MONTH(Sales[Fecha]) = 1
+)
+
+### CALCULATE vs Filtros Visuales
+
+| Método | Cuándo usar |
+|--------|-------------|
+| **Filtro visual** | El usuario elige qué ver |
+| **CALCULATE** | Siempre quieres ese filtro específico |
+
+**Ejemplo:** Un gráfico con filtro de mes permite al usuario elegir. Una medida con CALCULATE siempre mostrará Dwight sin importar los filtros.
+
 ### 🎮 Tip para Dunder Mifflin Misión 3
 
 La misión te pide comparar ventas de Dwight vs Jim:
@@ -435,6 +565,8 @@ VentasJim = CALCULATE([TotalVentas], Sales[Salesperson] = "Jim Halpert")
 DiferenciaDJ = [VentasDwight] - [VentasJim]
 
 La diferencia debería ser aproximadamente $15,400 a favor de Dwight.
+
+📚 **Prerequisito:** Asegúrate de entender SUM/AVERAGE/COUNT antes de aprender CALCULATE.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/dax/calculate-function-dax',
     gameRelevance: ['office', 'stark'],
@@ -447,6 +579,7 @@ La diferencia debería ser aproximadamente $15,400 a favor de Dwight.
     duration: '10 min',
     level: 'Intermedio',
     description: 'Lógica condicional para clasificar datos.',
+    relatedLessons: ['dax-intro', 'calculate-filter', 'divide-safe'],
     content: `
 ### IF - Condición Simple
 
@@ -461,6 +594,18 @@ Clasificacion = IF(
 Categoria = IF(
     [Ventas] > 50000, "Oro",
     IF([Ventas] > 20000, "Plata", "Bronce")
+)
+
+### SWITCH - Alternativa Más Limpia
+
+En lugar de muchos IF anidados, usa SWITCH:
+
+Categoria = SWITCH(
+    TRUE(),
+    [Ventas] > 50000, "Oro",
+    [Ventas] > 20000, "Plata",
+    [Ventas] > 5000, "Bronce",
+    "Sin categoría"
 )
 
 ### AND / OR - Múltiples condiciones
@@ -479,6 +624,14 @@ Alerta = IF(
     "Normal"
 )
 
+### Comparación IF vs SWITCH
+
+| Escenario | Usar |
+|-----------|------|
+| 1-2 condiciones simples | IF |
+| Múltiples rangos o categorías | SWITCH |
+| Valores exactos a comparar | SWITCH |
+
 ### 🎮 Tip para DataRescue Misión 6
 
 La regla de clasificación es: Revisar si (PESO > 1000) O (GANANCIA < 1000)
@@ -487,6 +640,8 @@ OperacionesRevisar = CALCULATE(
     COUNTROWS(Tabla),
     OR(Tabla[PESO_LIMPIO] > 1000, Tabla[GANANCIA_LIMPIA] < 1000)
 )
+
+📚 **Ver también:** Combina IF con CALCULATE para filtros condicionales poderosos.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/dax/if-function-dax',
     gameRelevance: ['datarescue', 'squid-game']
@@ -498,6 +653,7 @@ OperacionesRevisar = CALCULATE(
     duration: '5 min',
     level: 'Principiante',
     description: 'Evita errores de división por cero.',
+    relatedLessons: ['sum-average-count', 'common-mistakes', 'dax-intro'],
     content: `
 ### El Problema
 
@@ -510,6 +666,15 @@ Margen = DIVIDE([Ganancia], [Ventas], 0)
 
 El tercer parámetro es el valor a retornar si hay división por cero.
 
+### ¿Por qué es importante?
+
+En datos reales, siempre hay casos donde el denominador es cero:
+- Productos sin ventas
+- Clientes nuevos sin historial
+- Meses sin transacciones
+
+Si no usas DIVIDE, tu reporte mostrará errores feos.
+
 ### Ejemplos Prácticos
 
 **Porcentaje:**
@@ -518,12 +683,17 @@ PorcentajeGanancia = DIVIDE([Ganancia], [Costo], 0) * 100
 **Ratio:**
 ConversionRate = DIVIDE([Ventas], [Visitas], 0)
 
+**Crecimiento porcentual:**
+Crecimiento = DIVIDE([VentasActual] - [VentasAnterior], [VentasAnterior], 0) * 100
+
 ### 🎮 Tip para el Juego
 
 En DataRescue, la **Rentabilidad** se calcula como:
 Rentabilidad = DIVIDE([GananciaTotal], SUM(Tabla[PRECIO_COSTO]), 0)
 
 Debería dar aproximadamente 0.20 (20%).
+
+📚 **Error común:** Ver "Errores Comunes" para más sobre división por cero.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/dax/divide-function-dax',
     gameRelevance: ['datarescue', 'office']
@@ -539,26 +709,37 @@ Debería dar aproximadamente 0.20 (20%).
     duration: '8 min',
     level: 'Principiante',
     description: 'Cada historia necesita su visualización.',
+    relatedLessons: ['card-kpi', 'filters-slicers', 'first-report'],
     content: `
 ### Guía Rápida de Gráficos
 
-| Quiero mostrar... | Usa... |
-|-------------------|--------|
-| Un número importante (KPI) | **Tarjeta** |
-| Comparar categorías | **Barras** |
-| Tendencia en el tiempo | **Líneas** |
-| Parte de un todo | **Donut/Pie** |
-| Distribución | **Histograma** |
-| Ubicaciones | **Mapa** |
-| Ranking | **Barras ordenadas** |
-| Múltiples métricas | **Tabla/Matriz** |
+| Quiero mostrar... | Usa... | Ejemplo |
+|-------------------|--------|---------|
+| Un número importante (KPI) | **Tarjeta** | Total de ventas |
+| Comparar categorías | **Barras** | Ventas por vendedor |
+| Tendencia en el tiempo | **Líneas** | Ventas mensuales |
+| Parte de un todo | **Donut/Pie** | % por región |
+| Distribución | **Histograma** | Rango de precios |
+| Ubicaciones | **Mapa** | Ventas por ciudad |
+| Ranking | **Barras ordenadas** | Top 10 productos |
+| Múltiples métricas | **Tabla/Matriz** | Detalle por cliente |
+| Progreso hacia meta | **Medidor (Gauge)** | % de objetivo |
+| Valor vs objetivo | **KPI Visual** | Meta mensual |
 
 ### Reglas de Oro
 
-1. **Menos es más**: No satures con gráficos
-2. **Un gráfico = una historia**: No mezcles conceptos
-3. **Títulos claros**: "Ventas por Región" no "Gráfico 1"
-4. **Colores con propósito**: Resalta lo importante
+1. **Menos es más**: Máximo 5-6 visuales por página
+2. **Un gráfico = una historia**: No mezcles conceptos diferentes
+3. **Títulos claros**: "Ventas por Región Q1 2024" no "Gráfico 1"
+4. **Colores con propósito**: Usa color para resaltar, no decorar
+5. **Jerarquía visual**: Lo más importante arriba y a la izquierda
+
+### Errores a Evitar
+
+❌ Gráficos de pie con más de 5 categorías
+❌ Efectos 3D (distorsionan la percepción)
+❌ Colores aleatorios sin significado
+❌ Ejes truncados que exageran diferencias
 
 ### 🎮 Tip para las Misiones
 
@@ -577,6 +758,7 @@ Debería dar aproximadamente 0.20 (20%).
     duration: '5 min',
     level: 'Principiante',
     description: 'Resalta tus números más importantes.',
+    relatedLessons: ['chart-types', 'dax-intro', 'sum-average-count', 'first-report'],
     content: `
 ### La Tarjeta (Card)
 
@@ -592,6 +774,15 @@ Es el visual más simple pero crucial. Muestra **un solo número**.
 - **Categoría de datos** → Unidades (miles, millones)
 - **Etiqueta de categoría** → Muestra u oculta el nombre
 - **Título** → Personaliza el encabezado
+- **Color de fondo** → Hazla destacar en el dashboard
+- **Tamaño de fuente** → Ajusta para legibilidad
+
+### Multi-Row Card (Tarjeta Multi-fila)
+
+Para mostrar **varios KPIs** en un solo visual:
+1. Usa "Multi-row Card" del panel de visualizaciones
+2. Arrastra múltiples medidas
+3. Cada medida aparece en su propia fila
 
 ### KPI Visual
 
@@ -609,6 +800,8 @@ El juego te pide valores específicos. Usa una **Tarjeta** para mostrar tu respu
 2. Agrega una Tarjeta al reporte
 3. Arrastra la medida a la tarjeta
 4. Verifica que el número coincida con lo esperado
+
+📚 **Prerequisito:** Asegúrate de saber crear medidas DAX antes de usar tarjetas.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/visuals/power-bi-visualization-card',
     gameRelevance: ['office', 'datarescue', 'stark'],
@@ -621,12 +814,15 @@ El juego te pide valores específicos. Usa una **Tarjeta** para mostrar tu respu
     duration: '8 min',
     level: 'Principiante',
     description: 'Deja que el usuario explore los datos.',
+    relatedLessons: ['chart-types', 'calculate-filter', 'pbi-interface'],
     content: `
 ### Tipos de Filtros
 
-1. **Filtros de Visual**: Afectan solo un gráfico
-2. **Filtros de Página**: Afectan toda la página
-3. **Filtros de Reporte**: Afectan todas las páginas
+| Tipo | Alcance | Dónde configurar |
+|------|---------|------------------|
+| **Filtros de Visual** | Solo un gráfico | Panel de Filtros → Filtros en este visual |
+| **Filtros de Página** | Toda la página | Panel de Filtros → Filtros en esta página |
+| **Filtros de Reporte** | Todas las páginas | Panel de Filtros → Filtros en todas las páginas |
 
 ### Segmentador (Slicer)
 
@@ -639,16 +835,27 @@ Es un **filtro visual** que el usuario puede manipular.
 
 ### Estilos de Segmentador
 
-- **Lista**: Múltiples opciones clickeables
-- **Dropdown**: Menú desplegable (ahorra espacio)
-- **Entre**: Para rangos de fechas o números
-- **Menor/Mayor que**: Para valores mínimos/máximos
+| Estilo | Mejor para | Cómo activar |
+|--------|------------|--------------|
+| **Lista** | Pocas opciones | Por defecto |
+| **Dropdown** | Muchas opciones | Formato → Configuración del segmentador |
+| **Entre** | Rangos de fechas | Automático con fechas |
+| **Menor/Mayor que** | Filtros numéricos | Formato → Configuración |
+
+### Sincronizar Segmentadores
+
+Si tienes el mismo segmentador en varias páginas:
+1. Vista → Sincronizar segmentadores
+2. Selecciona en qué páginas aplica
+3. El usuario filtra una vez, afecta todas las páginas
 
 ### 🎮 Tip Práctico
 
 En Dunder Mifflin Misión 3, usa un segmentador de **Mes** para ver en qué mes Jim superó a Dwight.
 
 **Respuesta:** Febrero 🎯
+
+📚 **Ver también:** CALCULATE hace lo mismo que un filtro pero en código DAX.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/visuals/power-bi-visualization-slicers',
     gameRelevance: ['office', 'stark'],
@@ -665,6 +872,7 @@ En Dunder Mifflin Misión 3, usa un segmentador de **Mes** para ver en qué mes 
     duration: '5 min',
     level: 'Principiante',
     description: 'Cómo completar misiones eficientemente.',
+    relatedLessons: ['first-report', 'get-data', 'power-query-basics', 'quick-wins'],
     content: `
 ### El Proceso para Cada Misión
 
@@ -686,10 +894,24 @@ En Dunder Mifflin Misión 3, usa un segmentador de **Mes** para ver en qué mes 
 | Ctrl + Enter | Confirmar medida DAX |
 | F5 | Actualizar datos |
 | Ctrl + C → Ctrl + V | Copiar visualización |
+| Delete | Eliminar elemento |
+| Ctrl + A | Seleccionar todo |
+
+### Organización Recomendada
+
+Crea una carpeta para cada mundo:
+- 📁 DunderMifflin/
+  - Mision1.pbix
+  - Mision2.pbix
+  - datasets/
+- 📁 DataRescue/
+  - ...
 
 ### 🎮 Tip Pro
 
 Guarda tu archivo .pbix con el nombre de la misión (ej: "DataRescue-Mision1.pbix"). Así puedes volver a consultarlo después.
+
+📚 **Para empezar rápido:** Ve "Victorias Rápidas" para saber qué misiones completar primero.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/fundamentals/desktop-getting-started',
     gameRelevance: ['datarescue', 'office', 'stark', 'squid-game', 'hogwarts']
@@ -701,19 +923,20 @@ Guarda tu archivo .pbix con el nombre de la misión (ej: "DataRescue-Mision1.pbi
     duration: '10 min',
     level: 'Intermedio',
     description: 'Cómo vencer a Corruptex.',
+    relatedLessons: ['power-query-basics', 'handle-errors', 'column-from-examples', 'formula-cheatsheet'],
     content: `
 ### Los Ataques de Corruptex
 
 El villano usa estas tácticas de corrupción:
 
-| Ataque | Ejemplo | Solución |
-|--------|---------|----------|
-| **Nulos** | Celdas vacías | Reemplazar con cálculo |
-| **Texto en números** | "1234.5 kg" | Extraer solo el número |
-| **Formato contable** | "(1234)" = negativo | Reemplazar paréntesis |
-| **Duplicados** | Filas repetidas | DISTINCTCOUNT |
-| **Typos** | "ALUMIMUNDOO" | Normalizar texto |
-| **Outliers** | Peso de 50,000 kg | Filtrar con umbral |
+| Ataque | Ejemplo | Solución | Lección relacionada |
+|--------|---------|----------|---------------------|
+| **Nulos** | Celdas vacías | Reemplazar con cálculo | Manejar Errores y Nulos |
+| **Texto en números** | "1234.5 kg" | Extraer solo el número | Columna de Ejemplos |
+| **Formato contable** | "(1234)" = negativo | Reemplazar paréntesis | Power Query Básico |
+| **Duplicados** | Filas repetidas | DISTINCTCOUNT | SUM, AVERAGE, COUNT |
+| **Typos** | "ALUMIMUNDOO" | Normalizar texto | Power Query Básico |
+| **Outliers** | Peso de 50,000 kg | Filtrar con umbral | Power Query Básico |
 
 ### Fórmulas de Rescate
 
@@ -724,12 +947,25 @@ GANANCIA_LIMPIA = if [GANANCIA] = null then [PRECIO_VENTA] - [PRECIO_COSTO] else
 Usar: Columna a partir de ejemplos
 O: Text.BeforeDelimiter([PESO_KG], " ")
 
+**Misión 3 - Convertir formato contable:**
+= if Text.StartsWith([VALOR], "(") then -Number.From(Text.BetweenDelimiters([VALOR], "(", ")")) else Number.From([VALOR])
+
 **Misión 5 - Normalizar cliente:**
 CLIENTE_LIMPIO = Text.Upper(Text.Trim(Text.Clean([CLIENTE])))
+
+### Orden de Limpieza Recomendado
+
+1. Text.Clean() - Quita caracteres invisibles
+2. Text.Trim() - Quita espacios al inicio/final
+3. Reemplazar valores específicos
+4. Cambiar tipo de dato
+5. Crear columnas calculadas
 
 ### Tip Final
 
 Si un valor no se convierte a número, probablemente tiene **espacios invisibles** o **caracteres especiales**. Usa Text.Clean() primero.
+
+📚 **Recursos:** Ve el "Cheatsheet de Fórmulas DAX" para copiar y pegar fórmulas.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-query/best-practices',
     gameRelevance: ['datarescue']
@@ -741,34 +977,51 @@ Si un valor no se convierte a número, probablemente tiene **espacios invisibles
     duration: '8 min',
     level: 'Principiante',
     description: 'No caigas en estas trampas.',
+    relatedLessons: ['power-query-basics', 'dax-intro', 'divide-safe', 'sum-average-count', 'card-kpi'],
     content: `
 ### Error 1: Olvidar "Cerrar y aplicar"
 
 Después de transformar en Power Query, **debes hacer click en "Cerrar y aplicar"** o los cambios no se guardan.
+
+✅ **Solución:** Siempre verifica que el botón diga "Cerrar y aplicar" antes de salir de Power Query.
 
 ### Error 2: Tipo de dato incorrecto
 
 Si una columna de números aparece como "ABC", cambia el tipo:
 - En Power Query: Click derecho → Tipo → Número decimal
 
+✅ **Solución:** Revisa los íconos en los encabezados de columna (123 = número, ABC = texto).
+
 ### Error 3: Usar columna en lugar de medida
 
 ❌ Incorrecto: Arrastrar Sales[Amount] directamente
 ✅ Correcto: Crear medida TotalVentas = SUM(Sales[Amount])
+
+**¿Por qué?** Las columnas suman por defecto, pero una medida te da control total.
 
 ### Error 4: Dividir por cero
 
 ❌ Ratio = [A] / [B]
 ✅ Ratio = DIVIDE([A], [B], 0)
 
+📚 **Aprende más:** Ve la lección "DIVIDE: División Segura".
+
 ### Error 5: No verificar la respuesta
 
 Siempre usa una **Tarjeta (Card)** para ver el valor exacto de tu medida antes de validar en el juego.
+
+📚 **Aprende más:** Ve la lección "Tarjetas y KPIs".
 
 ### Error 6: Confundir COUNT vs COUNTROWS
 
 - COUNT(Tabla[Columna]) = cuenta celdas NO vacías de esa columna
 - COUNTROWS(Tabla) = cuenta TODAS las filas de la tabla
+
+📚 **Aprende más:** Ve la lección "SUM, AVERAGE, COUNT".
+
+### Error 7: No entender el contexto de filtro
+
+Las medidas se recalculan según los filtros aplicados. Si ves un número diferente al esperado, verifica qué filtros están activos.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/power-bi/guidance/star-schema',
     gameRelevance: ['office', 'datarescue', 'stark']
@@ -780,6 +1033,7 @@ Siempre usa una **Tarjeta (Card)** para ver el valor exacto de tu medida antes d
     duration: '5 min',
     level: 'Todos',
     description: 'Copia y pega para las misiones.',
+    relatedLessons: ['dax-intro', 'sum-average-count', 'calculate-filter', 'if-switch', 'divide-safe', 'datarescue-survival'],
     content: `
 ### Agregaciones Básicas
 
@@ -797,6 +1051,13 @@ VentasFiltradas = CALCULATE(
     Tabla[Region] = "Norte"
 )
 
+// Múltiples filtros (AND implícito)
+VentasFiltradas = CALCULATE(
+    SUM(Tabla[Ventas]),
+    Tabla[Region] = "Norte",
+    Tabla[Año] = 2024
+)
+
 ### Condicionales
 
 Clasificacion = IF([Valor] > 100, "Alto", "Bajo")
@@ -805,21 +1066,38 @@ ConOR = IF(OR([A] > 10, [B] < 5), "Sí", "No")
 
 ConAND = IF(AND([A] > 10, [B] > 5), "Sí", "No")
 
+// SWITCH para múltiples opciones
+Categoria = SWITCH(
+    TRUE(),
+    [Valor] > 1000, "Premium",
+    [Valor] > 500, "Standard",
+    "Básico"
+)
+
 ### División Segura
 
 Ratio = DIVIDE([Numerador], [Denominador], 0)
 Porcentaje = DIVIDE([Parte], [Total], 0) * 100
+Crecimiento = DIVIDE([Actual] - [Anterior], [Anterior], 0) * 100
 
 ### Power Query (M)
 
 // Reemplazar nulos
 = if [Columna] = null then 0 else [Columna]
 
-// Limpiar texto
-= Text.Upper(Text.Trim([Columna]))
+// Limpiar texto completamente
+= Text.Upper(Text.Trim(Text.Clean([Columna])))
 
 // Extraer número de texto
 = Number.From(Text.BeforeDelimiter([Columna], " "))
+
+// Convertir formato contable (1234) a -1234
+= if Text.StartsWith([Valor], "(") then 
+    -Number.From(Text.BetweenDelimiters([Valor], "(", ")")) 
+  else 
+    Number.From([Valor])
+
+📚 **Para entender cada fórmula:** Revisa las lecciones correspondientes en la sección de DAX.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/dax/dax-function-reference',
     gameRelevance: ['office', 'datarescue', 'stark', 'squid-game', 'hogwarts']
@@ -831,18 +1109,22 @@ Porcentaje = DIVIDE([Parte], [Total], 0) * 100
     duration: '3 min',
     level: 'Principiante',
     description: 'Gana XP fácil con estos tips.',
+    relatedLessons: ['game-workflow', 'first-report', 'sum-average-count', 'pbi-intro'],
     content: `
 ### Misiones Fáciles para Empezar
 
-1. **Dunder Mifflin Cap. 1**: Solo importar y contar filas
-2. **Dunder Mifflin Cap. 2**: SUM y AVERAGE básicos
-3. **DataRescue Cap. 1**: Recuperar GANANCIA con fórmula simple
+| Misión | Dificultad | Habilidades | XP |
+|--------|------------|-------------|-----|
+| Dunder Mifflin 1 | ⭐ | Importar, COUNTROWS | 150 |
+| Dunder Mifflin 2 | ⭐ | SUM, AVERAGE | 200 |
+| DataRescue 1 | ⭐⭐ | Power Query básico | 200 |
 
 ### Ganar XP Extra
 
 - **Racha diaria**: Juega al menos 1 misión por día
 - **Logros**: Revisa la sección de logros para objetivos ocultos
-- **Repetir misiones**: Puedes repetir para practicar
+- **Repetir misiones**: Puedes repetir para practicar (aunque no da XP extra)
+- **Sin errores**: Completar una misión sin respuestas incorrectas da bonus
 
 ### Desbloquear Mundos
 
@@ -852,17 +1134,23 @@ Porcentaje = DIVIDE([Parte], [Total], 0) * 100
 
 ### Nivel y XP
 
-- Cada 400 XP subes de nivel
-- Los niveles desbloquean misiones más avanzadas
-- Office 1 + 2 = 450 XP → ¡Ya eres nivel 2!
+| Nivel | XP Necesario | Total Acumulado |
+|-------|--------------|-----------------|
+| 1 → 2 | 400 XP | 400 XP |
+| 2 → 3 | 400 XP | 800 XP |
+| 3 → 4 | 400 XP | 1200 XP |
 
-### Orden Recomendado
+**Tip:** Office 1 + 2 = 350 XP → ¡Casi nivel 2!
 
-1. **Dunder Mifflin** (Office) - Fundamentos
-2. **DataRescue HQ** - Limpieza de datos
-3. **Stark Industries** - Análisis avanzado
+### Orden Recomendado de Mundos
+
+1. **Dunder Mifflin** (Office) - Fundamentos de Power BI
+2. **DataRescue HQ** - Limpieza de datos con Power Query
+3. **Stark Industries** - Análisis avanzado y CALCULATE
 4. **Squid Game** - Estadísticas y probabilidad
 5. **Gringotts** - Maestría total
+
+📚 **Antes de empezar:** Revisa "Flujo de Trabajo del Juego" para entender el proceso.
     `,
     officialLink: 'https://learn.microsoft.com/es-es/training/paths/get-started-power-bi/',
     gameRelevance: ['office', 'datarescue', 'stark', 'squid-game', 'hogwarts']
@@ -881,6 +1169,7 @@ Porcentaje = DIVIDE([Parte], [Total], 0) * 100
     isVideo: true,
     youtubeUrl: 'https://youtu.be/4vAYUjvYwus',
     youtubeId: '4vAYUjvYwus',
+    relatedLessons: ['pbi-intro', 'video-etl-conectores', 'get-data', 'first-report'],
     content: `
 ### 🎬 Power BI como Motor de Estrategia de Negocios
 
@@ -949,6 +1238,7 @@ Este video te prepara conceptualmente para entender **por qué** estamos usando 
     isVideo: true,
     youtubeUrl: 'https://youtu.be/gpApeeNAYcY',
     youtubeId: 'gpApeeNAYcY',
+    relatedLessons: ['video-pbi-estrategia', 'get-data', 'power-query-basics', 'first-report', 'pbi-interface'],
     content: `
 ### 🎬 La Puerta de Entrada: "Obtener Datos" y Transformación
 
