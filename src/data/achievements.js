@@ -134,5 +134,48 @@ export const ACHIEVEMENTS = [
         xp: 1500,
         rarity: 'legendary',
         image: '/images/achievements/corruptex-slayer.png'
+    },
+    // ============================================
+    // DUNDER MIFFLIN: Achievements específicos
+    // ============================================
+    {
+        id: 'dunder-mifflin-master',
+        title: 'Héroe de Scranton',
+        description: 'Completa todas las misiones de Dunder Mifflin Paper Co.',
+        icon: '🏢',
+        condition: (user) => {
+            const officeMissions = ['office-1', 'office-1b', 'office-2', 'office-3', 'office-4', 'office-5'];
+            return officeMissions.every(m => user.completedMissions.includes(m));
+        },
+        xp: 1500,
+        rarity: 'legendary',
+        image: '/images/achievements/dunder-mifflin-master.png'
+    },
+    {
+        id: 'dunder-mifflin-perfect',
+        title: 'That\'s What She Said',
+        description: 'Completa Dunder Mifflin con Perfect Run (sin errores ni pistas)',
+        icon: '🏆',
+        condition: (user) => {
+            const progress = user.worldProgress?.office;
+            if (!progress?.completedAt) return false;
+            return progress.totalWrongAnswers === 0;
+        },
+        xp: 2500,
+        rarity: 'legendary',
+        image: '/images/achievements/dunder-mifflin-perfect.png'
+    },
+    {
+        id: 'dax-rookie',
+        title: 'DAX Rookie',
+        description: 'Usa SUM, AVERAGE y CALCULATE en tus primeras misiones',
+        icon: '📊',
+        condition: (user) => {
+            const skills = user.worldSkills?.office || [];
+            return skills.includes('dax-sum-avg') && skills.includes('dax-calculate');
+        },
+        xp: 400,
+        rarity: 'rare',
+        image: '/images/achievements/dax-master.png'
     }
 ];

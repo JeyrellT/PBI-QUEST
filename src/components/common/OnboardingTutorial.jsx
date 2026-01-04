@@ -7,6 +7,9 @@ import {
 import confetti from 'canvas-confetti';
 import useResponsive from '../../hooks/useResponsive';
 
+// eslint - motion es usado en JSX como <motion.div>
+void motion;
+
 // Import images
 import welcomeImg from '../../assets/tutorial/welcome.png';
 import worldsImg from '../../assets/tutorial/worlds.png';

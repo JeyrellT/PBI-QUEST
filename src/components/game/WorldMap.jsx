@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Lock, CheckCircle2, Download, Play, Coins, Layers } from 'lucide-react';
+import { Lock, CheckCircle2, Download, Play, Coins, Layers, Award, BookOpen, Target, Sparkles, TrendingUp, AlertCircle } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { WORLDS } from '../../data/worlds';
 import { getAssetPath } from '../../utils/assetPath';
 import { useDataGenerator } from '../../hooks/useDataGenerator';
-import { getCardsForMission, MISSION_REQUIRED_CARDS } from '../../data/pdfCards';
+import { MISSION_REQUIRED_CARDS } from '../../data/pdfCards';
 import MissionCardSelector from './MissionCardSelector';
 import CardDeck from './CardDeck';
 import confetti from 'canvas-confetti';
 import MissionValidator from './MissionValidator';
 
 const WorldMap = () => {
-    const { user, completeMission, unlockWorld } = useGame();
+    const { 
+        user, 
+        completeMission, 
+        unlockWorld,
+        recordMissionPerformance,
+        unlockWorldSkills,
+        completeWorld,
+        getWorldPerformanceSummary
+    } = useGame();
     const {
         generateTreasuryData,
         generateSalesData,
@@ -39,8 +48,71 @@ const WorldMap = () => {
     const [showVictoryModal, setShowVictoryModal] = useState(false);
     const [missionResults, setMissionResults] = useState(null);
 
+    // NUEVO: Estados para narrativas y epílogo
+    const [showNarrativeModal, setShowNarrativeModal] = useState(false);
+    const [currentNarrative, setCurrentNarrative] = useState(null);
+    const [showEpilogueModal, setShowEpilogueModal] = useState(false);
+    const [epilogueWorld, setEpilogueWorld] = useState(null);
+    const [showReviewMode, setShowReviewMode] = useState(false);
+    const [reviewQuestions, setReviewQuestions] = useState([]);
+
     // Costo para desbloquear mundos (reducido a 100 para mejor progresión)
     const WORLD_UNLOCK_COST = 100;
+
+    // NUEVO: Generar preguntas de repaso basadas en las habilidades del mundo
+    const generateReviewQuestions = (world) => {
+        const questions = [];
+        
+        // Preguntas de repaso basadas en conceptos clave de Power BI
+        const reviewBank = {
+            'data-import': [
+                { q: '¿Qué opción de Power BI usas para cargar datos desde un archivo Excel?', a: 'Obtener Datos', options: ['Obtener Datos', 'Transformar Datos', 'Publicar', 'Nuevo Visual'] },
+                { q: '¿Qué herramienta usas para limpiar y transformar datos antes de cargarlos?', a: 'Power Query', options: ['Power Query', 'DAX Studio', 'Power Pivot', 'Excel'] }
+            ],
+            'data-cleaning': [
+                { q: '¿Qué función de Power Query convierte "JUAN PÉREZ" a "Juan Pérez"?', a: 'Text.Proper', options: ['Text.Proper', 'Text.Upper', 'Text.Lower', 'Text.Clean'] },
+                { q: '¿Cómo manejas fechas en formatos mixtos (DD/MM vs MM/DD)?', a: 'Cambiar Tipo con Configuración Regional', options: ['Cambiar Tipo con Configuración Regional', 'Eliminar la columna', 'Ignorar el problema', 'Usar DATEVALUE'] }
+            ],
+            'dax-sum-avg': [
+                { q: '¿Cuál es la diferencia entre una Medida y una Columna Calculada?', a: 'Medidas calculan en tiempo de consulta, columnas en tiempo de carga', options: ['Medidas calculan en tiempo de consulta, columnas en tiempo de carga', 'No hay diferencia', 'Columnas son más rápidas', 'Medidas solo funcionan en tablas'] },
+                { q: '¿Qué función DAX suma todos los valores de una columna?', a: 'SUM', options: ['SUM', 'SUMX', 'TOTAL', 'ADD'] }
+            ],
+            'dax-calculate': [
+                { q: '¿Para qué sirve la función CALCULATE en DAX?', a: 'Evaluar una expresión con filtros modificados', options: ['Evaluar una expresión con filtros modificados', 'Sumar valores', 'Crear columnas', 'Importar datos'] },
+                { q: '¿Qué función DAX es considerada la más poderosa y versátil?', a: 'CALCULATE', options: ['CALCULATE', 'SUM', 'IF', 'FILTER'] }
+            ],
+            'dax-distinctcount': [
+                { q: '¿Qué diferencia hay entre COUNT y DISTINCTCOUNT?', a: 'DISTINCTCOUNT ignora duplicados', options: ['DISTINCTCOUNT ignora duplicados', 'COUNT es más rápido', 'Son idénticas', 'COUNT solo funciona con números'] },
+                { q: '¿Cuándo usarías DISTINCTCOUNT en lugar de COUNTROWS?', a: 'Cuando quieres contar valores únicos de una columna', options: ['Cuando quieres contar valores únicos de una columna', 'Siempre', 'Nunca', 'Para tablas grandes'] }
+            ],
+            'profitability': [
+                { q: '¿Qué es el margen de beneficio?', a: 'Ganancia dividida entre ventas totales', options: ['Ganancia dividida entre ventas totales', 'Ventas menos costos', 'Precio de venta', 'Costos totales'] },
+                { q: '¿Para qué sirve VAR en DAX?', a: 'Definir variables para código más limpio y eficiente', options: ['Definir variables para código más limpio y eficiente', 'Calcular varianza', 'Crear variaciones de datos', 'Validar datos'] }
+            ]
+        };
+
+        // Seleccionar preguntas basadas en las habilidades del mundo
+        if (world.skillsLearned) {
+            world.skillsLearned.forEach(skill => {
+                const skillQuestions = reviewBank[skill.id] || [];
+                if (skillQuestions.length > 0) {
+                    // Seleccionar una pregunta aleatoria de cada habilidad
+                    const randomQ = skillQuestions[Math.floor(Math.random() * skillQuestions.length)];
+                    questions.push({ ...randomQ, skillId: skill.id, skillName: skill.name });
+                }
+            });
+        }
+
+        return questions;
+    };
+
+    // Iniciar modo repaso
+    const handleStartReview = (world) => {
+        const questions = generateReviewQuestions(world);
+        setReviewQuestions(questions.map(q => ({ ...q, userAnswer: null, isCorrect: null })));
+        setShowReviewMode(true);
+        setShowEpilogueModal(false);
+    };
 
     // Verificar si la misión requiere selección de cartas (solo DataRescue HQ)
     const missionRequiresCards = (missionId) => {
@@ -71,7 +143,7 @@ const WorldMap = () => {
         }
     };
 
-    const handleCardsSelected = (selectedCardIds) => {
+    const handleCardsSelected = () => {
         // Las cartas fueron seleccionadas correctamente, iniciar la misión
         setShowCardSelector(false);
         setSelectedMission(pendingMission);
@@ -142,6 +214,21 @@ const WorldMap = () => {
         setMissionResults(results);
         setShowVictoryModal(true);
 
+        // Registrar rendimiento de la misión
+        if (selectedWorld && selectedMission) {
+            recordMissionPerformance(selectedWorld.id, selectedMission.id, {
+                wrongAnswers: results.wrongAnswers || 0,
+                attempts: results.attempts || 1,
+                hints: results.hintsUsed || 0,
+                skillsDemo: results.skillsDemo || selectedMission.skillsDemo || []
+            });
+
+            // Desbloquear habilidades demostradas
+            if (selectedMission.skillsDemo?.length > 0) {
+                unlockWorldSkills(selectedWorld.id, selectedMission.skillsDemo);
+            }
+        }
+
         // Confetti burst initial
         confetti({
             particleCount: 150,
@@ -161,9 +248,43 @@ const WorldMap = () => {
             coins: selectedMission.coins
         }, selectedMission.title);
 
-        // Reset states
+        // Reset victory modal
         setShowVictoryModal(false);
         setMissionResults(null);
+
+        // Verificar si se completó el mundo
+        const allMissionIds = selectedWorld.missions.map(m => m.id);
+        const willCompleteWorld = allMissionIds.every(
+            id => id === selectedMission.id || user.completedMissions.includes(id)
+        );
+
+        if (willCompleteWorld && selectedWorld.epilogue) {
+            // Marcar mundo como completado
+            completeWorld(selectedWorld.id);
+            
+            // Mostrar epílogo después de un momento
+            setTimeout(() => {
+                setEpilogueWorld(selectedWorld);
+                setShowEpilogueModal(true);
+                
+                // Gran celebración
+                confetti({
+                    particleCount: 300,
+                    spread: 100,
+                    origin: { y: 0.5 },
+                    colors: [selectedWorld.color, '#ffd700', '#22c55e', '#ffffff']
+                });
+            }, 500);
+        } else if (selectedMission.outroNarrative) {
+            // Mostrar narrativa de transición
+            setCurrentNarrative({
+                type: 'outro',
+                text: selectedMission.outroNarrative,
+                missionTitle: selectedMission.title
+            });
+            setShowNarrativeModal(true);
+        }
+
         setSelectedMission(null);
     };
 
@@ -339,6 +460,32 @@ const WorldMap = () => {
                                                                     alt="Success"
                                                                     style={{ width: '100%', height: 'auto', display: 'block' }}
                                                                 />
+                                                            </div>
+                                                        )}
+
+                                                        {selectedMission?.acquiredSkills && (
+                                                            <div style={{ marginBottom: '24px' }}>
+                                                                <h4 style={{
+                                                                    fontSize: '1rem',
+                                                                    color: 'var(--accent-gold)',
+                                                                    marginBottom: '12px'
+                                                                }}>
+                                                                    Habilidades Adquiridas
+                                                                </h4>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                                                                    {selectedMission.acquiredSkills.map((skill, i) => (
+                                                                        <span key={i} style={{
+                                                                            background: 'rgba(59, 130, 246, 0.2)',
+                                                                            border: '1px solid rgba(59, 130, 246, 0.4)',
+                                                                            borderRadius: '12px',
+                                                                            padding: '6px 12px',
+                                                                            fontSize: '0.85rem',
+                                                                            color: '#60a5fa'
+                                                                        }}>
+                                                                            ✨ {skill}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
                                                             </div>
                                                         )}
 
@@ -554,7 +701,7 @@ const WorldMap = () => {
                                             }
                                         }}
                                     >
-                                        {selectedWorld.missions.map((mission, index) => {
+                                        {selectedWorld.missions.map((mission) => {
                                             const isCompleted = user.completedMissions.includes(mission.id);
                                             const isLocked = user.level < mission.level;
 
@@ -619,20 +766,22 @@ const WorldMap = () => {
                 )}
             </AnimatePresence >
 
-            {/* Botón flotante para ver el mazo de cartas */}
-            < motion.button
-                className="floating-deck-btn glass"
-                onClick={() => setShowCardDeck(true)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                title="Ver tu mazo de cartas"
-            >
-                <Layers size={24} />
-                <span>Mazo</span>
-            </motion.button >
+            {/* Botón flotante para ver el mazo de cartas (Solo DataRescue) */}
+            {selectedWorld?.id === 'datarescue' && (
+                <motion.button
+                    className="floating-deck-btn glass"
+                    onClick={() => setShowCardDeck(true)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 }}
+                    title="Ver tu mazo de cartas"
+                >
+                    <Layers size={24} />
+                    <span>Mazo</span>
+                </motion.button>
+            )}
 
             {/* Modal del Mazo de Cartas */}
             < AnimatePresence >
@@ -655,6 +804,598 @@ const WorldMap = () => {
                     />
                 )}
             </AnimatePresence >
+
+            {/* NUEVO: Modal de Narrativa de Transición */}
+            <AnimatePresence>
+                {showNarrativeModal && currentNarrative && (
+                    <motion.div
+                        className="narrative-modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(0,0,0,0.9)', zIndex: 1000,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '20px',
+                            backdropFilter: 'blur(10px)'
+                        }}
+                        onClick={() => setShowNarrativeModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8, y: 30 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.8, y: 30 }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                maxWidth: '600px', width: '100%',
+                                background: 'linear-gradient(145deg, var(--bg-surface), var(--bg-main))',
+                                border: '1px solid var(--accent-gold)',
+                                borderRadius: '24px',
+                                padding: '32px',
+                                textAlign: 'center',
+                                boxShadow: '0 0 60px rgba(255, 215, 0, 0.1)'
+                            }}
+                        >
+                            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📖</div>
+                            <h2 style={{ 
+                                color: 'var(--accent-gold)', 
+                                marginBottom: '8px',
+                                fontSize: '1.3rem'
+                            }}>
+                                Continuará...
+                            </h2>
+                            <p style={{ 
+                                color: 'var(--text-muted)', 
+                                fontSize: '0.9rem',
+                                marginBottom: '24px'
+                            }}>
+                                {currentNarrative.missionTitle}
+                            </p>
+                            <div style={{
+                                background: 'rgba(0,0,0,0.3)',
+                                borderRadius: '16px',
+                                padding: '24px',
+                                marginBottom: '24px',
+                                textAlign: 'left'
+                            }}>
+                                <p style={{
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem',
+                                    lineHeight: '1.7',
+                                    whiteSpace: 'pre-line'
+                                }}>
+                                    {currentNarrative.text}
+                                </p>
+                            </div>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setShowNarrativeModal(false)}
+                                style={{
+                                    background: 'linear-gradient(135deg, var(--accent-gold), #ffaa00)',
+                                    color: '#000',
+                                    padding: '14px 32px',
+                                    fontSize: '1rem',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Continuar →
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* NUEVO: Modal de Epílogo del Mundo */}
+            <AnimatePresence>
+                {showEpilogueModal && epilogueWorld && (
+                    <motion.div
+                        className="epilogue-modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(0,0,0,0.95)', zIndex: 1001,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '20px',
+                            backdropFilter: 'blur(12px)',
+                            overflowY: 'auto'
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.7, y: 50 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.7, y: 50 }}
+                            style={{
+                                maxWidth: '700px', width: '100%',
+                                background: 'linear-gradient(145deg, var(--bg-surface), var(--bg-main))',
+                                border: '2px solid var(--accent-gold)',
+                                borderRadius: '24px',
+                                padding: '40px',
+                                textAlign: 'center',
+                                boxShadow: '0 0 80px rgba(255, 215, 0, 0.2)',
+                                margin: '20px 0'
+                            }}
+                        >
+                            {/* Header */}
+                            <motion.div
+                                initial={{ y: -20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🏆</div>
+                                <h1 style={{
+                                    background: 'linear-gradient(135deg, #ffd700, #ffaa00)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    fontSize: '2rem',
+                                    marginBottom: '8px'
+                                }}>
+                                    ¡Mundo Completado!
+                                </h1>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                                    {epilogueWorld.name}
+                                </p>
+                            </motion.div>
+
+                            {/* Epílogo */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.4 }}
+                                style={{
+                                    background: 'rgba(0,0,0,0.4)',
+                                    borderRadius: '16px',
+                                    padding: '24px',
+                                    margin: '24px 0',
+                                    textAlign: 'left'
+                                }}
+                            >
+                                <p style={{
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem',
+                                    lineHeight: '1.8',
+                                    whiteSpace: 'pre-line'
+                                }}>
+                                    {epilogueWorld.epilogue}
+                                </p>
+                            </motion.div>
+
+                            {/* Habilidades Adquiridas */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.6 }}
+                                style={{ marginBottom: '24px' }}
+                            >
+                                <h3 style={{ 
+                                    color: 'var(--accent-green)', 
+                                    marginBottom: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}>
+                                    <Award size={20} />
+                                    Habilidades Adquiridas
+                                </h3>
+                                <div style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: '10px',
+                                    justifyContent: 'center'
+                                }}>
+                                    {epilogueWorld.skillsLearned?.map((skill, skillIndex) => (
+                                        <motion.div
+                                            key={skill.id}
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ delay: 0.7 + skillIndex * 0.1 }}
+                                            style={{
+                                                background: 'rgba(34, 197, 94, 0.15)',
+                                                border: '1px solid rgba(34, 197, 94, 0.3)',
+                                                borderRadius: '12px',
+                                                padding: '12px 16px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                            }}
+                                            title={skill.description}
+                                        >
+                                            <span style={{ fontSize: '1.2rem' }}>{skill.icon}</span>
+                                            <span style={{ color: '#22c55e', fontWeight: '600', fontSize: '0.9rem' }}>
+                                                {skill.name}
+                                            </span>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </motion.div>
+
+                            {/* Resumen de Rendimiento */}
+                            {(() => {
+                                const summary = getWorldPerformanceSummary(epilogueWorld.id);
+                                if (!summary) return null;
+                                
+                                return (
+                                    <motion.div
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.8 }}
+                                        style={{ marginBottom: '24px' }}
+                                    >
+                                        <h3 style={{ 
+                                            color: '#a855f7', 
+                                            marginBottom: '16px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px'
+                                        }}>
+                                            <TrendingUp size={20} />
+                                            Tu Rendimiento
+                                        </h3>
+                                        
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(3, 1fr)',
+                                            gap: '12px',
+                                            marginBottom: '16px'
+                                        }}>
+                                            <div style={{
+                                                background: 'rgba(168, 85, 247, 0.15)',
+                                                borderRadius: '12px',
+                                                padding: '16px'
+                                            }}>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#a855f7' }}>
+                                                    {summary.perfectMissions}/{summary.totalMissions}
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                    Misiones Perfectas
+                                                </div>
+                                            </div>
+                                            <div style={{
+                                                background: summary.totalWrongAnswers === 0 
+                                                    ? 'rgba(34, 197, 94, 0.15)' 
+                                                    : 'rgba(239, 68, 68, 0.15)',
+                                                borderRadius: '12px',
+                                                padding: '16px'
+                                            }}>
+                                                <div style={{ 
+                                                    fontSize: '1.5rem', 
+                                                    fontWeight: 'bold', 
+                                                    color: summary.totalWrongAnswers === 0 ? '#22c55e' : '#ef4444' 
+                                                }}>
+                                                    {summary.totalWrongAnswers}
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                    Errores Totales
+                                                </div>
+                                            </div>
+                                            <div style={{
+                                                background: 'rgba(255, 184, 0, 0.15)',
+                                                borderRadius: '12px',
+                                                padding: '16px'
+                                            }}>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ffb800' }}>
+                                                    {summary.totalHints}
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                    Pistas Usadas
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Áreas de Mejora */}
+                                        {summary.areasToImprove.length > 0 && (
+                                            <div style={{
+                                                background: 'rgba(239, 68, 68, 0.1)',
+                                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                borderRadius: '12px',
+                                                padding: '16px',
+                                                textAlign: 'left'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    marginBottom: '12px',
+                                                    color: '#ef4444'
+                                                }}>
+                                                    <AlertCircle size={18} />
+                                                    <span style={{ fontWeight: '600' }}>Puntos a Reforzar</span>
+                                                </div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                    {summary.areasToImprove.map(area => (
+                                                        <span
+                                                            key={area.id}
+                                                            style={{
+                                                                background: 'rgba(239, 68, 68, 0.2)',
+                                                                borderRadius: '8px',
+                                                                padding: '6px 12px',
+                                                                fontSize: '0.85rem',
+                                                                color: '#fca5a5'
+                                                            }}
+                                                        >
+                                                            {area.icon} {area.name}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Badge de Perfecto */}
+                                        {summary.isPerfectRun && (
+                                            <motion.div
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                transition={{ delay: 1, type: 'spring' }}
+                                                style={{
+                                                    background: 'linear-gradient(135deg, #ffd700, #ffaa00)',
+                                                    borderRadius: '12px',
+                                                    padding: '16px',
+                                                    marginTop: '16px',
+                                                    color: '#000',
+                                                    fontWeight: 'bold',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px'
+                                                }}
+                                            >
+                                                <Sparkles size={20} />
+                                                ¡PERFECT RUN! +{epilogueWorld.perfectRunBonus || 300} XP Bonus
+                                            </motion.div>
+                                        )}
+                                    </motion.div>
+                                );
+                            })()}
+
+                            {/* Botones de Acción */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 1 }}
+                                style={{
+                                    display: 'flex',
+                                    gap: '12px',
+                                    justifyContent: 'center',
+                                    flexWrap: 'wrap'
+                                }}
+                            >
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => handleStartReview(epilogueWorld)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '14px 24px'
+                                    }}
+                                >
+                                    <BookOpen size={18} />
+                                    Modo Repaso
+                                </button>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => {
+                                        setShowEpilogueModal(false);
+                                        setEpilogueWorld(null);
+                                        setSelectedWorld(null);
+                                    }}
+                                    style={{
+                                        background: 'linear-gradient(135deg, var(--accent-gold), #ffaa00)',
+                                        color: '#000',
+                                        padding: '14px 32px',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    ¡Explorar Nuevos Mundos! →
+                                </button>
+                            </motion.div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* NUEVO: Modal de Modo Repaso */}
+            <AnimatePresence>
+                {showReviewMode && reviewQuestions.length > 0 && (
+                    <motion.div
+                        className="review-modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(0,0,0,0.95)', zIndex: 1002,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '20px',
+                            backdropFilter: 'blur(12px)',
+                            overflowY: 'auto'
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8, y: 30 }}
+                            animate={{ scale: 1, y: 0 }}
+                            style={{
+                                maxWidth: '700px', width: '100%',
+                                background: 'linear-gradient(145deg, var(--bg-surface), var(--bg-main))',
+                                border: '1px solid #a855f7',
+                                borderRadius: '24px',
+                                padding: '32px',
+                                maxHeight: '90vh',
+                                overflowY: 'auto',
+                                margin: '20px 0'
+                            }}
+                        >
+                            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '12px' }}>📚</div>
+                                <h2 style={{ color: '#a855f7', marginBottom: '8px' }}>
+                                    Modo Repaso
+                                </h2>
+                                <p style={{ color: 'var(--text-muted)' }}>
+                                    Repasa los conceptos clave de Power BI
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                {reviewQuestions.map((rq, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        style={{
+                                            background: 'rgba(0,0,0,0.3)',
+                                            borderRadius: '16px',
+                                            padding: '20px',
+                                            border: rq.isCorrect === true 
+                                                ? '2px solid #22c55e' 
+                                                : rq.isCorrect === false 
+                                                    ? '2px solid #ef4444' 
+                                                    : '1px solid var(--border)'
+                                        }}
+                                    >
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            marginBottom: '12px',
+                                            fontSize: '0.85rem',
+                                            color: 'var(--text-muted)'
+                                        }}>
+                                            <Target size={14} />
+                                            {rq.skillName}
+                                        </div>
+                                        <p style={{
+                                            color: 'var(--text-main)',
+                                            fontWeight: '600',
+                                            marginBottom: '16px'
+                                        }}>
+                                            {rq.q}
+                                        </p>
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '1fr 1fr',
+                                            gap: '10px'
+                                        }}>
+                                            {rq.options.map((opt, optIdx) => (
+                                                <button
+                                                    key={optIdx}
+                                                    onClick={() => {
+                                                        if (rq.userAnswer !== null) return;
+                                                        const isCorrect = opt === rq.a;
+                                                        setReviewQuestions(prev => 
+                                                            prev.map((q, i) => 
+                                                                i === idx 
+                                                                    ? { ...q, userAnswer: opt, isCorrect } 
+                                                                    : q
+                                                            )
+                                                        );
+                                                    }}
+                                                    disabled={rq.userAnswer !== null}
+                                                    style={{
+                                                        padding: '12px',
+                                                        borderRadius: '10px',
+                                                        cursor: rq.userAnswer !== null ? 'default' : 'pointer',
+                                                        fontSize: '0.9rem',
+                                                        transition: 'all 0.2s',
+                                                        background: rq.userAnswer === opt
+                                                            ? rq.isCorrect
+                                                                ? 'rgba(34, 197, 94, 0.3)'
+                                                                : 'rgba(239, 68, 68, 0.3)'
+                                                            : rq.userAnswer !== null && opt === rq.a
+                                                                ? 'rgba(34, 197, 94, 0.2)'
+                                                                : 'rgba(255,255,255,0.05)',
+                                                        color: rq.userAnswer === opt
+                                                            ? rq.isCorrect ? '#22c55e' : '#ef4444'
+                                                            : 'var(--text-main)',
+                                                        border: rq.userAnswer === opt
+                                                            ? rq.isCorrect
+                                                                ? '2px solid #22c55e'
+                                                                : '2px solid #ef4444'
+                                                            : rq.userAnswer !== null && opt === rq.a
+                                                                ? '2px solid #22c55e'
+                                                                : '1px solid var(--border)'
+                                                    }}
+                                                >
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {rq.userAnswer !== null && !rq.isCorrect && (
+                                            <p style={{
+                                                marginTop: '12px',
+                                                fontSize: '0.85rem',
+                                                color: '#22c55e'
+                                            }}>
+                                                ✓ Respuesta correcta: {rq.a}
+                                            </p>
+                                        )}
+                                    </motion.div>
+                                ))}
+                            </div>
+
+                            {/* Resultado del Repaso */}
+                            {reviewQuestions.every(q => q.userAnswer !== null) && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    style={{
+                                        textAlign: 'center',
+                                        marginTop: '24px',
+                                        padding: '24px',
+                                        background: 'rgba(168, 85, 247, 0.1)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(168, 85, 247, 0.3)'
+                                    }}
+                                >
+                                    <h3 style={{ color: '#a855f7', marginBottom: '12px' }}>
+                                        Resultado del Repaso
+                                    </h3>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                                        {reviewQuestions.filter(q => q.isCorrect).length} / {reviewQuestions.length}
+                                    </div>
+                                    <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
+                                        respuestas correctas
+                                    </p>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => {
+                                            setShowReviewMode(false);
+                                            setReviewQuestions([]);
+                                        }}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+                                            padding: '12px 24px'
+                                        }}
+                                    >
+                                        Cerrar Repaso
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* Botón Cerrar */}
+                            {!reviewQuestions.every(q => q.userAnswer !== null) && (
+                                <button
+                                    className="btn btn-ghost"
+                                    onClick={() => {
+                                        setShowReviewMode(false);
+                                        setReviewQuestions([]);
+                                    }}
+                                    style={{
+                                        marginTop: '24px',
+                                        width: '100%'
+                                    }}
+                                >
+                                    Salir del Repaso
+                                </button>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div >
     );
 };

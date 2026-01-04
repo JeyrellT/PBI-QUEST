@@ -2,10 +2,60 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ACHIEVEMENTS } from '../data/achievements';
 import { useToast } from './ToastContext';
 import { getUnlockedCards, CARD_UNLOCK_PROGRESSION } from '../data/pdfCards';
+import { SCORING_PROFILES, WORLDS } from '../data/worlds';
 
 const GameContext = createContext();
 
 export const useGame = () => useContext(GameContext);
+
+// ============================================
+// FUNCIONES DE CÁLCULO DE SCORING
+// ============================================
+
+/**
+ * Calcula el XP final de una misión con penalizaciones
+ * @param {number} baseXP - XP base de la misión
+ * @param {object} profile - Perfil de scoring del mundo
+ * @param {object} stats - { hints, attempts, wrongAnswers, isPerfect }
+ * @returns {object} { finalXP, multiplier, breakdown }
+ */
+export const calculateMissionScore = (baseXP, profileId, stats) => {
+    const profile = SCORING_PROFILES[profileId] || SCORING_PROFILES['office-standard'];
+    
+    const { hints = 0, attempts = 0, wrongAnswers = 0 } = stats;
+    
+    // Calcular penalizaciones
+    const hintPenalty = hints * profile.hintPenalty;
+    const attemptPenalty = Math.max(0, (attempts - 1) * profile.attemptPenalty);
+    const wrongPenalty = wrongAnswers * profile.wrongAnswerPenalty;
+    
+    // Calcular multiplicador base
+    let multiplier = 1 - hintPenalty - attemptPenalty - wrongPenalty;
+    
+    // Aplicar bonus por perfecto (sin errores, sin hints, primer intento)
+    const isPerfect = hints === 0 && attempts <= 1 && wrongAnswers === 0;
+    if (isPerfect) {
+        multiplier = profile.perfectBonus;
+    }
+    
+    // Aplicar límite mínimo
+    multiplier = Math.max(profile.minMultiplier, multiplier);
+    
+    const finalXP = Math.round(baseXP * multiplier);
+    
+    return {
+        finalXP,
+        multiplier,
+        isPerfect,
+        breakdown: {
+            base: baseXP,
+            hintPenalty: Math.round(baseXP * hintPenalty),
+            attemptPenalty: Math.round(baseXP * attemptPenalty),
+            wrongPenalty: Math.round(baseXP * wrongPenalty),
+            perfectBonus: isPerfect ? Math.round(baseXP * (profile.perfectBonus - 1)) : 0
+        }
+    };
+};
 
 export const GameProvider = ({ children }) => {
     const { showToast } = useToast();
@@ -28,7 +78,22 @@ export const GameProvider = ({ children }) => {
             },
             // Sistema de cartas
             viewedCards: [],           // IDs de cartas que el jugador ha visto
-            cardsUsedInMissions: {}    // { missionId: [cardIds] }
+            cardsUsedInMissions: {},   // { missionId: [cardIds] }
+            
+            // NUEVO: Tracking de rendimiento por mundo
+            worldProgress: {
+                // office: { 
+                //     totalWrongAnswers: 0, 
+                //     missionsData: { 'office-1': { wrongAnswers: 0, attempts: 1, hints: 0 } },
+                //     completedAt: null,
+                //     skillsUnlocked: ['data-import', 'dax-sum-avg']
+                // }
+            },
+            
+            // NUEVO: Habilidades adquiridas por mundo
+            worldSkills: {
+                // office: ['data-import', 'data-cleaning', 'dax-sum-avg', ...]
+            }
         };
     });
 
@@ -400,6 +465,170 @@ export const GameProvider = ({ children }) => {
         }
     }, [user.weeklyChallenge]);
 
+    // =========================================================================
+    // SISTEMA DE PROGRESO POR MUNDO Y HABILIDADES
+    // =========================================================================
+
+    /**
+     * Registra el rendimiento de una misión (errores, intentos, hints)
+     */
+    const recordMissionPerformance = (worldId, missionId, performanceData) => {
+        const { wrongAnswers = 0, attempts = 1, hints = 0, skillsDemo = [] } = performanceData;
+        
+        setUser(prev => {
+            const worldProgress = prev.worldProgress || {};
+            const currentWorld = worldProgress[worldId] || { 
+                totalWrongAnswers: 0, 
+                missionsData: {},
+                completedAt: null 
+            };
+            
+            return {
+                ...prev,
+                worldProgress: {
+                    ...worldProgress,
+                    [worldId]: {
+                        ...currentWorld,
+                        totalWrongAnswers: currentWorld.totalWrongAnswers + wrongAnswers,
+                        missionsData: {
+                            ...currentWorld.missionsData,
+                            [missionId]: { wrongAnswers, attempts, hints }
+                        }
+                    }
+                }
+            };
+        });
+    };
+
+    /**
+     * Desbloquea habilidades para un mundo específico
+     */
+    const unlockWorldSkills = (worldId, skillIds) => {
+        setUser(prev => {
+            const worldSkills = prev.worldSkills || {};
+            const currentSkills = worldSkills[worldId] || [];
+            const newSkills = skillIds.filter(s => !currentSkills.includes(s));
+            
+            if (newSkills.length > 0) {
+                return {
+                    ...prev,
+                    worldSkills: {
+                        ...worldSkills,
+                        [worldId]: [...currentSkills, ...newSkills]
+                    }
+                };
+            }
+            return prev;
+        });
+    };
+
+    /**
+     * Marca un mundo como completado y calcula estadísticas finales
+     */
+    const completeWorld = (worldId) => {
+        setUser(prev => {
+            const worldProgress = prev.worldProgress || {};
+            const currentWorld = worldProgress[worldId] || { 
+                totalWrongAnswers: 0, 
+                missionsData: {} 
+            };
+            
+            return {
+                ...prev,
+                worldProgress: {
+                    ...worldProgress,
+                    [worldId]: {
+                        ...currentWorld,
+                        completedAt: new Date().toISOString()
+                    }
+                }
+            };
+        });
+    };
+
+    /**
+     * Obtiene el progreso de un mundo específico
+     */
+    const getWorldProgress = (worldId) => {
+        return user.worldProgress?.[worldId] || null;
+    };
+
+    /**
+     * Obtiene las habilidades desbloqueadas de un mundo
+     */
+    const getWorldSkills = (worldId) => {
+        return user.worldSkills?.[worldId] || [];
+    };
+
+    /**
+     * Verifica si todas las misiones de un mundo están completadas
+     */
+    const isWorldCompleted = (worldId) => {
+        const world = WORLDS.find(w => w.id === worldId);
+        if (!world) return false;
+        
+        const missionIds = world.missions.map(m => m.id);
+        return missionIds.every(id => user.completedMissions.includes(id));
+    };
+
+    /**
+     * Obtiene estadísticas de rendimiento del mundo para el resumen final
+     */
+    const getWorldPerformanceSummary = (worldId) => {
+        const world = WORLDS.find(w => w.id === worldId);
+        const progress = user.worldProgress?.[worldId];
+        
+        if (!world || !progress) return null;
+        
+        const missionsData = progress.missionsData || {};
+        const totalMissions = world.missions.length;
+        const completedMissions = Object.keys(missionsData).length;
+        
+        let totalWrongAnswers = 0;
+        let totalAttempts = 0;
+        let totalHints = 0;
+        let perfectMissions = 0;
+        
+        Object.values(missionsData).forEach(data => {
+            totalWrongAnswers += data.wrongAnswers || 0;
+            totalAttempts += data.attempts || 1;
+            totalHints += data.hints || 0;
+            if (data.wrongAnswers === 0 && data.hints === 0 && data.attempts <= 1) {
+                perfectMissions++;
+            }
+        });
+        
+        // Identificar áreas de mejora basadas en los errores
+        const areasToImprove = [];
+        world.missions.forEach(mission => {
+            const mData = missionsData[mission.id];
+            if (mData && mData.wrongAnswers > 0) {
+                const skills = mission.skillsDemo || [];
+                skills.forEach(skillId => {
+                    const skill = world.skillsLearned?.find(s => s.id === skillId);
+                    if (skill && !areasToImprove.find(a => a.id === skillId)) {
+                        areasToImprove.push({
+                            ...skill,
+                            wrongCount: mData.wrongAnswers
+                        });
+                    }
+                });
+            }
+        });
+        
+        return {
+            totalMissions,
+            completedMissions,
+            totalWrongAnswers,
+            totalAttempts,
+            totalHints,
+            perfectMissions,
+            isPerfectRun: totalWrongAnswers === 0 && totalHints === 0,
+            areasToImprove,
+            skillsUnlocked: user.worldSkills?.[worldId] || []
+        };
+    };
+
     const completeWeeklyChallenge = (weekNumber, xpReward) => {
         // Validación: solo permitir XP positivo
         const safeXPReward = Math.max(0, xpReward || 0);
@@ -470,7 +699,17 @@ export const GameProvider = ({ children }) => {
             getPlayerUnlockedCards,
             checkNewCardsUnlocked,
             // Retos Semanales
-            completeWeeklyChallenge
+            completeWeeklyChallenge,
+            // NUEVO: Sistema de progreso por mundo
+            recordMissionPerformance,
+            unlockWorldSkills,
+            completeWorld,
+            getWorldProgress,
+            getWorldSkills,
+            isWorldCompleted,
+            getWorldPerformanceSummary,
+            // Referencia a perfiles de scoring
+            SCORING_PROFILES
         }}>
             {children}
         </GameContext.Provider>

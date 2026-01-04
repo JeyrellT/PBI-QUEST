@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     CheckCircle, XCircle, AlertTriangle, HelpCircle,
     Target, Lightbulb, RotateCcw, Trophy, Sparkles,
-    ChevronDown, ChevronUp, Calculator
+    ChevronDown, ChevronUp, Calculator, TrendingDown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import StepValidator from './StepValidator';
+import { calculateMissionScore } from '../../context/GameContext';
 
 // eslint sometimes misses JSX member usage (<motion.div>)
 void motion;
@@ -14,6 +15,7 @@ void motion;
 /**
  * MissionValidator - Componente para validar respuestas de misiones
  * Permite al usuario ingresar sus respuestas y compara con el answer key
+ * Trackea respuestas incorrectas para penalización en scoring
  */
 const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => {
     const [userAnswers, setUserAnswers] = useState({});
@@ -23,6 +25,13 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
     const [attempts, setAttempts] = useState(0);
     const [isExpanded, setIsExpanded] = useState(true);
     const [stepsPassed, setStepsPassed] = useState(false);
+
+    // NUEVO: Trackear respuestas incorrectas acumuladas
+    const [totalWrongAnswers, setTotalWrongAnswers] = useState(0);
+
+    // Estados para sistema de villano (DataRescue)
+    const [corruptionLevel, setCorruptionLevel] = useState(0);
+    const [villainMessage, setVillainMessage] = useState(null);
 
     const validation = mission?.validation;
     const verification = mission?.verification;
@@ -157,6 +166,7 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
         setAttempts(prev => prev + 1);
         const results = {};
         let allCorrect = true;
+        let wrongInThisAttempt = 0;
 
         fields.forEach(field => {
             const userValue = userAnswers[field.id];
@@ -189,10 +199,35 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                 tolerance: field.tolerance
             };
 
-            if (!isCorrect) allCorrect = false;
+            if (!isCorrect) {
+                allCorrect = false;
+                wrongInThisAttempt++;
+            }
         });
 
-        setValidationResult({ results, allCorrect });
+        // Acumular respuestas incorrectas para penalización
+        if (wrongInThisAttempt > 0) {
+            setTotalWrongAnswers(prev => prev + wrongInThisAttempt);
+        }
+
+        setValidationResult({ results, allCorrect, wrongInThisAttempt });
+
+        // Logic for DataRescue Villain
+        if (mission.villainPenalty?.active) {
+            if (!allCorrect) {
+                // Increase corruption on failure
+                const newCorruption = Math.min(100, corruptionLevel + 15);
+                setCorruptionLevel(newCorruption);
+
+                // Trigger random taunt
+                const taunts = mission.villainPenalty.taunts || ["¡Fallaste! ¡Más datos corruptos!"];
+                const taunt = taunts[Math.floor(Math.random() * taunts.length)];
+                setVillainMessage(taunt);
+
+                // Clear taunt after 3 seconds
+                setTimeout(() => setVillainMessage(null), 3500);
+            }
+        }
 
         if (allCorrect) {
             // Celebración!
@@ -202,20 +237,38 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                 origin: { y: 0.6 }
             });
 
-            // Calcular bonus basado en intentos y hints
-            const baseXP = mission.xp;
-            const hintPenalty = hintsUsed * 0.1; // -10% por cada hint usado
-            const attemptPenalty = Math.max(0, (attempts - 1) * 0.05); // -5% por cada intento extra
-            const bonusMultiplier = Math.max(0.5, 1 - hintPenalty - attemptPenalty);
-            const finalXP = Math.round(baseXP * bonusMultiplier);
+            // Obtener perfil de scoring del mundo (si existe)
+            const scoringProfile = mission.scoringProfile || 'office-standard';
+
+            // Calcular score usando el nuevo sistema con penalización de corrupción
+            const corruptionPenalty = corruptionLevel / 100;
+            const totalWrong = totalWrongAnswers + wrongInThisAttempt;
+
+            const scoreResult = calculateMissionScore(
+                mission.xp,
+                scoringProfile,
+                {
+                    hints: hintsUsed,
+                    attempts: attempts,
+                    wrongAnswers: totalWrong
+                }
+            );
+
+            // Aplicar penalización extra de corrupción si existe
+            const finalMultiplier = Math.max(0.1, scoreResult.multiplier - corruptionPenalty);
+            const finalXP = Math.round(mission.xp * finalMultiplier);
 
             if (onValidationComplete) {
                 onValidationComplete({
                     success: true,
                     attempts,
                     hintsUsed,
+                    wrongAnswers: totalWrong,
                     xpEarned: finalXP,
-                    bonusMultiplier
+                    bonusMultiplier: finalMultiplier,
+                    isPerfect: scoreResult.isPerfect && corruptionLevel === 0,
+                    breakdown: scoreResult.breakdown,
+                    skillsDemo: mission.skillsDemo || []
                 });
             }
         }
@@ -233,6 +286,11 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
         setValidationResult(null);
         setShowHints(false);
         setStepsPassed(false);
+        setCorruptionLevel(0);
+        setVillainMessage(null);
+        setTotalWrongAnswers(0);
+        setAttempts(0);
+        setHintsUsed(0);
     };
 
     // Generar hints basados en los tips de la misión
@@ -249,9 +307,35 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                 marginTop: '20px',
                 overflow: 'hidden'
             }}
+
         >
+            {/* Villain Message Overlay */}
+            < AnimatePresence >
+                {villainMessage && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            background: '#ef4444',
+                            color: 'white',
+                            padding: '12px',
+                            textAlign: 'center',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <Skull size={20} />
+                        {villainMessage}
+                    </motion.div>
+                )}
+            </AnimatePresence >
+
             {/* Header */}
-            <div
+            < div
                 onClick={() => setIsExpanded(!isExpanded)}
                 style={{
                     padding: '16px 24px',
@@ -288,13 +372,28 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                                 : `${fields.length} campo(s) a validar • Intento ${attempts || 0}`
                             }
                         </p>
+
+                        {/* Corruption Bar if active */}
+                        {mission.villainPenalty?.active && (
+                            <div style={{ marginTop: '6px', width: '100%', maxWidth: '200px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#ef4444', marginBottom: '2px' }}>
+                                    <span>Corrupción: {corruptionLevel}%</span>
+                                </div>
+                                <div style={{ height: '4px', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '2px', overflow: 'hidden' }}>
+                                    <motion.div
+                                        animate={{ width: `${corruptionLevel}%` }}
+                                        style={{ height: '100%', background: '#ef4444' }}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
                 {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-            </div>
+            </div >
 
             {/* Content */}
-            <AnimatePresence>
+            < AnimatePresence >
                 {isExpanded && (
                     <motion.div
                         initial={{ height: 0 }}
@@ -574,8 +673,8 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                         </div>
                     </motion.div>
                 )}
-            </AnimatePresence>
-        </motion.div>
+            </AnimatePresence >
+        </motion.div >
     );
 };
 

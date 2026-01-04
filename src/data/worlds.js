@@ -1,3 +1,17 @@
+// ============================================
+// SCORING PROFILES - Perfiles de puntuación por mundo
+// ============================================
+export const SCORING_PROFILES = {
+    'office-standard': {
+        hintPenalty: 0.08,           // -8% por pista usada (permisivo)
+        attemptPenalty: 0.04,        // -4% por intento extra (permisivo)
+        wrongAnswerPenalty: 0.02,    // -2% por respuesta incorrecta (permisivo)
+        minMultiplier: 0.6,          // Mínimo 60% del XP base
+        perfectBonus: 1.15,          // +15% bonus si perfecto (sin errores)
+        description: 'Perfil permisivo para aprendizaje con algo de picante'
+    }
+};
+
 export const WORLDS = [
     {
         id: 'office',
@@ -11,6 +25,34 @@ export const WORLDS = [
         image: '/images/worlds/office.png',
         prologue: 'David Wallace ha enviado un ultimátum: Scranton debe demostrar su valor o será absorbida. Michael Scott te ha nombrado "Asistente del Asistente del Gerente Regional" (de datos). Tu misión: usar Power BI para probar que sois la mejor sucursal.',
         storyArc: 'La Batalla por Scranton',
+
+        // Perfil de puntuación específico del mundo
+        scoringProfile: 'office-standard',
+
+        // Epílogo - mensaje final al completar todas las misiones
+        epilogue: `🎉 ¡INCREÍBLE! Lo lograste.
+
+Michael está llorando de orgullo (y un poco porque pensó que lo despedirían). Gracias a tus análisis en Power BI, David Wallace ha declarado oficialmente a Scranton como la MEJOR SUCURSAL de Dunder Mifflin.
+
+Dwight te ha otorgado el título honorario de "Asistente del Asistente del Gerente Regional de Datos" (AAGRdD). Jim te ha dado un high-five silencioso. Pam te ha hecho un dibujo.
+
+Pero lo más importante: has demostrado que los datos cuentan historias, y tú sabes contarlas.
+
+— "That's what she said... sobre los datos." - Michael Scott`,
+
+        // Habilidades que se aprenden en este mundo
+        skillsLearned: [
+            { id: 'data-import', name: 'Importación de Datos', icon: '📥', description: 'Cargar datos desde Excel/CSV a Power BI' },
+            { id: 'data-cleaning', name: 'Limpieza de Datos', icon: '🧹', description: 'Text.Proper, formatos de fecha, normalización' },
+            { id: 'dax-sum-avg', name: 'SUM y AVERAGE', icon: '➕', description: 'Agregaciones básicas con DAX' },
+            { id: 'dax-calculate', name: 'CALCULATE con Filtros', icon: '🔮', description: 'La función más poderosa de DAX' },
+            { id: 'dax-distinctcount', name: 'DISTINCTCOUNT', icon: '🎯', description: 'Contar valores únicos' },
+            { id: 'profitability', name: 'Análisis de Rentabilidad', icon: '📊', description: 'Márgenes, variables (VAR), impacto de descuentos' }
+        ],
+
+        // Bonus por completar todo el mundo sin errores
+        perfectRunBonus: 300,
+
         missions: [
             {
                 id: 'office-1',
@@ -21,26 +63,52 @@ export const WORLDS = [
                 coins: 50,
                 description: 'Tu primer día. Importa los datos de ventas y conoce al equipo.',
                 storyContext: 'Michael insiste en que "las personas compran papel a personas", pero Jan Levinson quiere ver números. Tu primera tarea es cargar el histórico de ventas y asegurarte de que los datos estén limpios.',
+
+                // Narrativa introductoria antes de empezar
+                introNarrative: '📋 Michael te recibe con un abrazo incómodo: "¡Bienvenido a la familia Dunder Mifflin! Tu escritorio está junto al de Dwight... perdón por eso. Ahora, David Wallace quiere ver NÚMEROS. ¿Puedes hacer magia con esos datos?"',
+
+                // Narrativa al completar (transición a siguiente misión)
+                outroNarrative: '✅ ¡Excelente trabajo! Los datos están cargados y limpios. Michael está impresionado: "¡Eso fue como cuando Wayne Gretzky dijo... bueno, no recuerdo qué dijo, pero fue épico!"\n\nPero hay un problema... Toby acaba de encontrar un archivo de pesadilla.',
+
+                // Habilidades demostradas en esta misión
+                skillsDemo: ['data-import'],
+
+                // Penalización específica por respuesta incorrecta (2% por defecto)
+                wrongAnswerPenalty: 0.02,
+
                 objectives: [
-                    'Importar dataset de ventas (Excel/CSV)',
-                    'Revisar tipos de datos (Fecha, Moneda, Texto)',
+                    'Importar dataset de ventas (Excel/CSV) desde la carpeta compartida',
+                    'Revisar tipos de datos automáticos (Fecha, Moneda, Texto, Número)',
+                    'Corregir la columna "Fecha" si Power BI la detectó como texto',
+                    'Formatear "Amount" como moneda con símbolo $',
                     'Crear Medida: TotalFilas = COUNTROWS(Sales)',
-                    'Verificar que todas las filas se cargaron correctamente'
+                    'Crear Medida: TotalVentasBruto = SUM(Sales[Amount])',
+                    'Crear una Tarjeta (Card) visual para mostrar TotalFilas',
+                    'Verificar que no haya valores nulos en columnas críticas'
                 ],
                 datasets: ['office_sales'],
                 guide: [
-                    '1. Abre Power BI Desktop.',
-                    '2. Usa "Obtener Datos" para importar el archivo de ventas.',
-                    '3. Abre el "Editor de Power Query" (Transformar datos).',
-                    '4. Verifica que la columna "Fecha" tenga formato de fecha y "Monto" formato de moneda.',
-                    '5. Crea una medida COUNTROWS para verificar el total de registros.'
+                    '1. Abre Power BI Desktop y selecciona "Obtener Datos" > Excel o Texto/CSV.',
+                    '2. Navega hasta el archivo DunderMifflin_Sales.xlsx y selecciónalo.',
+                    '3. En la ventana de previsualización, verifica que los datos se vean correctos.',
+                    '4. Haz clic en "Transformar datos" para abrir Power Query Editor.',
+                    '5. Revisa cada columna: Fecha debe ser tipo "Date", Amount tipo "Currency", Salesperson tipo "Text".',
+                    '6. Si Fecha está como texto, haz clic derecho > Cambiar tipo > Fecha.',
+                    '7. Aplica los cambios con "Cerrar y aplicar".',
+                    '8. En vista de Reporte, ve a Modelado > Nueva Medida.',
+                    '9. Escribe: TotalFilas = COUNTROWS(Sales) y presiona Enter.',
+                    '10. Arrastra la medida a una visualización tipo Tarjeta.',
+                    '11. Verifica que el número coincida con las filas del archivo original.'
                 ],
                 tips: [
-                    'Siempre revisa la calidad de los datos antes de empezar.',
+                    'Siempre revisa la calidad de los datos antes de empezar cualquier análisis.',
                     'Si ves nombres mal escritos (ej. "Jim Halpert" vs "Jim H."), unifícalos en Power Query.',
-                    'Guarda tu archivo como "DM_Reporting.pbix".'
+                    'Guarda tu archivo como "DM_Reporting.pbix" para no perder trabajo.',
+                    'Power BI a veces detecta fechas americanas (MM/DD) mal - verifica siempre.',
+                    'Las medidas son dinámicas: cambian según los filtros aplicados.',
+                    'Usa la vista de Datos (icono de tabla) para explorar tus datos fila por fila.'
                 ],
-                expectedOutcome: 'Un modelo de datos limpio con 500 filas de ventas verificadas.',
+                expectedOutcome: 'Un modelo de datos limpio con 500 filas de ventas verificadas y 2 medidas funcionando.',
                 verification: [
                     {
                         question: "¿Cuántas filas totales de ventas cargaste en el modelo?",
@@ -53,6 +121,24 @@ export const WORLDS = [
                         type: "number",
                         answer: 12,
                         hint: "Ve a la vista de Datos y revisa los valores únicos en la columna Producto, o usa DISTINCTCOUNT."
+                    },
+                    {
+                        question: "¿Cuántos vendedores únicos aparecen en la columna 'Salesperson'?",
+                        type: "number",
+                        answer: 7,
+                        hint: "Cuenta los nombres únicos: Michael, Dwight, Jim, Pam, Andy, Phyllis, Stanley."
+                    },
+                    {
+                        question: "¿Cuál es el valor total bruto de ventas (TotalVentasBruto) sin decimales?",
+                        type: "number",
+                        answer: 847500,
+                        hint: "Revisa la tarjeta con la medida SUM(Sales[Amount])."
+                    },
+                    {
+                        question: "¿En qué año comienza el registro de ventas más antiguo?",
+                        type: "number",
+                        answer: 2023,
+                        hint: "Ordena la columna Fecha de menor a mayor y mira la primera fila."
                     }
                 ],
                 winImage: '/images/story/office-1-win.png'
@@ -66,27 +152,49 @@ export const WORLDS = [
                 coins: 75,
                 description: 'Toby encontró un archivo de clientes con datos sucios. Limpia mayúsculas, fechas y separadores.',
                 storyContext: 'Toby descubrió un archivo Excel antiguo de clientes que nunca fue limpiado. Los nombres están en MAYÚSCULAS, minúsculas, o MeZcLaDoS. Las fechas aparecen como "01/15/2024", "15-Ene-2024", "2024.01.15". Los teléfonos tienen puntos, comas y guiones. Michael dice: "Esto es peor que Scott\'s Tots".',
+
+                introNarrative: '😰 Toby se acerca tímidamente: "Oye... encontré este archivo. Sé que nadie me escucha, pero creo que es importante." Michael rueda los ojos, pero tú sabes que Toby tiene razón. Esos datos son un desastre.',
+
+                outroNarrative: '🧹 ¡Los datos están impecables! Toby sonríe (por primera vez en meses). Michael admite a regañadientes: "Bueno, supongo que Toby sirve para algo después de todo."\n\n¡Es hora de los Dundies! Michael necesita datos para los premios.',
+
+                skillsDemo: ['data-cleaning'],
+                wrongAnswerPenalty: 0.02,
+
                 objectives: [
-                    'Detectar inconsistencias: mayúsculas, fechas, separadores',
-                    'Normalizar nombres: Aplicar PROPER() o Text.Proper()',
-                    'Unificar fechas: Convertir todos los formatos a Date',
-                    'Limpiar teléfonos: Remover puntos, comas, espacios',
-                    'Crear columna: DatosLimpios = SI todo correcto'
+                    'Detectar inconsistencias: mayúsculas, fechas, separadores en todas las columnas',
+                    'Crear columna personalizada para identificar registros problemáticos',
+                    'Normalizar nombres: Aplicar Text.Proper() a la columna CLIENTE',
+                    'Limpiar espacios extra: Usar Text.Trim() y Text.Clean()',
+                    'Unificar fechas: Convertir formatos MM/DD/YYYY, DD-MMM-YYYY a Date estándar',
+                    'Limpiar teléfonos: Remover puntos, comas, espacios, guiones con Text.Remove()',
+                    'Validar emails: Verificar que todos contengan @ y dominio válido',
+                    'Crear columna: RegistroLimpio = true/false para auditoría'
                 ],
                 datasets: ['office_dirty_clients'],
                 guide: [
-                    '1. Importa el archivo de clientes "sucios" en Power Query.',
-                    '2. Revisa la columna CLIENTE: usa Text.Proper() para capitalizar correctamente.',
-                    '3. Para FECHA_REGISTRO: usa Date.From() con locale apropiado.',
-                    '4. Para TELEFONO: usa Text.Remove([TELEFONO], {".", ",", " ", "-"}).',
-                    '5. Verifica la calidad final: todas las fechas deben ser tipo Date, nombres capitalizados.'                ],
+                    '1. Importa el archivo "DM_Clientes_Sucios.xlsx" en Power Query.',
+                    '2. Selecciona la columna CLIENTE y ve a Transformar > Formato > Cada Palabra En Mayúscula.',
+                    '3. Alternativamente, crea columna personalizada: Text.Proper([CLIENTE]).',
+                    '4. Para FECHA_REGISTRO: Haz clic derecho > Cambiar tipo > Usando configuración regional.',
+                    '5. Selecciona "Inglés (Estados Unidos)" si las fechas son MM/DD/YYYY.',
+                    '6. Para TELEFONO: Agrega columna personalizada con:',
+                    '   Text.Remove([TELEFONO], {".", ",", " ", "-", "(", ")", "+"})',
+                    '7. Para EMAIL: Filtra donde Text.Contains([EMAIL], "@") = false para encontrar inválidos.',
+                    '8. Crea columna de validación: if [TELEFONO_LIMPIO] <> null and [FECHA_OK] <> null then true else false.',
+                    '9. En Inicio > Cerrar y aplicar para guardar los cambios.',
+                    '10. Crea una medida para contar registros limpios vs sucios.'
+                ],
                 tips: [
                     'Text.Proper("JIM HALPERT") = "Jim Halpert" - ¡Perfecto para nombres!',
+                    'Text.Proper("MARÍA GARCÍA") = "María García" - Funciona con acentos.',
                     'Las fechas en formato americano (MM/DD/YYYY) son diferentes al europeo (DD/MM/YYYY).',
-                    'Usa Cambiar Tipo > Usando Configuración Regional para fechas ambiguas.',
-                    'Un teléfono limpio solo debe tener números: "5551234567"'
+                    'Usa "Cambiar Tipo > Usando Configuración Regional" para fechas ambiguas.',
+                    'Un teléfono limpio solo debe tener números: "5551234567".',
+                    'Text.Trim() elimina espacios al inicio y final, Text.Clean() elimina caracteres no imprimibles.',
+                    'Siempre mantén una copia del dato original antes de transformar.',
+                    'Usa "Columna de ejemplo" si no quieres escribir fórmulas manualmente.'
                 ],
-                expectedOutcome: 'Tabla de clientes con 100% de datos normalizados y consistentes.',
+                expectedOutcome: 'Tabla de clientes con 100% de datos normalizados: 45 nombres corregidos, 28 fechas unificadas, 52 teléfonos limpiados.',
                 verification: [
                     {
                         question: "Después de limpiar, ¿cuántos clientes tienen el nombre correctamente capitalizado (Nombre Apellido)?",
@@ -99,6 +207,24 @@ export const WORLDS = [
                         type: "number",
                         answer: 28,
                         hint: "Revisa las fechas que tenían guiones, puntos o formato americano."
+                    },
+                    {
+                        question: "¿Cuántos teléfonos tenían caracteres especiales (puntos, guiones, paréntesis)?",
+                        type: "number",
+                        answer: 52,
+                        hint: "Compara la longitud del teléfono original vs el limpio."
+                    },
+                    {
+                        question: "¿Cuántos emails son INVÁLIDOS (no contienen @)?",
+                        type: "number",
+                        answer: 3,
+                        hint: "Filtra donde NOT Text.Contains([EMAIL], '@')."
+                    },
+                    {
+                        question: "¿Cuál es el porcentaje de registros totalmente limpios después de la transformación?",
+                        type: "number",
+                        answer: 93,
+                        hint: "Divide registros con RegistroLimpio=true entre el total y multiplica por 100."
                     }
                 ],
                 winImage: '/images/story/office-1b-win.png'
@@ -112,26 +238,49 @@ export const WORLDS = [
                 coins: 100,
                 description: 'Michael necesita datos para los premios. Usa medidas básicas (SUM, AVERAGE).',
                 storyContext: 'Es la noche de los Dundies en Chili\'s. Michael quiere un premio basado en datos reales este año (además del de "Zapatillas más Blancas"). Necesita saber quién vendió más en total y quién tuvo el mejor promedio por venta.',
+
+                introNarrative: '🏆 Michael entra con un micrófono de karaoke: "¡Es la noche más importante del año! Los DUNDIES. Pero este año, los premios serán basados en DATOS. Nada de favoritismos... excepto para mí, obviamente."',
+
+                outroNarrative: '🎤 ¡Los Dundies fueron un éxito! Dwight ganó el "Dundie al Vendedor del Año" (basado en datos, no en favoritismo). Jim ganó el "Dundie al Mejor Promedio por Venta". Stanley ganó el "Dundie a la Mayor Cantidad de Crucigramas Resueltos"... espera, eso no estaba en los datos.\n\nPero ahora Dwight y Jim están discutiendo sobre quién es REALMENTE mejor...',
+
+                skillsDemo: ['dax-sum-avg'],
+                wrongAnswerPenalty: 0.02,
+
                 objectives: [
                     'Crear Medida: TotalVentas = SUM(Sales[Amount])',
                     'Crear Medida: TicketPromedio = AVERAGE(Sales[Amount])',
-                    'Identificar al vendedor con mayor total de ventas',
-                    'Visualizar los ganadores en gráficos de barras'
+                    'Crear Medida: NumeroVentas = COUNT(Sales[TransactionID])',
+                    'Crear Medida: VentaMaxima = MAX(Sales[Amount])',
+                    'Crear Medida: VentaMinima = MIN(Sales[Amount])',
+                    'Crear gráfico de barras: Vendedor vs TotalVentas',
+                    'Crear tabla matricial con vendedor, TotalVentas, TicketPromedio, NumeroVentas',
+                    'Identificar al vendedor con mayor total y mejor promedio',
+                    'Añadir formato condicional (barras de datos) a la matriz'
                 ],
                 datasets: ['office_sales'],
                 guide: [
                     '1. En la vista de "Reporte", ve a la pestaña "Modelado" > "Nueva Medida".',
-                    '2. Escribe: TotalVentas = SUM(Sales[Amount]).',
+                    '2. Escribe: TotalVentas = SUM(Sales[Amount]) y presiona Enter.',
                     '3. Crea otra medida: TicketPromedio = AVERAGE(Sales[Amount]).',
-                    '4. Usa gráficos de barras para mostrar quién lidera cada métrica.',
-                    '5. ¡Descubre quién merece el Dundie al "Vendedor del Año"!'
+                    '4. Crea: NumeroVentas = COUNT(Sales[TransactionID]).',
+                    '5. Para encontrar la venta más grande: VentaMaxima = MAX(Sales[Amount]).',
+                    '6. Arrastra un gráfico de barras horizontales al lienzo.',
+                    '7. Pon "Salesperson" en el Eje Y, y "TotalVentas" en el Eje X.',
+                    '8. Ordena de mayor a menor haciendo clic en los "..." del visual.',
+                    '9. Crea una tabla Matriz: Filas = Salesperson, Valores = TotalVentas, TicketPromedio, NumeroVentas.',
+                    '10. Selecciona la matriz > Formato > Formato condicional > Barras de datos.',
+                    '11. Añade títulos descriptivos: "🏆 Ranking de Vendedores - Dundies 2024".'
                 ],
                 tips: [
                     'Las Medidas son mejores que las columnas calculadas para agregaciones.',
-                    'Da formato de moneda ($) a tus medidas inmediatamente.',
-                    'Usa etiquetas de datos para que Michael pueda leer los números fácilmente.'
+                    'Da formato de moneda ($) a tus medidas: Herramientas de medida > Formato > Moneda.',
+                    'Usa etiquetas de datos para que Michael pueda leer los números fácilmente.',
+                    'SUM suma todos los valores, AVERAGE calcula el promedio, COUNT cuenta filas.',
+                    'MAX y MIN son útiles para encontrar extremos y detectar anomalías.',
+                    'El formato condicional hace que los datos "hablen" visualmente.',
+                    'Guarda frecuentemente - Michael tiende a tropezar con cables.'
                 ],
-                expectedOutcome: 'Total de ventas de ~$847,500 y ticket promedio de ~$1,695.',
+                expectedOutcome: 'Total de ventas de ~$847,500, ticket promedio de ~$1,695, y ranking claro de vendedores.',
                 verification: [
                     {
                         question: "¿Quién es el vendedor con mayor monto TOTAL de ventas?",
@@ -144,6 +293,24 @@ export const WORLDS = [
                         type: "number",
                         answer: 1695,
                         hint: "Revisa tu tarjeta de KPI para la medida TicketPromedio."
+                    },
+                    {
+                        question: "¿Cuántas transacciones de venta totales hay en el dataset?",
+                        type: "number",
+                        answer: 500,
+                        hint: "Tu medida NumeroVentas = COUNT(Sales[TransactionID]) te da este número."
+                    },
+                    {
+                        question: "¿Cuál es el monto de la venta individual más alta registrada?",
+                        type: "number",
+                        answer: 8500,
+                        hint: "Usa la medida VentaMaxima = MAX(Sales[Amount])."
+                    },
+                    {
+                        question: "¿Quién tiene el MEJOR ticket promedio por venta (aunque no el mayor total)?",
+                        type: "text",
+                        answer: "Jim Halpert",
+                        hint: "Mira la columna TicketPromedio en tu matriz. Jim vende menos pero más caro."
                     }
                 ],
                 winImage: '/images/story/office-2-win.png'
@@ -157,26 +324,49 @@ export const WORLDS = [
                 coins: 150,
                 description: 'La guerra de bromas escala a los datos. Usa CALCULATE y FILTER.',
                 storyContext: 'Dwight afirma que sus ventas de papel "Premium" son superiores. Jim dice que Dwight solo vende porque roba clientes. Debes arbitrar esta disputa usando DAX para filtrar ventas específicas.',
+
+                introNarrative: '⚔️ Dwight golpea tu escritorio: "¡ESCÚCHAME! Mis ventas de papel Premium son SUPERIORES. Jim es un FRAUDE." Jim, desde su escritorio, simplemente levanta una ceja y dice: "Demuéstralo con datos, Dwight."\n\nMichael interviene: "¡Pelea de datos! Esto es como Celebrity Deathmatch, pero con Excel."',
+
+                outroNarrative: '📊 Los datos han hablado. Dwight lidera en ventas totales, pero Jim lo superó en Febrero (cuando Dwight estaba en su "retiro de supervivencia Schrute"). Dwight exige un reconteo. Jim simplemente sonríe.\n\nPero hay noticias de Corporate: ¡la sucursal de Stamford cierra y se fusiona con Scranton!',
+
+                skillsDemo: ['dax-calculate'],
+                wrongAnswerPenalty: 0.025, // Un poco más difícil
+
                 objectives: [
-                    'Medida: VentasDwight = CALCULATE([TotalVentas], Salesperson="Dwight Schrute")',
-                    'Medida: VentasJim = CALCULATE([TotalVentas], Salesperson="Jim Halpert")',
-                    'Calcular la diferencia: DiferenciaDJ = [VentasDwight] - [VentasJim]',
-                    'Comparar el rendimiento de ambos en un gráfico de líneas'
+                    'Medida: VentasDwight = CALCULATE([TotalVentas], Sales[Salesperson]="Dwight Schrute")',
+                    'Medida: VentasJim = CALCULATE([TotalVentas], Sales[Salesperson]="Jim Halpert")',
+                    'Medida: DiferenciaDJ = [VentasDwight] - [VentasJim]',
+                    'Medida: VentasPremium = CALCULATE([TotalVentas], Sales[ProductCategory]="Premium")',
+                    'Medida: VentasStandard = CALCULATE([TotalVentas], Sales[ProductCategory]="Standard")',
+                    'Crear gráfico de líneas: Mes vs Ventas por vendedor',
+                    'Crear tabla comparativa lado a lado: Dwight vs Jim',
+                    'Identificar el mes donde Jim superó a Dwight',
+                    'Calcular el porcentaje de ventas Premium de cada vendedor'
                 ],
                 datasets: ['office_sales'],
                 guide: [
-                    '1. Usa la función CALCULATE para aislar las ventas de un vendedor específico.',
-                    '2. Sintaxis: CALCULATE( [Medida Base], Columna = "Valor" ).',
-                    '3. Crea medidas separadas para Jim y Dwight.',
-                    '4. Colócalas en un gráfico de líneas comparativo (Eje X = Mes).',
-                    '5. Calcula quién vende más y por cuánto.'
+                    '1. CALCULATE modifica el contexto de filtro. Sintaxis: CALCULATE([Medida], Filtro).',
+                    '2. Crea la medida: VentasDwight = CALCULATE([TotalVentas], Sales[Salesperson]="Dwight Schrute").',
+                    '3. Repite para Jim: VentasJim = CALCULATE([TotalVentas], Sales[Salesperson]="Jim Halpert").',
+                    '4. Calcula la diferencia: DiferenciaDJ = [VentasDwight] - [VentasJim].',
+                    '5. Para ventas Premium: VentasPremium = CALCULATE([TotalVentas], Sales[ProductCategory]="Premium").',
+                    '6. Crea un gráfico de líneas: Eje X = Fecha (por Mes), Valores = VentasDwight, VentasJim.',
+                    '7. O usa un gráfico de líneas con Salesperson en la Leyenda para comparar automáticamente.',
+                    '8. Agrega una Segmentación de datos (Slicer) por Mes para análisis interactivo.',
+                    '9. Usa formato condicional en la DiferenciaDJ: verde si positivo, rojo si negativo.',
+                    '10. Crea tarjetas KPI para mostrar totales de cada vendedor.',
+                    '11. Identifica visualmente el cruce de líneas (cuando Jim supera a Dwight).'
                 ],
                 tips: [
-                    'CALCULATE es la función más poderosa de DAX. ¡Entiéndela bien!',
-                    'Usa colores distintivos: Mostaza para Dwight, Azul para Jim.',
-                    'Analiza la tendencia: ¿Quién es más consistente?'
+                    'CALCULATE es LA función más poderosa de DAX. ¡Domínala!',
+                    'Usa colores distintivos: Mostaza/Marrón para Dwight, Azul para Jim.',
+                    'Analiza la tendencia: ¿Quién es más consistente mes a mes?',
+                    'CALCULATE puede tener múltiples filtros separados por comas.',
+                    'La función ALL() dentro de CALCULATE elimina filtros existentes.',
+                    'Puedes anidar CALCULATE dentro de otra CALCULATE para filtros complejos.',
+                    'Jim puede tener mejor promedio pero menor volumen - ¿es mejor vendedor?'
                 ],
-                expectedOutcome: 'Dwight lidera por aproximadamente $15,000 sobre Jim.',
+                expectedOutcome: 'Dwight lidera por ~$15,400 sobre Jim. Jim lo superó en Febrero. Dwight vende más Premium.',
                 verification: [
                     {
                         question: "¿Cuál es la diferencia exacta en dólares entre las ventas de Dwight y Jim?",
@@ -189,6 +379,24 @@ export const WORLDS = [
                         type: "text",
                         answer: "Febrero",
                         hint: "Mira el gráfico de líneas. Hay un pico donde la línea azul (Jim) cruza a la mostaza."
+                    },
+                    {
+                        question: "¿Cuánto vendió Dwight en productos Premium (sin decimales)?",
+                        type: "number",
+                        answer: 78500,
+                        hint: "Usa CALCULATE con filtro de ProductCategory='Premium' y Salesperson='Dwight Schrute'."
+                    },
+                    {
+                        question: "¿Qué porcentaje del total de ventas de Jim corresponde a productos Premium?",
+                        type: "number",
+                        answer: 42,
+                        hint: "Divide VentasPremiumJim entre VentasJim y multiplica por 100."
+                    },
+                    {
+                        question: "¿En cuántos meses Dwight superó a Jim en ventas?",
+                        type: "number",
+                        answer: 11,
+                        hint: "Cuenta los meses en el gráfico donde la línea de Dwight está arriba. Solo 1 mes Jim ganó."
                     }
                 ],
                 winImage: '/images/story/office-3-win.png'
@@ -202,25 +410,50 @@ export const WORLDS = [
                 coins: 200,
                 description: 'Stamford se une a Scranton. Analiza el rendimiento comparativo y retención.',
                 storyContext: '¡Pánico! La sucursal de Stamford cierra y sus empleados vienen a Scranton. Andy Bernard viene con fuerza. Debes integrar los datos y contar cuántos vendedores únicos hay ahora.',
+
+                introNarrative: '🏢 El caos reina en la oficina. Andy Bernard entra cantando a cappella. Karen Filippelli busca un escritorio. Martin Nash pregunta por el plan de 401k. Michael está nervioso: "¡Esto es como cuando dos familias se juntan en Thanksgiving! ¿Quién es el pavo? ¡¿SOY YO EL PAVO?!"\n\nTu misión: unificar los datos de ambas sucursales.',
+
+                outroNarrative: '🤝 ¡La fusión de datos fue exitosa! Ahora tienes visibilidad completa de la "Super-Sucursal". Andy ya se autonombró "Experto en Sincronización de Datos" (no lo es). Karen y Jim tienen tensión rara. Phyllis pregunta si esto afecta su descuento en Bob Vance, Vance Refrigeration.\n\nPero David Wallace tiene una última preocupación: la promoción del Billete Dorado...',
+
+                skillsDemo: ['dax-distinctcount'],
+                wrongAnswerPenalty: 0.025,
+
                 objectives: [
+                    'Importar tabla de ventas de Stamford en Power Query',
                     'Unir (Append) tablas de ventas de Scranton y Stamford',
+                    'Agregar columna "Sucursal" para identificar origen de cada venta',
                     'Medida: VendedoresUnicos = DISTINCTCOUNT(Sales[Salesperson])',
-                    'Calcular ventas totales combinadas',
-                    'Analizar contribución por sucursal de origen'
+                    'Medida: VentasTotales = SUM(Sales[Amount])',
+                    'Medida: VentasScranton = CALCULATE([VentasTotales], Sales[Branch]="Scranton")',
+                    'Medida: VentasStamford = CALCULATE([VentasTotales], Sales[Branch]="Stamford")',
+                    'Crear gráfico de dona: Contribución por sucursal',
+                    'Crear matriz: Vendedor vs Ventas con subtotales por sucursal',
+                    'Analizar si la fusión aumentó o canibalizó ventas'
                 ],
                 datasets: ['office_sales_merged'],
                 guide: [
-                    '1. En Power Query, usa "Anexar consultas" (Append) para unir las ventas.',
-                    '2. Asegúrate de tener una columna "Sucursal" para distinguirlas.',
-                    '3. Usa DISTINCTCOUNT para contar vendedores únicos.',
-                    '4. Compara el rendimiento por sucursal de origen.'
+                    '1. En Power Query, haz clic en "Nuevo origen" > Excel y selecciona Stamford_Sales.xlsx.',
+                    '2. Antes de fusionar, agrega una columna personalizada a cada tabla: "Scranton" o "Stamford".',
+                    '3. Selecciona la consulta Scranton > Inicio > Anexar consultas > Stamford.',
+                    '4. Esto crea una tabla combinada con todas las ventas.',
+                    '5. Cierra y aplica los cambios.',
+                    '6. Crea la medida: VendedoresUnicos = DISTINCTCOUNT(Sales[Salesperson]).',
+                    '7. DISTINCTCOUNT cuenta valores únicos - perfecto para contar personas.',
+                    '8. Crea medidas separadas para cada sucursal usando CALCULATE.',
+                    '9. Usa un gráfico de dona para visualizar la proporción 70/30.',
+                    '10. Crea una matriz agrupada por Sucursal > Vendedor para ver el detalle.',
+                    '11. Verifica las relaciones en Vista de Modelo si usas múltiples tablas.'
                 ],
                 tips: [
                     'DISTINCTCOUNT cuenta valores únicos, ignorando duplicados.',
                     'Verifica que las relaciones en la vista de "Modelo" sean correctas.',
-                    '¿La fusión aumentó las ventas totales o hubo canibalización?'
+                    '¿La fusión aumentó las ventas totales o hubo canibalización de clientes?',
+                    'Append (Anexar) une filas, Merge (Combinar) une columnas por clave.',
+                    'Si un vendedor aparece en ambas sucursales, DISTINCTCOUNT lo cuenta una vez.',
+                    'Usa la función RELATED() si necesitas traer datos de tablas relacionadas.',
+                    'Los subtotales en una matriz ayudan a ver el agregado por grupo.'
                 ],
-                expectedOutcome: '9 vendedores únicos después de la fusión, ventas combinadas de ~$1.2M.',
+                expectedOutcome: '14 vendedores únicos, ventas combinadas de ~$1.25M, Scranton aporta 70%.',
                 verification: [
                     {
                         question: "Después de fusionar las tablas, ¿cuántos vendedores únicos (DISTINCTCOUNT) hay en total?",
@@ -233,6 +466,24 @@ export const WORLDS = [
                         type: "number",
                         answer: 1250000,
                         hint: "La suma total de la columna Amount en tu tabla unida."
+                    },
+                    {
+                        question: "¿Qué porcentaje de las ventas totales aporta Scranton?",
+                        type: "number",
+                        answer: 68,
+                        hint: "Divide VentasScranton entre VentasTotales y multiplica por 100."
+                    },
+                    {
+                        question: "¿Cuántos vendedores vinieron de Stamford?",
+                        type: "number",
+                        answer: 6,
+                        hint: "Filtra la tabla por Branch='Stamford' y cuenta vendedores únicos."
+                    },
+                    {
+                        question: "¿Quién es el vendedor con más ventas que vino de Stamford?",
+                        type: "text",
+                        answer: "Karen Filippelli",
+                        hint: "Filtra por Stamford y ordena por TotalVentas descendente."
                     }
                 ],
                 winImage: '/images/story/office-4-win.png'
@@ -246,25 +497,56 @@ export const WORLDS = [
                 coins: 300,
                 description: 'La idea de Michael sale mal (¿o no?). Análisis de Rentabilidad Avanzado.',
                 storyContext: 'Michael puso 5 billetes dorados (10% descuento permanente) en cajas de papel. Todos fueron al cliente más grande, Blue Cross. Calcula el impacto real en el margen.',
+
+                introNarrative: '💰 Michael está sudando. David Wallace llama furioso: "¡¿CINCO billetes dorados fueron al MISMO cliente?! ¡¿Cuánto dinero perdimos?!"\n\nDwight intenta culpar a Jim. Jim intenta culpar a Dwight. Michael intenta culpar a Toby (como siempre).\n\nPero tú puedes salvar el día: calcula el impacto REAL. Tal vez no sea tan malo... ¿o sí?',
+
+                outroNarrative: '📈 ¡LO LOGRASTE! Tu análisis de rentabilidad demostró que, aunque el descuento dolió, el volumen adicional de Blue Cross CASI compensa la pérdida. David Wallace está... menos furioso.\n\nMichael te abraza (de nuevo, incómodamente): "¡Eres el héroe de Dunder Mifflin! ¡El Michael Jordan de los datos! ¡El Wayne Gretzky de las hojas de cálculo!"\n\n🏆 Has completado la Saga de Dunder Mifflin. Scranton está a salvo... por ahora.',
+
+                skillsDemo: ['profitability'],
+                wrongAnswerPenalty: 0.03, // Misión final, un poco más desafiante
+
                 objectives: [
-                    'Calcular MargenOriginal = SUM(Sales[Amount]) - SUM(Sales[Cost])',
-                    'Calcular MargenConDescuento = MargenOriginal * 0.90',
-                    'Medida: ImpactoDescuento = MargenOriginal - MargenConDescuento',
-                    'Determinar si el volumen extra compensa la pérdida'
+                    'Calcular VentasBlueCross = CALCULATE([TotalVentas], Customers[Name]="Blue Cross")',
+                    'Calcular CostoBlueCross = CALCULATE(SUM(Sales[Cost]), Customers[Name]="Blue Cross")',
+                    'Calcular MargenOriginal = [VentasBlueCross] - [CostoBlueCross]',
+                    'Calcular VentasConDescuento = [VentasBlueCross] * 0.90',
+                    'Calcular MargenConDescuento = [VentasConDescuento] - [CostoBlueCross]',
+                    'Medida con VAR: ImpactoDescuento (usando variables para claridad)',
+                    'Calcular PorcentajeMargen = [MargenConDescuento] / [VentasConDescuento]',
+                    'Calcular VolumenNecesario para recuperar el descuento',
+                    'Crear gráfico de cascada: Margen Original vs Impacto vs Margen Final',
+                    'Crear escenario What-If: ¿Qué pasa con 5%, 10%, 15% descuento?'
                 ],
                 datasets: ['office_golden_ticket'],
                 guide: [
-                    '1. Calcula el margen original de Blue Cross.',
-                    '2. Aplica el 10% de descuento al precio de venta.',
-                    '3. Recalcula el margen con el descuento.',
-                    '4. Compara escenarios: ¿A qué volumen el descuento se paga solo?'
+                    '1. Primero, filtra las ventas solo para el cliente "Blue Cross".',
+                    '2. Crea VentasBlueCross = CALCULATE([TotalVentas], Customers[Name]="Blue Cross").',
+                    '3. Crea CostoBlueCross = CALCULATE(SUM(Sales[Cost]), Customers[Name]="Blue Cross").',
+                    '4. El margen es Ventas - Costos. Crea: MargenOriginal = [VentasBlueCross] - [CostoBlueCross].',
+                    '5. Con 10% descuento: VentasConDescuento = [VentasBlueCross] * 0.90.',
+                    '6. Nuevo margen: MargenConDescuento = [VentasConDescuento] - [CostoBlueCross].',
+                    '7. Usa VAR para código más limpio:',
+                    '   ImpactoDescuento = ',
+                    '   VAR VentasOrig = [VentasBlueCross]',
+                    '   VAR CostoOrig = [CostoBlueCross]',
+                    '   VAR MargenOrig = VentasOrig - CostoOrig',
+                    '   VAR VentasDesc = VentasOrig * 0.90',
+                    '   VAR MargenDesc = VentasDesc - CostoOrig',
+                    '   RETURN MargenOrig - MargenDesc',
+                    '8. Para el punto de equilibrio: ¿Cuánto más volumen necesitas para compensar?',
+                    '9. Crea un parámetro What-If: Modelado > Nuevo Parámetro > % Descuento (0-20%).',
+                    '10. Conecta el parámetro a tus medidas para análisis dinámico.'
                 ],
                 tips: [
-                    'Usa variables (VAR) para hacer el código DAX más limpio.',
-                    'El punto de equilibrio es cuando el volumen extra supera el 11% adicional.',
-                    'Conclusión: ¿Fue una idea genial o un desastre financiero?'
+                    'Usa VAR (variables) para hacer el código DAX más limpio y legible.',
+                    'El punto de equilibrio es cuando el volumen extra supera el ~11.1% adicional.',
+                    'Fórmula: Si pierdes 10% en precio, necesitas 10%/(100%-10%) = 11.1% más volumen.',
+                    'Conclusión: ¿Fue una idea genial (más volumen) o un desastre financiero (pérdida neta)?',
+                    'Los gráficos de cascada son perfectos para mostrar cómo se "descompone" un valor.',
+                    'Un parámetro What-If permite a David Wallace explorar escenarios sin que toques el código.',
+                    'Documenta tus medidas con comentarios: // Esta medida calcula...'
                 ],
-                expectedOutcome: 'Impacto del descuento de ~$25,000, requiere 12% más volumen para compensar.',
+                expectedOutcome: 'Impacto del descuento de ~$24,500, margen cae a 35%, necesita 12% más volumen.',
                 verification: [
                     {
                         question: "¿Cuánto dinero perdimos EXACTAMENTE por el descuento del 10% en Blue Cross?",
@@ -277,6 +559,30 @@ export const WORLDS = [
                         type: "number",
                         answer: 35,
                         hint: "Divide el MargenConDescuento entre la Venta Total descontada."
+                    },
+                    {
+                        question: "¿Cuál era el monto total de ventas a Blue Cross ANTES del descuento?",
+                        type: "number",
+                        answer: 245000,
+                        hint: "Usa la medida VentasBlueCross sin aplicar el descuento."
+                    },
+                    {
+                        question: "¿Cuál es el costo total de los productos vendidos a Blue Cross?",
+                        type: "number",
+                        answer: 159250,
+                        hint: "Usa CostoBlueCross = CALCULATE(SUM(Sales[Cost]), ...)."
+                    },
+                    {
+                        question: "¿Qué porcentaje adicional de volumen necesita Blue Cross comprar para que el descuento se pague solo?",
+                        type: "number",
+                        answer: 11,
+                        hint: "Fórmula: %Descuento / (100% - %Descuento) = 10/90 ≈ 11.1%."
+                    },
+                    {
+                        question: "Si Blue Cross aumenta sus compras un 15%, ¿cuál sería el nuevo margen total (sin decimales)?",
+                        type: "number",
+                        answer: 93840,
+                        hint: "Recalcula: (VentasOrig * 1.15 * 0.90) - (CostoOrig * 1.15)."
                     }
                 ],
                 winImage: '/images/story/office-5-win.png'
@@ -813,7 +1119,17 @@ export const WORLDS = [
                     tolerance: 0.02,
                     requiredCards: ['SUM', 'IF']
                 },
-                winImage: '/images/story/datarescue-1-win.png'
+                acquiredSkills: ['Limpieza de Datos', 'Lógica DAX Básica'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡Jajaja! ¿Crees que puedes limpiar MI desastre?",
+                        "¡Ese cálculo es tan incorrecto como tu esperanza!",
+                        "¡Más errores! ¡Más poder para Corruptex!"
+                    ]
+                },
+                winImage: '/images/story/datarescue-1-win.png',
+                outroNarrative: '¡Ja! Arreglaste las ganancias, pero ¿de qué sirve el dinero si el producto no pesa lo que dice pesar? He alterado la gravedad misma de tus datos... ¡Revisa los kilogramos si te atreves!'
             },
             {
                 id: 'datarescue-2',
@@ -878,7 +1194,17 @@ export const WORLDS = [
                     tolerance: 0.05,
                     requiredCards: ['AVERAGE']
                 },
-                winImage: '/images/story/datarescue-2-win.png'
+                acquiredSkills: ['Normalización de Texto', 'Manejo de Outliers'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡Tus promedios son tan débiles como tu voluntad!",
+                        "¡Esos kilos extra son mis bugs alimentándose!",
+                        "¡Nunca encontrarás el peso real!"
+                    ]
+                },
+                winImage: '/images/story/datarescue-2-win.png',
+                outroNarrative: '¿Recuperaste el peso? ¡Qué pesado eres! Pero el espacio es relativo... He inflado los volúmenes cúbicos. ¡Tu almacén virtual va a explotar con mis decimales desplazados!'
             },
             {
                 id: 'datarescue-3',
@@ -936,7 +1262,17 @@ export const WORLDS = [
                     expectedSetFrom: 'stepKey.outliersVolumen',
                     requiredCards: ['MAX', 'IF']
                 },
-                winImage: '/images/story/datarescue-3-win.png'
+                acquiredSkills: ['Estadística Básica', 'Detección de Anomalías'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡Ese outlier es mi mascota, no lo toques!",
+                        "¡Tus máximos son mínimos comparados con mi poder!",
+                        "¡La desviación estándar está de mi lado!"
+                    ]
+                },
+                winImage: '/images/story/datarescue-3-win.png',
+                outroNarrative: 'Volumen corregido... aburrido. ¿Sabes qué es divertido? ¡Ver doble! He clonado tus transacciones. ¿Cuál es la real y cuál es mi fantasma? ¡Buena suerte contando!'
             },
             {
                 id: 'datarescue-4',
@@ -995,7 +1331,17 @@ export const WORLDS = [
                     tolerance: 0,
                     requiredCards: ['COUNTROWS', 'DISTINCTCOUNT']
                 },
-                winImage: '/images/story/datarescue-4-win.png'
+                acquiredSkills: ['Conteo Avanzado', 'Identificación de Duplicados'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡Veo doble... o tú ves la mitad!",
+                        "¡Multiplícate por cero, analista!",
+                        "¡Mis duplicados son legión!"
+                    ]
+                },
+                winImage: '/images/story/datarescue-4-win.png',
+                outroNarrative: 'Eliminaste mis gemelos malvados. Impresionante. Pero, ¿conoces a tus clientes? He reescrito sus nombres con mi pluma de caos. "Alumimundo" ahora es... algo irreconocible. ¡Identifícalos si puedes!'
             },
             {
                 id: 'datarescue-5',
@@ -1060,7 +1406,17 @@ export const WORLDS = [
                     tolerance: 0,
                     requiredCards: ['DISTINCTCOUNT']
                 },
-                winImage: '/images/story/datarescue-5-win.png'
+                acquiredSkills: ['Limpieza de Strings', 'Normalización de Entidades'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡Nadie escapa de mi lista de clientes corruptos!",
+                        "¡Tus strings están tan sucios como mis intenciones!",
+                        "¡Jamás unificarás esa tabla!"
+                    ]
+                },
+                winImage: '/images/story/datarescue-5-win.png',
+                outroNarrative: '¡Mis clientes! ¡Los has unificado! Grrr... Es hora de romper el tejido del tiempo. He mezclado los calendarios. Ayer es mañana, y el formato de fecha es una adivinanza. ¡Piérdete en mi cronología corrupta!'
             },
             {
                 id: 'datarescue-5b',
@@ -1140,7 +1496,17 @@ export const WORLDS = [
                     tolerance: 0.01,
                     requiredCards: ['DATE', 'TEXT']
                 },
-                winImage: '/images/story/datarescue-5b-win.png'
+                acquiredSkills: ['Manejo de Fechas', 'Regional Settings'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡El tiempo está de mi lado... y en formato incorrecto!",
+                        "¡Mes/Día/Año o Día/Mes/Año? ¡Jajaja!",
+                        "¡Nunca sabrás cuándo ocurrió realmente!"
+                    ]
+                },
+                winImage: '/images/story/datarescue-5b-win.png',
+                outroNarrative: 'Has restaurado el tiempo... molesto analista. Pero mi corrupción más sutil te espera. No es un error de dato, ¡es un error de lógica! He invertido las reglas de riesgo. ¿Lo seguro es peligroso? ¡Averígualo!'
             },
             {
                 id: 'datarescue-6',
@@ -1199,7 +1565,17 @@ export const WORLDS = [
                     tolerance: 2,
                     requiredCards: ['IF', 'OR']
                 },
-                winImage: '/images/story/datarescue-6-win.png'
+                acquiredSkills: ['Lógica Condicional', 'Reglas de Negocio'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡Tu lógica es defectuosa!",
+                        "¡OR... tal vez AND... nunca lo sabrás!",
+                        "¡El riesgo es todo tuyo!"
+                    ]
+                },
+                winImage: '/images/story/datarescue-6-win.png',
+                outroNarrative: '¡Lógica implacable! Me has arrinconado. Solo me queda una opción: ¡EL COLAPSO TOTAL! He convocado a todos mis bugs para la batalla final. ¡Prepara tu dashboard definitivo, porque voy a borrarlo todo!'
             },
             {
                 id: 'datarescue-7',
@@ -1249,6 +1625,15 @@ export const WORLDS = [
                         { id: 'OperacionesRevisar', expectedFrom: 'answerKey.OperacionesRevisar', tolerance: 2 }
                     ],
                     requiredCards: ['SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT', 'COUNTROWS', 'DISTINCTCOUNT', 'IF', 'AND', 'OR']
+                },
+                acquiredSkills: ['Dashboarding Completo', 'Storytelling con Datos'],
+                villainPenalty: {
+                    active: true,
+                    taunts: [
+                        "¡IMPOSIBLE! ¡Mis datos eran indestructibles!",
+                        "¡Nooooo! ¡La verdad duele!",
+                        "¡Volveré con más NULLs!"
+                    ]
                 },
                 winImage: '/images/story/datarescue-7-win.png'
             }
