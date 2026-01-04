@@ -85,6 +85,40 @@ const Academy = () => {
                                     </motion.div>
                                 )}
 
+                                {/* YouTube Video Embed */}
+                                {selectedLesson.isVideo && selectedLesson.youtubeId && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="youtube-video-container"
+                                        style={{
+                                            margin: '2rem 0',
+                                            borderRadius: '16px',
+                                            overflow: 'hidden',
+                                            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                                            border: '2px solid rgba(255, 0, 0, 0.3)',
+                                            position: 'relative',
+                                            paddingBottom: '56.25%', /* 16:9 aspect ratio */
+                                            height: 0
+                                        }}
+                                    >
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${selectedLesson.youtubeId}?rel=0&modestbranding=1`}
+                                            title={selectedLesson.title}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                border: 'none'
+                                            }}
+                                        />
+                                    </motion.div>
+                                )}
+
                                 <div className="rich-content">
                                     {selectedLesson.content.split('\n').map((line, index) => {
                                         const trimmed = line.trim();
@@ -175,17 +209,28 @@ const Academy = () => {
                                         href={selectedLesson.officialLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="btn btn-microsoft"
+                                        className={`btn ${selectedLesson.isVideo ? 'btn-youtube' : 'btn-microsoft'}`}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                     >
-                                        <svg width="16" height="16" viewBox="0 0 21 21" fill="none" style={{ marginRight: '8px' }}>
-                                            <rect width="10" height="10" fill="#F25022" />
-                                            <rect x="11" width="10" height="10" fill="#7FBA00" />
-                                            <rect y="11" width="10" height="10" fill="#00A4EF" />
-                                            <rect x="11" y="11" width="10" height="10" fill="#FFB900" />
-                                        </svg>
-                                        Ver documentación oficial en Microsoft Learn ↗
+                                        {selectedLesson.isVideo ? (
+                                            <>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '8px' }}>
+                                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                </svg>
+                                                Ver video completo en YouTube ↗
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg width="16" height="16" viewBox="0 0 21 21" fill="none" style={{ marginRight: '8px' }}>
+                                                    <rect width="10" height="10" fill="#F25022" />
+                                                    <rect x="11" width="10" height="10" fill="#7FBA00" />
+                                                    <rect y="11" width="10" height="10" fill="#00A4EF" />
+                                                    <rect x="11" y="11" width="10" height="10" fill="#FFB900" />
+                                                </svg>
+                                                Ver documentación oficial en Microsoft Learn ↗
+                                            </>
+                                        )}
                                     </motion.a>
                                 </div>
                             </div>
@@ -286,7 +331,7 @@ const Academy = () => {
                                 return (
                                     <motion.div
                                         key={lesson.id}
-                                        className="lesson-card glass"
+                                        className={`lesson-card glass ${lesson.isVideo ? 'is-video' : ''}`}
                                         onClick={() => setSelectedLesson(lesson)}
                                         variants={{
                                             hidden: { opacity: 0, y: 20 },
@@ -297,11 +342,11 @@ const Academy = () => {
                                     >
                                         <div className="lesson-card-header" style={{ background: category?.gradient, height: '6px', width: '100%', position: 'absolute', top: 0, left: 0 }}></div>
                                         <div style={{ marginTop: '10px' }}>
-                                            <h3>{lesson.title}</h3>
+                                            <h3>{lesson.isVideo && '🎬 '}{lesson.title}</h3>
                                             <p>{lesson.description}</p>
                                         </div>
                                         <div className="lesson-meta">
-                                            <span className="lesson-duration">⏱️ {lesson.duration}</span>
+                                            <span className="lesson-duration">{lesson.isVideo ? '▶️' : '⏱️'} {lesson.duration}</span>
                                             <span className="lesson-level-badge lesson-badge" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>{lesson.level}</span>
                                         </div>
                                     </motion.div>

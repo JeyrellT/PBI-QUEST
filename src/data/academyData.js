@@ -33,6 +33,13 @@ export const academyCategories = [
     icon: '🎮',
     description: 'Atajos para completar misiones.',
     gradient: 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)'
+  },
+  {
+    id: 'videos',
+    title: 'Videos',
+    icon: '🎬',
+    description: 'Tutoriales en video de YouTube.',
+    gradient: 'linear-gradient(135deg, #FF0000 0%, #CC0000 100%)'
   }
 ];
 
@@ -859,5 +866,166 @@ Porcentaje = DIVIDE([Parte], [Total], 0) * 100
     `,
     officialLink: 'https://learn.microsoft.com/es-es/training/paths/get-started-power-bi/',
     gameRelevance: ['office', 'datarescue', 'stark', 'squid-game', 'hogwarts']
+  },
+
+  // =========================================================================
+  // VIDEOS - Tutoriales de YouTube
+  // =========================================================================
+  {
+    id: 'video-pbi-estrategia',
+    categoryId: 'videos',
+    title: 'La Propuesta de Valor de Power BI frente a Excel',
+    duration: '10 min',
+    level: 'Principiante',
+    description: 'Una introducción conceptual que explica por qué migrar de hojas de cálculo dispersas a Power BI.',
+    isVideo: true,
+    youtubeUrl: 'https://youtu.be/4vAYUjvYwus',
+    youtubeId: '4vAYUjvYwus',
+    content: `
+### 🎬 Power BI como Motor de Estrategia de Negocios
+
+Este video funciona como el **"Pitch de venta"** o la justificación estratégica para implementar Business Intelligence.
+
+---
+
+### El Problema: La Fragmentación de Datos
+
+El video inicia identificando un dolor común en las empresas: la **"parálisis por análisis"** causada por tener la información dispersa.
+
+Se mencionan silos de datos típicos:
+- 📁 Archivos locales de Excel
+- 🗄️ Bases de datos SQL
+- ☁️ La nube
+- 📂 Carpetas compartidas
+
+> **El argumento central:** cuando los datos están desordenados, es imposible ver el panorama completo ("Big Picture") necesario para tomar decisiones rápidas.
+
+---
+
+### La Solución: Flujo de 3 Pasos
+
+El narrador resume el funcionamiento de Power BI en un ciclo de vida de datos simplificado:
+
+1. **🔌 Conectar:** Unificar las fuentes sin importar su origen.
+2. **🧹 Limpiar y Organizar:** Preparar los datos automáticamente para que sean fiables (fase de ETL).
+3. **📊 Visualizar:** Crear el reporte gráfico.
+
+---
+
+### Diferenciación Técnica: Excel vs. Power BI
+
+Se aborda la duda frecuente: *"¿Por qué no seguir usando Excel?"*
+
+| Característica | Excel | Power BI |
+|----------------|-------|----------|
+| **Volumen** | Se traba con muchas filas | Maneja millones de filas |
+| **Interactividad** | Estático | Filtrado cruzado dinámico |
+| **Actualización** | Copiar y pegar manual | Botón "Actualizar" automático |
+
+**Demostración clave:** Al hacer clic en una barra del gráfico (ej. "Mouse inalámbrico"), toda la tabla de detalles y los demás KPIs se recalculan instantáneamente.
+
+---
+
+### 💡 Conclusión del Video
+
+El objetivo final no es estético ("gráficos bonitos"), sino **operativo**: liberar tiempo de procesamiento manual para dedicarlo al análisis estratégico.
+
+---
+
+### 🎮 Relevancia para el Juego
+
+Este video te prepara conceptualmente para entender **por qué** estamos usando Power BI en las misiones de Dunder Mifflin y otros mundos. La automatización que aprenderás aquí es exactamente lo que Michael Scott necesita para salvar Scranton.
+    `,
+    officialLink: 'https://youtu.be/4vAYUjvYwus',
+    gameRelevance: ['office', 'datarescue', 'stark']
+  },
+  {
+    id: 'video-etl-conectores',
+    categoryId: 'videos',
+    title: 'Dominando la Ingesta y Transformación de Datos (ETL)',
+    duration: '12 min',
+    level: 'Principiante',
+    description: 'Tutorial técnico centrado en "Get Data", conectores disponibles, y cómo modelar y limpiar información.',
+    isVideo: true,
+    youtubeUrl: 'https://youtu.be/gpApeeNAYcY',
+    youtubeId: 'gpApeeNAYcY',
+    content: `
+### 🎬 La Puerta de Entrada: "Obtener Datos" y Transformación
+
+Este video entra en el detalle técnico del **"cómo"** se logra la automatización prometida en el primer video.
+
+---
+
+### El Fin del "Copiar y Pegar"
+
+Se presenta la función **Obtener Datos (Get Data)** como la herramienta que elimina la tarea manual de mover datos entre archivos.
+
+---
+
+### Versatilidad de Conectores
+
+Power BI puede conectarse a **más de 100 fuentes**:
+
+- 📄 **Archivos planos:** Excel, PDF, CSV
+- 🗄️ **Bases de datos:** SQL Server, Oracle, SAP
+- ☁️ **Servicios en la Nube:** Google Analytics, Salesforce, Azure
+- 🌐 **Web:** Conexión directa a URLs
+
+---
+
+### El Concepto del "Puente Vivo"
+
+Un punto crucial: Power BI **no copia los datos estáticamente**, sino que crea un puente directo con la fuente.
+
+> Si el archivo Excel origen se modifica (ej. alguien corrige una venta), Power BI solo necesita **"Actualizar"** para reflejar el cambio.
+
+Esto garantiza la **integridad de los datos** sin reconstruir el reporte.
+
+---
+
+### La "Aduana" de Power Query
+
+Se introduce **Power Query** como una "aduana":
+
+- Antes de que los datos entren al modelo, pasan por este filtro
+- Decides qué columnas entran
+- Limpias errores
+- Optimizas la carga
+
+**Beneficio:** Ahorro de memoria y tiempo de procesamiento.
+
+---
+
+### Operaciones Prácticas en Data View
+
+El video demuestra:
+
+1. **Carga de Excel:** Navegación, selección de hoja (customer_dim), y carga
+2. **Formato de Datos:** Cambiar tipo de columna de fecha de formato largo a "Short Date"
+3. **Creación de Columnas:** Menú para agregar "Nuevas Columnas" o "Nuevas Medidas" con DAX
+
+---
+
+### 🔗 Síntesis: Complemento con Video 1
+
+| Video 1 | Video 2 |
+|---------|----------|
+| Vende la idea y beneficio | Explica la ejecución técnica |
+| Estrategia, Interactividad | Conectores, Power Query |
+| El "por qué" | El "cómo" |
+
+Juntos, narran la transición del **"Operador de Datos"** (que gasta su día en Excel limpiando celdas) al **"Analista de Datos"** (que construye flujos automatizados para tomar decisiones).
+
+---
+
+### 🎮 Relevancia para el Juego
+
+Este video es **esencial** para las misiones:
+- **Office 1 & 1b:** Importar y limpiar datos de ventas
+- **DataRescue 1-3:** Conectar fuentes corruptas y usar Power Query
+- **La Fusión (Office 4):** Anexar tablas de diferentes sucursales
+    `,
+    officialLink: 'https://youtu.be/gpApeeNAYcY',
+    gameRelevance: ['office', 'datarescue']
   }
 ];
