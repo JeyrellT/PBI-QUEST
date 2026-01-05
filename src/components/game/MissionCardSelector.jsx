@@ -26,6 +26,7 @@ const MissionCardSelector = ({
     const [quizActive, setQuizActive] = useState(false);
     const [quizCard, setQuizCard] = useState(null);
     const [quizFeedback, setQuizFeedback] = useState(null);
+    const [shuffledOptions, setShuffledOptions] = useState([]);
 
     const unlockedCards = getUnlockedCards(user.level);
     const missionCardInfo = getCardsForMission(missionId);
@@ -67,6 +68,9 @@ const MissionCardSelector = ({
                 if (candidates.length > 0) {
                     // Seleccionar una al azar
                     const card = candidates[Math.floor(Math.random() * candidates.length)];
+                    // Mezclar las opciones aquí, no durante el render
+                    const shuffled = [...card.tacticalQuestion.options].sort(() => Math.random() - 0.5);
+                    setShuffledOptions(shuffled);
                     setQuizCard(card);
 
                     // Esperar un momento y mostrar el quiz
@@ -186,7 +190,7 @@ const MissionCardSelector = ({
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     {!quizFeedback ? (
-                                        quizCard.tacticalQuestion.options.sort(() => Math.random() - 0.5).map((opt, i) => (
+                                        shuffledOptions.map((opt, i) => (
                                             <motion.button
                                                 key={i}
                                                 whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.1)' }}

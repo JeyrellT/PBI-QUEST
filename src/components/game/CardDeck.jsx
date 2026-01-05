@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Sparkles, Zap, Shield, Brain, ZoomIn, Image } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
-import { useSound } from '../../context/SoundContext';
+import useSound from '../../hooks/useSound';
 import { HERO_CARDS, VILLAIN_CARDS, SPECIAL_CARDS, COVER_CARD, getUnlockedCards } from '../../data/pdfCards';
 import { getAssetPath } from '../../utils/assetPath';
 import '../../styles/CardDeck.css';

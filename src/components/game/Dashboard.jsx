@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Trophy, Target, TrendingUp, Flame, Zap, Star, Clock } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
-import { useSound } from '../../context/SoundContext';
+import useSound from '../../hooks/useSound';
 import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 import ParticleBackground from '../common/ParticleBackground';
 import { WORLDS } from '../../data/worlds';

@@ -1,7 +1,8 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
-import { useSound } from '../../context/SoundContext';
+import useSound from '../../hooks/useSound';
 
 /**
  * Toggle de sonido para el header

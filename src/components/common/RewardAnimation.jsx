@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
-import { useSound } from '../../context/SoundContext';
+import useSound from '../../hooks/useSound';
 
 /**
  * Componente de animación de recompensas premium

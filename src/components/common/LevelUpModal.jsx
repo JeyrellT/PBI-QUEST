@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, X, Zap, Sparkles, Crown, TrendingUp } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { useSound } from '../../context/SoundContext';
+import useSound from '../../hooks/useSound';
 import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 
 // Premium particle component

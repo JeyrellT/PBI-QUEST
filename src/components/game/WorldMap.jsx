@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, CheckCircle2, Download, Play, Coins, Layers, Award, BookOpen, Target, Sparkles, TrendingUp, AlertCircle } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
-import { useSound } from '../../context/SoundContext';
+import useSound from '../../hooks/useSound';
 import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 import ParticleBackground from '../common/ParticleBackground';
 import { WORLDS } from '../../data/worlds';
