@@ -21,28 +21,28 @@ export const useGame = () => useContext(GameContext);
  */
 export const calculateMissionScore = (baseXP, profileId, stats) => {
     const profile = SCORING_PROFILES[profileId] || SCORING_PROFILES['office-standard'];
-    
+
     const { hints = 0, attempts = 0, wrongAnswers = 0 } = stats;
-    
+
     // Calcular penalizaciones
     const hintPenalty = hints * profile.hintPenalty;
     const attemptPenalty = Math.max(0, (attempts - 1) * profile.attemptPenalty);
     const wrongPenalty = wrongAnswers * profile.wrongAnswerPenalty;
-    
+
     // Calcular multiplicador base
     let multiplier = 1 - hintPenalty - attemptPenalty - wrongPenalty;
-    
+
     // Aplicar bonus por perfecto (sin errores, sin hints, primer intento)
     const isPerfect = hints === 0 && attempts <= 1 && wrongAnswers === 0;
     if (isPerfect) {
         multiplier = profile.perfectBonus;
     }
-    
+
     // Aplicar límite mínimo
     multiplier = Math.max(profile.minMultiplier, multiplier);
-    
+
     const finalXP = Math.round(baseXP * multiplier);
-    
+
     return {
         finalXP,
         multiplier,
@@ -79,7 +79,7 @@ export const GameProvider = ({ children }) => {
             // Sistema de cartas
             viewedCards: [],           // IDs de cartas que el jugador ha visto
             cardsUsedInMissions: {},   // { missionId: [cardIds] }
-            
+
             // NUEVO: Tracking de rendimiento por mundo
             worldProgress: {
                 // office: { 
@@ -89,7 +89,7 @@ export const GameProvider = ({ children }) => {
                 //     skillsUnlocked: ['data-import', 'dax-sum-avg']
                 // }
             },
-            
+
             // NUEVO: Habilidades adquiridas por mundo
             worldSkills: {
                 // office: ['data-import', 'data-cleaning', 'dax-sum-avg', ...]
@@ -144,7 +144,7 @@ export const GameProvider = ({ children }) => {
 
         if (daysSinceActive >= 3) {
             // 3+ días de inactividad: resetear racha
-            showToast('¡Racha perdida por inactividad! Tu racha se ha reiniciado.', 'error');
+            showToast('¡Racha perdida por inactividad! Tu racha se ha reiniciado.', 'error', { title: 'Racha Reiniciada' });
             setUser(prev => ({
                 ...prev,
                 streak: 1,
@@ -155,7 +155,7 @@ export const GameProvider = ({ children }) => {
             setUser(prev => {
                 const newStreak = prev.streak + 1;
                 if (newStreak === 3 || newStreak === 5 || newStreak === 7) {
-                    showToast(`🔥 ¡Racha de ${newStreak} días! Multiplicador: ${getStreakMultiplier(newStreak)}x`, 'success');
+                    showToast(`🔥 ¡Racha de ${newStreak} días! Multiplicador: ${getStreakMultiplier(newStreak)}x`, 'streak');
                 }
                 return {
                     ...prev,
@@ -176,7 +176,7 @@ export const GameProvider = ({ children }) => {
     useEffect(() => {
         const daysSinceActive = getDaysSinceLastActive(user.lastActive);
         if (daysSinceActive >= 3) {
-            showToast(`⚠️ Han pasado ${daysSinceActive} días. Tu racha se reiniciará.`, 'error');
+            showToast(`⚠️ Han pasado ${daysSinceActive} días. Tu racha se reiniciará.`, 'error', { title: 'Advertencia de Racha' });
             setUser(prev => ({
                 ...prev,
                 streak: 1,
@@ -196,8 +196,8 @@ export const GameProvider = ({ children }) => {
 
     // Función auxiliar para calcular logros desbloqueados (para uso atómico dentro de setUser)
     const getNewAchievements = (currentUser) => {
-        return ACHIEVEMENTS.filter(achievement => 
-            !currentUser.achievements.includes(achievement.id) && 
+        return ACHIEVEMENTS.filter(achievement =>
+            !currentUser.achievements.includes(achievement.id) &&
             achievement.condition(currentUser)
         );
     };
@@ -220,7 +220,7 @@ export const GameProvider = ({ children }) => {
 
         // Mostrar toasts para cada logro (fuera del flujo de estado)
         newAchievements.forEach(ach => {
-            setTimeout(() => showToast(`¡Logro Desbloqueado: ${ach.title}!`, 'success'), 0);
+            setTimeout(() => showToast(`¡Logro Desbloqueado: ${ach.title}!`, 'achievement'), 0);
         });
 
         return {
@@ -271,7 +271,7 @@ export const GameProvider = ({ children }) => {
             // Notificar si subió de nivel
             if (newLevel > oldLevel) {
                 setTimeout(() => {
-                    showToast(`🎉 ¡Subiste al nivel ${newLevel}!`, 'success');
+                    showToast(`🎉 ¡Subiste al nivel ${newLevel}!`, 'levelup');
                     checkNewCardsUnlocked(newLevel);
                 }, 100);
             }
@@ -302,7 +302,7 @@ export const GameProvider = ({ children }) => {
                 // Día consecutivo: incrementar racha
                 newStreak = prev.streak + 1;
                 if (newStreak === 3 || newStreak === 5 || newStreak === 7) {
-                    setTimeout(() => showToast(`🔥 ¡Racha de ${newStreak} días! Multiplicador: ${getStreakMultiplier(newStreak)}x`, 'success'), 500);
+                    setTimeout(() => showToast(`🔥 ¡Racha de ${newStreak} días! Multiplicador: ${getStreakMultiplier(newStreak)}x`, 'streak'), 500);
                 }
             } else if (daysSinceActive >= 3) {
                 // Perdió la racha
@@ -318,12 +318,12 @@ export const GameProvider = ({ children }) => {
             const oldLevel = prev.level;
             const newLevel = calculateLevel(newTotalXP);
 
-            showToast(`Misión Completada: ${missionTitle} (+${finalXP} XP)`, 'success');
+            showToast(`Misión Completada: ${missionTitle} (+${finalXP} XP)`, 'success', { title: '¡Misión Exitosa!' });
 
             // Notificar si subió de nivel
             if (newLevel > oldLevel) {
                 setTimeout(() => {
-                    showToast(`🎉 ¡Subiste al nivel ${newLevel}!`, 'success');
+                    showToast(`🎉 ¡Subiste al nivel ${newLevel}!`, 'levelup');
                     checkNewCardsUnlocked(newLevel);
                 }, 200);
             }
@@ -474,15 +474,15 @@ export const GameProvider = ({ children }) => {
      */
     const recordMissionPerformance = (worldId, missionId, performanceData) => {
         const { wrongAnswers = 0, attempts = 1, hints = 0, skillsDemo = [] } = performanceData;
-        
+
         setUser(prev => {
             const worldProgress = prev.worldProgress || {};
-            const currentWorld = worldProgress[worldId] || { 
-                totalWrongAnswers: 0, 
+            const currentWorld = worldProgress[worldId] || {
+                totalWrongAnswers: 0,
                 missionsData: {},
-                completedAt: null 
+                completedAt: null
             };
-            
+
             return {
                 ...prev,
                 worldProgress: {
@@ -508,7 +508,7 @@ export const GameProvider = ({ children }) => {
             const worldSkills = prev.worldSkills || {};
             const currentSkills = worldSkills[worldId] || [];
             const newSkills = skillIds.filter(s => !currentSkills.includes(s));
-            
+
             if (newSkills.length > 0) {
                 return {
                     ...prev,
@@ -528,11 +528,11 @@ export const GameProvider = ({ children }) => {
     const completeWorld = (worldId) => {
         setUser(prev => {
             const worldProgress = prev.worldProgress || {};
-            const currentWorld = worldProgress[worldId] || { 
-                totalWrongAnswers: 0, 
-                missionsData: {} 
+            const currentWorld = worldProgress[worldId] || {
+                totalWrongAnswers: 0,
+                missionsData: {}
             };
-            
+
             return {
                 ...prev,
                 worldProgress: {
@@ -566,7 +566,7 @@ export const GameProvider = ({ children }) => {
     const isWorldCompleted = (worldId) => {
         const world = WORLDS.find(w => w.id === worldId);
         if (!world) return false;
-        
+
         const missionIds = world.missions.map(m => m.id);
         return missionIds.every(id => user.completedMissions.includes(id));
     };
@@ -577,18 +577,18 @@ export const GameProvider = ({ children }) => {
     const getWorldPerformanceSummary = (worldId) => {
         const world = WORLDS.find(w => w.id === worldId);
         const progress = user.worldProgress?.[worldId];
-        
+
         if (!world || !progress) return null;
-        
+
         const missionsData = progress.missionsData || {};
         const totalMissions = world.missions.length;
         const completedMissions = Object.keys(missionsData).length;
-        
+
         let totalWrongAnswers = 0;
         let totalAttempts = 0;
         let totalHints = 0;
         let perfectMissions = 0;
-        
+
         Object.values(missionsData).forEach(data => {
             totalWrongAnswers += data.wrongAnswers || 0;
             totalAttempts += data.attempts || 1;
@@ -597,7 +597,7 @@ export const GameProvider = ({ children }) => {
                 perfectMissions++;
             }
         });
-        
+
         // Identificar áreas de mejora basadas en los errores
         const areasToImprove = [];
         world.missions.forEach(mission => {
@@ -615,7 +615,7 @@ export const GameProvider = ({ children }) => {
                 });
             }
         });
-        
+
         return {
             totalMissions,
             completedMissions,
@@ -646,13 +646,13 @@ export const GameProvider = ({ children }) => {
             const oldLevel = prev.level;
             const newLevel = calculateLevel(newTotalXP);
 
-            showToast(`¡Reto Semanal Completado! +${safeXPReward} XP`, 'success');
+            showToast(`¡Reto Semanal Completado! +${safeXPReward} XP`, 'achievement');
             setTimeout(() => showToast(`📅 Próximo reto desbloqueable en 7 días`, 'info'), 1500);
 
             // Notificar si subió de nivel
             if (newLevel > oldLevel) {
                 setTimeout(() => {
-                    showToast(`🎉 ¡Subiste al nivel ${newLevel}!`, 'success');
+                    showToast(`🎉 ¡Subiste al nivel ${newLevel}!`, 'levelup');
                     checkNewCardsUnlocked(newLevel);
                 }, 300);
             }

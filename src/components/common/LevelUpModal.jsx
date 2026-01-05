@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, X, Zap, Sparkles, Crown, TrendingUp } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useSound } from '../../context/SoundContext';
+import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 
 // Premium particle component
 const FloatingParticle = ({ delay, color }) => (
@@ -60,19 +62,25 @@ const PulseRing = ({ delay, size }) => (
 
 const LevelUpModal = ({ show, onClose, level, rewards }) => {
     const [showContent, setShowContent] = useState(false);
+    const { sounds } = useSound();
+    const { effectsConfig, shouldUseLightEffects } = useDeviceCapabilities();
 
     useEffect(() => {
         if (show) {
             // Delay content for dramatic effect
             setTimeout(() => setShowContent(true), 300);
             
-            // Enhanced confetti burst
-            const duration = 4000;
+            // Reproducir sonido de level up
+            sounds.levelUp();
+            
+            // Enhanced confetti burst (adaptado al dispositivo)
+            const particleCount = effectsConfig.confetti.particleCount;
+            const duration = shouldUseLightEffects ? 2000 : 4000;
             const end = Date.now() + duration;
 
             // Initial burst
             confetti({
-                particleCount: 100,
+                particleCount: particleCount,
                 spread: 70,
                 origin: { x: 0.5, y: 0.6 },
                 colors: ['#ffd700', '#ffb800', '#00d2ff', '#9d50bb', '#ff6b6b'],
@@ -81,27 +89,30 @@ const LevelUpModal = ({ show, onClose, level, rewards }) => {
                 scalar: 1.2
             });
 
-            const frame = () => {
-                confetti({
-                    particleCount: 3,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#00d2ff', '#9d50bb', '#ffb800']
-                });
-                confetti({
-                    particleCount: 3,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#00d2ff', '#9d50bb', '#ffb800']
-                });
+            // Solo animación continua en desktop
+            if (!shouldUseLightEffects) {
+                const frame = () => {
+                    confetti({
+                        particleCount: 3,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        colors: ['#00d2ff', '#9d50bb', '#ffb800']
+                    });
+                    confetti({
+                        particleCount: 3,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        colors: ['#00d2ff', '#9d50bb', '#ffb800']
+                    });
 
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            };
-            frame();
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                };
+                frame();
+            }
         } else {
             setShowContent(false);
         }

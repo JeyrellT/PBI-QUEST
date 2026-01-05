@@ -14,6 +14,13 @@ export const academyCategories = [
     gradient: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)'
   },
   {
+    id: 'advanced-tips',
+    title: 'Tips Avanzados',
+    icon: '🚀',
+    description: 'Buenas prácticas pro (junior → senior).',
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  },
+  {
     id: 'modeling',
     title: 'DAX',
     icon: '🧮',
@@ -1154,6 +1161,246 @@ Crecimiento = DIVIDE([Actual] - [Anterior], [Anterior], 0) * 100
     `,
     officialLink: 'https://learn.microsoft.com/es-es/training/paths/get-started-power-bi/',
     gameRelevance: ['office', 'datarescue', 'stark', 'squid-game', 'hogwarts']
+  },
+
+  // =========================================================================
+  // TIPS AVANZADOS - Videos Curados
+  // =========================================================================
+  {
+    id: 'adv-star-schema-powerbi-loves',
+    categoryId: 'advanced-tips',
+    title: 'Modelado en Power BI - Esquema en Estrella',
+    duration: 'Video',
+    level: 'Avanzado',
+    description: 'Modelado senior: por qué el esquema estrella mejora rendimiento, claridad y mantenibilidad.',
+    isVideo: true,
+    youtubeUrl: 'https://www.youtube.com/watch?v=SHc2ByE4V3I',
+    youtubeId: 'SHc2ByE4V3I',
+    content: `
+### 🎬 Tip Avanzado: Esquema estrella (de verdad)
+
+**Junior:** conecta tablas “como venga”, trae todo, y luego “arregla” con DAX.
+
+**Senior:** diseña el modelo primero. Un **esquema estrella** reduce ambigüedad, mejora el performance y hace que las medidas sean predecibles.
+
+---
+
+### Checklist rápido
+
+- 1 **tabla de hechos** (ventas, eventos) + **dimensiones** (fecha, producto, cliente)
+- Dimensiones con **clave única** (sin duplicados)
+- Relaciones **1 → * (single direction)** cuando sea posible
+- Dimensiones “anchas” (atributos) y hechos “largas” (muchas filas)
+
+---
+
+### Señales de alarma (anti-senior)
+
+- Many-to-many por “resolver rápido”
+- Columnas calculadas para resolver lo que era de modelado
+- Filtros bidireccionales “porque sí”
+
+📌 Si este video te hace rearmar el modelo, vas por buen camino.
+    `,
+    officialLink: 'https://www.youtube.com/watch?v=SHc2ByE4V3I',
+    gameRelevance: ['stark', 'office']
+  },
+  {
+    id: 'adv-performance-analyzer-review',
+    categoryId: 'advanced-tips',
+    title: 'Mejora tu reporte con el Analizador de Rendimiento',
+    duration: 'Video',
+    level: 'Avanzado',
+    description: 'Diagnóstico pro: usa Performance Analyzer para encontrar cuellos de botella en visuals y DAX.',
+    isVideo: true,
+    youtubeUrl: 'https://www.youtube.com/watch?v=QCPZL5sLkBA',
+    youtubeId: 'QCPZL5sLkBA',
+    content: `
+### 🎬 Tip Avanzado: Performance Analyzer (trabaja con evidencia)
+
+**Junior:** “se siente lento”.
+
+**Senior:** mide y separa el problema en 3 causas: **visual**, **DAX query**, **render**.
+
+---
+
+### Qué sacar de este video
+
+- Cómo capturar tiempos por visual
+- Cómo identificar visuals “caros” (muchos puntos, demasiados campos)
+- Cómo priorizar: arreglar **modelo** primero, luego **DAX**, luego **visual**
+
+---
+
+### Regla práctica
+
+Si un reporte está lento, normalmente no es “un DAX mágico”:
+- Modelo con cardinalidad alta + relaciones ambiguas
+- Medidas sobre columnas mal tipadas
+- Visuals con demasiadas categorías
+
+🎯 Objetivo: pasar de “optimizar a ciegas” a “optimizar con datos”.
+    `,
+    officialLink: 'https://www.youtube.com/watch?v=QCPZL5sLkBA',
+    gameRelevance: ['stark']
+  },
+  {
+    id: 'adv-best-practice-analyzer-tabular-editor',
+    categoryId: 'advanced-tips',
+    title: 'Best Practice Analyzer en Tabular Editor',
+    duration: 'Video',
+    level: 'Avanzado',
+    description: 'Higiene senior: reglas de BPA para nombres, medidas, relaciones y performance (Tabular Editor).',
+    isVideo: true,
+    youtubeUrl: 'https://www.youtube.com/watch?v=FnN-piOoMl4',
+    youtubeId: 'FnN-piOoMl4',
+    content: `
+### 🎬 Tip Avanzado: Best Practice Analyzer (BPA)
+
+**Junior:** arregla “cuando duele”.
+
+**Senior:** aplica reglas y estándares desde el día 1.
+
+---
+
+### Qué te da el BPA
+
+- Detección de problemas típicos (nombres, carpetas de display, medidas sin formato)
+- Alertas de modelado (relaciones riesgosas, columnas innecesarias)
+- Señales de performance (cardinalidad y columnas que no deberían estar)
+
+---
+
+### Estándares que separan junior vs senior
+
+- Convenciones de nombres consistentes (Dim/Fact, prefijos, carpetas)
+- Medidas con formato + descripción
+- Modelo “delgado”: solo columnas necesarias, el resto se queda en PQ o en el origen
+
+✅ Úsalo como checklist antes de publicar.
+    `,
+    officialLink: 'https://www.youtube.com/watch?v=FnN-piOoMl4',
+    gameRelevance: ['stark', 'hogwarts']
+  },
+  {
+    id: 'adv-relationships-multiple-facts',
+    categoryId: 'advanced-tips',
+    title: 'Dos Tablas de Hechos y Modelado Estrella',
+    duration: 'Video',
+    level: 'Avanzado',
+    description: 'Modelado con múltiples hechos: evitar relaciones ambiguas y elegir patrones (role-playing dims, bridges).',
+    isVideo: true,
+    youtubeUrl: 'https://www.youtube.com/watch?v=76UmPVJZn0I',
+    youtubeId: '76UmPVJZn0I',
+    content: `
+### 🎬 Tip Avanzado: Múltiples tablas de hechos (sin caos)
+
+Cuando hay más de un hecho (Ventas, Devoluciones, Inventario), los modelos se vuelven frágiles si conectas “todo con todo”.
+
+---
+
+### Junior vs Senior
+
+**Junior:** activa relaciones bidireccionales y many-to-many para “que funcione”.
+
+**Senior:** elige un patrón explícito:
+- Dimensiones compartidas bien diseñadas
+- Dimensiones de rol (role-playing: FechaPedido vs FechaEntrega)
+- Tablas puente cuando el negocio lo requiere (y sabiendo el costo)
+
+---
+
+### Resultado buscado
+
+- Medidas consistentes
+- Filtros que fluyen como esperas
+- Menos sorpresas en totales
+
+📌 Si te cuesta explicar “por dónde viaja el filtro”, es una señal para re-diseñar.
+    `,
+    officialLink: 'https://www.youtube.com/watch?v=76UmPVJZn0I',
+    gameRelevance: ['stark']
+  },
+  {
+    id: 'adv-modeling-full-course',
+    categoryId: 'advanced-tips',
+    title: 'Modelamiento de Datos - Secretos del Modelo Estrella',
+    duration: 'Video',
+    level: 'Avanzado',
+    description: 'Curso completo de modelado: fundamentos + criterios pro para escalar datasets reales.',
+    isVideo: true,
+    youtubeUrl: 'https://www.youtube.com/watch?v=0XJhzPsvhjc',
+    youtubeId: '0XJhzPsvhjc',
+    content: `
+### 🎬 Ruta Avanzada: Modelado de datos “de producción”
+
+Este video es ideal si quieres pasar de “hacer reportes” a **construir modelos que escalan**.
+
+---
+
+### Qué practicar mientras lo ves
+
+- Identificar hechos vs dimensiones
+- Controlar cardinalidad y tipos de datos
+- Diseñar relaciones simples y evitar ambigüedad
+- Separar ETL (Power Query) vs Semántica (modelo) vs Métricas (medidas)
+
+---
+
+### Mentalidad senior
+
+- El modelo es un **producto**: debe ser entendible por otro analista
+- Menos columnas, más medidas
+- Nombres y estructura que permiten mantenimiento
+
+🎯 Si mejoras el modelo, mejoras todo lo demás: DAX, performance y UX.
+    `,
+    officialLink: 'https://www.youtube.com/watch?v=0XJhzPsvhjc',
+    gameRelevance: ['stark', 'hogwarts']
+  },
+  {
+    id: 'adv-descriptive-statistics',
+    categoryId: 'advanced-tips',
+    title: 'Estadística Descriptiva: Min, Max, Desviación Estándar, Promedio',
+    duration: 'Video',
+    level: 'Avanzado',
+    description: 'Análisis avanzado: estadística descriptiva en Power BI para detectar outliers y variabilidad.',
+    isVideo: true,
+    youtubeUrl: 'https://www.youtube.com/watch?v=tfR-AkVAXas',
+    youtubeId: 'tfR-AkVAXas',
+    content: `
+### 🎬 Tip Avanzado: Estadística Descriptiva en Power BI
+
+**Canal:** Ec. Ricardo Contreras, MBA
+
+Este video muestra cómo implementar medidas estadísticas descriptivas directamente en Power BI usando DAX, esencial para detectar outliers y entender la distribución de tus datos.
+
+---
+
+**Junior:** muestra promedios.
+
+**Senior:** explica dispersión, sesgo y outliers. Un promedio sin contexto puede mentir.
+
+---
+
+### Qué construir en tu reporte
+
+- Media vs Mediana (robustez)
+- Desviación estándar (variabilidad)
+- Z-score (detección rápida de outliers)
+
+---
+
+### Aplicación práctica
+
+- Ventas: detectar tiendas “anómalas”
+- Calidad: alertas por desviación
+- Operaciones: tiempos fuera de rango
+
+🎮 Perfecto para el mundo Squid Game: probabilidad y análisis.
+    `,
+    officialLink: 'https://www.youtube.com/watch?v=tfR-AkVAXas',
+    gameRelevance: ['squid-game', 'stark']
   },
 
   // =========================================================================

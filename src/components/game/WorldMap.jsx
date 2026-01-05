@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, CheckCircle2, Download, Play, Coins, Layers, Award, BookOpen, Target, Sparkles, TrendingUp, AlertCircle } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
+import { useSound } from '../../context/SoundContext';
+import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
+import ParticleBackground from '../common/ParticleBackground';
 import { WORLDS } from '../../data/worlds';
 import { getAssetPath } from '../../utils/assetPath';
 import { useDataGenerator } from '../../hooks/useDataGenerator';
@@ -13,15 +16,19 @@ import confetti from 'canvas-confetti';
 import MissionValidator from './MissionValidator';
 
 const WorldMap = () => {
-    const { 
-        user, 
-        completeMission, 
+    const {
+        user,
+        completeMission,
         unlockWorld,
         recordMissionPerformance,
         unlockWorldSkills,
         completeWorld,
         getWorldPerformanceSummary
     } = useGame();
+    const { sounds } = useSound();
+    const { canUseHeavyEffects } = useDeviceCapabilities();
+    const containerRef = useRef(null);
+
     const {
         generateTreasuryData,
         generateSalesData,
@@ -62,7 +69,7 @@ const WorldMap = () => {
     // NUEVO: Generar preguntas de repaso basadas en las habilidades del mundo
     const generateReviewQuestions = (world) => {
         const questions = [];
-        
+
         // Preguntas de repaso basadas en conceptos clave de Power BI
         const reviewBank = {
             'data-import': [
@@ -261,12 +268,12 @@ const WorldMap = () => {
         if (willCompleteWorld && selectedWorld.epilogue) {
             // Marcar mundo como completado
             completeWorld(selectedWorld.id);
-            
+
             // Mostrar epílogo después de un momento
             setTimeout(() => {
                 setEpilogueWorld(selectedWorld);
                 setShowEpilogueModal(true);
-                
+
                 // Gran celebración
                 confetti({
                     particleCount: 300,
@@ -289,7 +296,23 @@ const WorldMap = () => {
     };
 
     return (
-        <div className="world-map-container" style={{ width: '100%' }}>
+        <div className="world-map-container" ref={containerRef} style={{ width: '100%', position: 'relative' }}>
+            {/* Fondo de partículas mágicas (solo desktop) */}
+            {canUseHeavyEffects && !selectedWorld && (
+                <div className="world-map-particles" style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    overflow: 'hidden',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                }}>
+                    <ParticleBackground variant="magic" intensity={0.4} interactive={false} />
+                </div>
+            )}
+
             <AnimatePresence mode="wait">
                 {selectedMission ? (
                     <motion.div
@@ -298,9 +321,15 @@ const WorldMap = () => {
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 50 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     >
-                        <button className="btn btn-ghost" onClick={() => setSelectedMission(null)}>
+                        <button
+                            className="btn btn-ghost"
+                            onClick={() => {
+                                sounds.click();
+                                setSelectedMission(null);
+                            }}
+                        >
                             ← Volver a {selectedWorld.name}
                         </button>
 
@@ -407,16 +436,19 @@ const WorldMap = () => {
                                                     style={{
                                                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                                                         background: 'rgba(0,0,0,0.85)', zIndex: 1000,
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        display: 'flex',
                                                         padding: '20px',
-                                                        backdropFilter: 'blur(8px)'
+                                                        backdropFilter: 'blur(8px)',
+                                                        overflowY: 'auto'
                                                     }}
                                                 >
                                                     <motion.div
                                                         className="victory-card"
-                                                        initial={{ scale: 0.8, y: 50 }}
-                                                        animate={{ scale: 1, y: 0 }}
+                                                        initial={{ scale: 0.8, y: 50, opacity: 0 }}
+                                                        animate={{ scale: 1, y: 0, opacity: 1 }}
+                                                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                                         style={{
+                                                            margin: 'auto',
                                                             maxWidth: '500px', width: '100%',
                                                             background: 'var(--bg-surface)',
                                                             border: '1px solid var(--accent-gold)',
@@ -587,26 +619,39 @@ const WorldMap = () => {
                                         hidden: { opacity: 0 },
                                         visible: {
                                             opacity: 1,
-                                            transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+                                            transition: { staggerChildren: 0.08, delayChildren: 0.1 }
                                         }
                                     }}
                                 >
                                     {[...WORLDS].sort((a, b) => (a.order || 99) - (b.order || 99)).map(world => {
                                         const isUnlocked = user.unlockedWorlds.includes(world.id);
                                         const completedCount = world.missions.filter(m => user.completedMissions.includes(m.id)).length;
+                                        const isWorldCompleted = completedCount === world.missions.length;
 
                                         return (
                                             <motion.div
                                                 key={world.id}
-                                                className={`world-card glass ${!isUnlocked ? 'locked' : ''} ${!isUnlocked && user.coins >= WORLD_UNLOCK_COST ? 'can-unlock' : ''}`}
-                                                onClick={() => isUnlocked ? setSelectedWorld(world) : (user.coins >= WORLD_UNLOCK_COST && handleUnlockWorld(world))}
+                                                className={`world-card glass ${!isUnlocked ? 'locked' : ''} ${!isUnlocked && user.coins >= WORLD_UNLOCK_COST ? 'can-unlock' : ''} ${isWorldCompleted ? 'world-completed' : ''}`}
+                                                style={{
+                                                    borderColor: isWorldCompleted ? '#22c55e' : undefined,
+                                                    borderWidth: isWorldCompleted ? '2px' : undefined
+                                                }}
+                                                onClick={() => {
+                                                    if (isUnlocked) {
+                                                        sounds.click();
+                                                        setSelectedWorld(world);
+                                                    } else if (user.coins >= WORLD_UNLOCK_COST) {
+                                                        handleUnlockWorld(world);
+                                                    }
+                                                }}
+                                                onMouseEnter={() => isUnlocked && sounds.hover()}
                                                 variants={{
-                                                    hidden: { opacity: 0, scale: 0.8, y: 30 },
+                                                    hidden: { opacity: 0, scale: 0.9, y: 20 },
                                                     visible: {
                                                         opacity: 1,
                                                         scale: 1,
                                                         y: 0,
-                                                        transition: { type: "spring", stiffness: 200, damping: 20 }
+                                                        transition: { type: "spring", stiffness: 350, damping: 25 }
                                                     }
                                                 }}
                                                 whileHover={isUnlocked ? {
@@ -660,6 +705,28 @@ const WorldMap = () => {
                                                         </div>
                                                     )}
                                                 </div>
+
+                                                {/* Badge de Completado */}
+                                                {isWorldCompleted && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: '12px',
+                                                        right: '12px',
+                                                        background: '#22c55e',
+                                                        color: '#000',
+                                                        padding: '6px 10px',
+                                                        borderRadius: '20px',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '0.75rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        zIndex: 5,
+                                                        boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+                                                    }}>
+                                                        <span>✓</span> COMPLETADO
+                                                    </div>
+                                                )}
                                             </motion.div>
                                         );
                                     })}
@@ -816,9 +883,10 @@ const WorldMap = () => {
                         style={{
                             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                             background: 'rgba(0,0,0,0.9)', zIndex: 1000,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            display: 'flex',
                             padding: '20px',
-                            backdropFilter: 'blur(10px)'
+                            backdropFilter: 'blur(10px)',
+                            overflowY: 'auto'
                         }}
                         onClick={() => setShowNarrativeModal(false)}
                     >
@@ -828,6 +896,7 @@ const WorldMap = () => {
                             exit={{ scale: 0.8, y: 30 }}
                             onClick={(e) => e.stopPropagation()}
                             style={{
+                                margin: 'auto',
                                 maxWidth: '600px', width: '100%',
                                 background: 'linear-gradient(145deg, var(--bg-surface), var(--bg-main))',
                                 border: '1px solid var(--accent-gold)',
@@ -838,15 +907,15 @@ const WorldMap = () => {
                             }}
                         >
                             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📖</div>
-                            <h2 style={{ 
-                                color: 'var(--accent-gold)', 
+                            <h2 style={{
+                                color: 'var(--accent-gold)',
                                 marginBottom: '8px',
                                 fontSize: '1.3rem'
                             }}>
                                 Continuará...
                             </h2>
-                            <p style={{ 
-                                color: 'var(--text-muted)', 
+                            <p style={{
+                                color: 'var(--text-muted)',
                                 fontSize: '0.9rem',
                                 marginBottom: '24px'
                             }}>
@@ -897,7 +966,7 @@ const WorldMap = () => {
                         style={{
                             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                             background: 'rgba(0,0,0,0.95)', zIndex: 1001,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            display: 'flex',
                             padding: '20px',
                             backdropFilter: 'blur(12px)',
                             overflowY: 'auto'
@@ -915,7 +984,7 @@ const WorldMap = () => {
                                 padding: '40px',
                                 textAlign: 'center',
                                 boxShadow: '0 0 80px rgba(255, 215, 0, 0.2)',
-                                margin: '20px 0'
+                                margin: 'auto'
                             }}
                         >
                             {/* Header */}
@@ -969,8 +1038,8 @@ const WorldMap = () => {
                                 transition={{ delay: 0.6 }}
                                 style={{ marginBottom: '24px' }}
                             >
-                                <h3 style={{ 
-                                    color: 'var(--accent-green)', 
+                                <h3 style={{
+                                    color: 'var(--accent-green)',
                                     marginBottom: '16px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1016,7 +1085,7 @@ const WorldMap = () => {
                             {(() => {
                                 const summary = getWorldPerformanceSummary(epilogueWorld.id);
                                 if (!summary) return null;
-                                
+
                                 return (
                                     <motion.div
                                         initial={{ y: 20, opacity: 0 }}
@@ -1024,8 +1093,8 @@ const WorldMap = () => {
                                         transition={{ delay: 0.8 }}
                                         style={{ marginBottom: '24px' }}
                                     >
-                                        <h3 style={{ 
-                                            color: '#a855f7', 
+                                        <h3 style={{
+                                            color: '#a855f7',
                                             marginBottom: '16px',
                                             display: 'flex',
                                             alignItems: 'center',
@@ -1035,7 +1104,7 @@ const WorldMap = () => {
                                             <TrendingUp size={20} />
                                             Tu Rendimiento
                                         </h3>
-                                        
+
                                         <div style={{
                                             display: 'grid',
                                             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -1055,16 +1124,16 @@ const WorldMap = () => {
                                                 </div>
                                             </div>
                                             <div style={{
-                                                background: summary.totalWrongAnswers === 0 
-                                                    ? 'rgba(34, 197, 94, 0.15)' 
+                                                background: summary.totalWrongAnswers === 0
+                                                    ? 'rgba(34, 197, 94, 0.15)'
                                                     : 'rgba(239, 68, 68, 0.15)',
                                                 borderRadius: '12px',
                                                 padding: '16px'
                                             }}>
-                                                <div style={{ 
-                                                    fontSize: '1.5rem', 
-                                                    fontWeight: 'bold', 
-                                                    color: summary.totalWrongAnswers === 0 ? '#22c55e' : '#ef4444' 
+                                                <div style={{
+                                                    fontSize: '1.5rem',
+                                                    fontWeight: 'bold',
+                                                    color: summary.totalWrongAnswers === 0 ? '#22c55e' : '#ef4444'
                                                 }}>
                                                     {summary.totalWrongAnswers}
                                                 </div>
@@ -1250,10 +1319,10 @@ const WorldMap = () => {
                                             background: 'rgba(0,0,0,0.3)',
                                             borderRadius: '16px',
                                             padding: '20px',
-                                            border: rq.isCorrect === true 
-                                                ? '2px solid #22c55e' 
-                                                : rq.isCorrect === false 
-                                                    ? '2px solid #ef4444' 
+                                            border: rq.isCorrect === true
+                                                ? '2px solid #22c55e'
+                                                : rq.isCorrect === false
+                                                    ? '2px solid #ef4444'
                                                     : '1px solid var(--border)'
                                         }}
                                     >
@@ -1286,10 +1355,10 @@ const WorldMap = () => {
                                                     onClick={() => {
                                                         if (rq.userAnswer !== null) return;
                                                         const isCorrect = opt === rq.a;
-                                                        setReviewQuestions(prev => 
-                                                            prev.map((q, i) => 
-                                                                i === idx 
-                                                                    ? { ...q, userAnswer: opt, isCorrect } 
+                                                        setReviewQuestions(prev =>
+                                                            prev.map((q, i) =>
+                                                                i === idx
+                                                                    ? { ...q, userAnswer: opt, isCorrect }
                                                                     : q
                                                             )
                                                         );

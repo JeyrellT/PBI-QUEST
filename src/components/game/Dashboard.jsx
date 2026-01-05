@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Trophy, Target, TrendingUp, Flame, Zap, Star, Clock } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
+import { useSound } from '../../context/SoundContext';
+import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
+import ParticleBackground from '../common/ParticleBackground';
 import { WORLDS } from '../../data/worlds';
 import { getAssetPath } from '../../utils/assetPath';
 
@@ -67,6 +70,8 @@ const ProgressRing = ({ progress = 0, size = 60, strokeWidth = 6, color = 'var(-
 
 const Dashboard = ({ setActiveTab }) => {
     const { user, getTier, getStreakMultiplier, levelStats } = useGame();
+    const { sounds } = useSound();
+    const { effectsConfig, canUseHeavyEffects } = useDeviceCapabilities();
 
     // Safety check for user context
     if (!user) return <div className="p-8 text-center">Cargando datos del analista...</div>;
@@ -142,10 +147,52 @@ const Dashboard = ({ setActiveTab }) => {
         }))
         : [];
 
-    const recommendedMission = WORLDS[0]?.missions[0] || { title: 'Sin misiones', description: 'No hay misiones disponibles', xp: 0, coins: 0 };
+    // Logic to find the next recommended mission
+    const getRecommendedMission = () => {
+        // 1. Iterate through worlds the user has unlocked
+        for (const world of WORLDS) {
+            if (user.unlockedWorlds?.includes(world.id)) {
+                // 2. Find the first uncompleted mission in this world
+                const nextMission = world.missions.find(m => !user.completedMissions?.includes(m.id));
+                if (nextMission) {
+                    return { ...nextMission, worldName: world.name };
+                }
+            }
+        }
+
+        // 3. If all unlocked worlds are complete, look for the next locked world
+        const nextLockedWorld = WORLDS.find(w => !user.unlockedWorlds?.includes(w.id));
+        if (nextLockedWorld) {
+            return {
+                title: `Desbloquea: ${nextLockedWorld.name}`,
+                description: `¡Has dominado tus mundos actuales! Es hora de desbloquear ${nextLockedWorld.name} por ${2500} monedas.`, // Assuming cost logic or generic message
+                xp: 0,
+                coins: 0,
+                isUnlockRecommendation: true
+            };
+        }
+
+        // 4. If everything is done
+        return {
+            title: '¡Todo Completado!',
+            description: 'Eres una leyenda de los datos. ¡Has completado todas las misiones disponibles!',
+            xp: 0,
+            coins: 0,
+            isCompleted: true
+        };
+    };
+
+    const recommendedMission = getRecommendedMission();
 
     return (
         <div className="dashboard page-container-animate">
+            {/* Aurora Background - solo en desktop */}
+            {canUseHeavyEffects && (
+                <div className="dashboard-aurora-bg">
+                    <ParticleBackground variant="aurora" intensity={0.5} interactive={false} />
+                </div>
+            )}
+
             <div className="liquid-geometry">
                 <motion.div
                     className="blob-obj"
@@ -188,7 +235,14 @@ const Dashboard = ({ setActiveTab }) => {
                                 <span className="streak-text">Días de racha</span>
                             </div>
                         </div>
-                        <button className="btn btn-primary btn-lg" onClick={() => setActiveTab('worlds')}>
+                        <button
+                            className="btn btn-primary btn-lg hover-glow"
+                            onClick={() => {
+                                sounds.click();
+                                setActiveTab('worlds');
+                            }}
+                            onMouseEnter={() => sounds.hover()}
+                        >
                             <Play size={20} fill="currentColor" />
                             <span>Continuar Aventura</span>
                         </button>

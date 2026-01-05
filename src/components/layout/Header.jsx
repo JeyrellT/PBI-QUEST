@@ -4,6 +4,7 @@ import { Menu, Search, Bell, Coins, Flame, HelpCircle, Trophy, Target, BookOpen 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../../context/GameContext';
 import { Tooltip, HelpBubble } from '../common/InteractiveElements';
+import SoundToggle from '../common/SoundToggle';
 import '../../styles/Header.css';
 
 const Header = ({ onMenuClick, isMobile }) => {
@@ -71,6 +72,9 @@ const Header = ({ onMenuClick, isMobile }) => {
                         </div>
                     </div>
                 </Tooltip>
+
+                {/* Sound Toggle */}
+                <SoundToggle />
 
                 {/* Help Button */}
                 <button 

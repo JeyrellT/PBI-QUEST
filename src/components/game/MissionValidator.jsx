@@ -163,6 +163,17 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
             return;
         }
 
+        // Verificar datos faltantes (por si no descargaron el dataset)
+        const missingData = fields.some(f => f.expected === undefined);
+        if (missingData) {
+            setValidationResult({
+                results: {},
+                allCorrect: false,
+                error: 'Faltan datos para validar. Asegúrate de haber descargado el dataset.'
+            });
+            return;
+        }
+
         setAttempts(prev => prev + 1);
         const results = {};
         let allCorrect = true;
@@ -396,9 +407,10 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
             < AnimatePresence >
                 {isExpanded && (
                     <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: 'auto' }}
-                        exit={{ height: 0 }}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
                         style={{ overflow: 'hidden' }}
                     >
                         <div style={{ padding: '24px' }}>
@@ -515,7 +527,7 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                                                 }}>
                                                     Valor esperado: {Array.isArray(result.expected)
                                                         ? result.expected.join(', ')
-                                                        : result.expected.toLocaleString()
+                                                        : (result.expected?.toLocaleString() || 'N/A')
                                                     }
                                                 </p>
                                             )}
@@ -569,6 +581,24 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                                     </motion.div>
                                 )}
                             </AnimatePresence>
+
+                            {validationResult?.error && (
+                                <div style={{
+                                    marginBottom: '16px',
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    color: '#ef4444',
+                                    fontSize: '0.9rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}>
+                                    <AlertTriangle size={18} />
+                                    {validationResult.error}
+                                </div>
+                            )}
 
                             {/* Action Buttons */}
                             <div style={{

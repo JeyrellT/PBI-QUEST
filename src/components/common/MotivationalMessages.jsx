@@ -16,7 +16,7 @@ const MOTIVATIONAL_MESSAGES = {
         { text: "Un dashboard bien hecho vale más que mil palabras.", author: "Data Wisdom" },
         { text: "¡Bienvenido de vuelta, Analista! Tu misión te espera.", author: "Power BI Quest" },
     ],
-    
+
     // Después de completar una misión
     missionComplete: [
         { text: "¡Excelente trabajo! Los datos nunca mienten cuando los tratas bien. 🎯", author: "Michael Scott (datos edition)" },
@@ -25,7 +25,7 @@ const MOTIVATIONAL_MESSAGES = {
         { text: "¡Así se hace! Dwight estaría orgulloso de tu eficiencia. 📈", author: "Dunder Mifflin" },
         { text: "Los KPIs que rescatas hoy, salvan decisiones mañana. 💡", author: "DataRescue HQ" },
     ],
-    
+
     // Cuando sube de nivel
     levelUp: [
         { text: "¡Nuevo nivel desbloqueado! El poder de DAX crece en ti. ⚡", author: "Power BI Quest" },
@@ -33,7 +33,7 @@ const MOTIVATIONAL_MESSAGES = {
         { text: "Tu progreso es la mejor medida de tu éxito. 📊", author: "Métricas de Vida" },
         { text: "¡Nivel alcanzado! Las funciones avanzadas te esperan.", author: "DAX Master" },
     ],
-    
+
     // Para mantener la racha
     streak: [
         { text: "¡Tu racha está en fuego! 🔥 No la dejes enfriar.", author: "Streak Master" },
@@ -41,7 +41,7 @@ const MOTIVATIONAL_MESSAGES = {
         { text: "Cada día de práctica te acerca a la excelencia.", author: "Tu mentor" },
         { text: "¡{streak} días seguidos! Eres imparable. 💪", author: "Racha Tracker" },
     ],
-    
+
     // Cuando el usuario está atascado (sin completar misiones por un tiempo)
     encouragement: [
         { text: "Recuerda: todos los expertos fueron principiantes alguna vez.", author: "Sabiduría" },
@@ -49,7 +49,7 @@ const MOTIVATIONAL_MESSAGES = {
         { text: "Un pequeño paso en datos es un gran salto en insights.", author: "Data Philosophy" },
         { text: "Los errores son oportunidades de aprendizaje disfrazadas.", author: "Growth Mindset" },
     ],
-    
+
     // Tips de Power BI
     powerBiTips: [
         { text: "Tip: CALCULATE es la función más poderosa de DAX. ¡Domínala!", author: "DAX Tips" },
@@ -59,7 +59,7 @@ const MOTIVATIONAL_MESSAGES = {
         { text: "Tip: DISTINCTCOUNT es tu amigo contra los duplicados.", author: "Conteos Correctos" },
         { text: "Tip: Usa variables (VAR) en DAX para código más limpio.", author: "Clean Code" },
     ],
-    
+
     // Cuando desbloquea algo nuevo
     unlock: [
         { text: "¡Nuevo territorio desbloqueado! La aventura continúa. 🗺️", author: "Explorer" },
@@ -123,7 +123,7 @@ export const QuoteCard = ({ message, onDismiss, autoHide = true, duration = 5000
                         }}>
                             <Quote size={20} color="white" />
                         </div>
-                        
+
                         <div style={{ flex: 1 }}>
                             <p style={{
                                 fontSize: '1rem',
@@ -177,7 +177,7 @@ export const DailyTipBanner = ({ onAction }) => {
     const [tip] = useState(() => {
         const lastTipDate = localStorage.getItem('powerbi-quest-last-tip-date');
         const today = new Date().toDateString();
-        
+
         if (lastTipDate !== today) {
             localStorage.setItem('powerbi-quest-last-tip-date', today);
             return getRandomMessage('powerBiTips');
@@ -199,7 +199,8 @@ export const DailyTipBanner = ({ onAction }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: '16px'
+                gap: '16px',
+                flexWrap: 'wrap'
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -208,7 +209,7 @@ export const DailyTipBanner = ({ onAction }) => {
                     <strong>Tip del día:</strong> {tip.text}
                 </span>
             </div>
-            
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {onAction && (
                     <button
@@ -274,13 +275,14 @@ export const MotivationalPopup = ({ show, message, onClose, duration = 4000 }) =
                         border: '1px solid rgba(168, 85, 247, 0.3)',
                         borderRadius: '16px',
                         padding: '16px 24px',
-                        maxWidth: '400px',
+                        maxWidth: 'min(400px, 90vw)',
+                        width: 'max-content',
                         textAlign: 'center',
                         zIndex: 1500,
                         boxShadow: '0 8px 32px rgba(168, 85, 247, 0.2)'
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Sparkles size={24} color="#a855f7" />
                         <p style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem' }}>
                             {message.text}

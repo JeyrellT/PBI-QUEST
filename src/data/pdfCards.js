@@ -17,7 +17,16 @@ export const HERO_CARDS = [
         color: '#22c55e',
         icon: '➕',
         unlocksAtLevel: 1,
-        power: 10
+        power: 10,
+        tacticalQuestion: {
+            q: "El dataset tiene celdas vacías (null) en la columna 'Ventas'. Si usas SUM directamente, ¿qué ocurre?",
+            options: [
+                "Da error ('NaN') inmediatamente.",
+                "Ignora los nulos (los trata como 0) y suma el resto.",
+                "Devuelve 'null' como resultado total."
+            ],
+            correct: "Ignora los nulos (los trata como 0) y suma el resto."
+        }
     },
     {
         id: 'promediador',
@@ -31,7 +40,16 @@ export const HERO_CARDS = [
         color: '#3b82f6',
         icon: '⚖️',
         unlocksAtLevel: 1,
-        power: 10
+        power: 10,
+        tacticalQuestion: {
+            q: "Corruptex insertó un valor de 5,000,000 en un rango de datos que va de 10 a 100. ¿Cuál es el riesgo de usar PROMEDIADOR aquí?",
+            options: [
+                "El promedio se inflará drásticamente, ocultando la tendencia real.",
+                "AVERAGE ignorará automáticamente el outlier.",
+                "Dará un error de desbordamiento de memoria."
+            ],
+            correct: "El promedio se inflará drásticamente, ocultando la tendencia real."
+        }
     },
     {
         id: 'maximo',
@@ -45,7 +63,16 @@ export const HERO_CARDS = [
         color: '#ef4444',
         icon: '⬆️',
         unlocksAtLevel: 1,
-        power: 10
+        power: 10,
+        tacticalQuestion: {
+            q: "Si aplicas MÁXIMO a una columna de fechas (Date), ¿qué dato estratégico obtienes?",
+            options: [
+                "La fecha más reciente (última actualización).",
+                "La fecha más antigua (inicio del periodo).",
+                "El día con mayor número de transacciones."
+            ],
+            correct: "La fecha más reciente (última actualización)."
+        }
     },
     {
         id: 'minimo',
@@ -59,7 +86,16 @@ export const HERO_CARDS = [
         color: '#06b6d4',
         icon: '⬇️',
         unlocksAtLevel: 1,
-        power: 10
+        power: 10,
+        tacticalQuestion: {
+            q: "Ojo al dato: Si usas MÍNIMO en una columna de texto (Nombres de Clientes), ¿qué determina el resultado?",
+            options: [
+                "El orden alfabético (A-Z, el primero).",
+                "La longitud del nombre (el más corto).",
+                "El valor con menos caracteres especiales."
+            ],
+            correct: "El orden alfabético (A-Z, el primero)."
+        }
     },
     {
         id: 'contador',
@@ -73,7 +109,16 @@ export const HERO_CARDS = [
         color: '#8b5cf6',
         icon: '🔢',
         unlocksAtLevel: 2,
-        power: 12
+        power: 12,
+        tacticalQuestion: {
+            q: "Tienes 1000 transacciones, pero 200 no tienen 'Descuento' (celda vacía). Si usas CONTADOR sobre la columna 'Descuento', ¿qué obtienes?",
+            options: [
+                "800",
+                "1000",
+                "200"
+            ],
+            correct: "800"
+        }
     },
     {
         id: 'filator',
@@ -87,7 +132,16 @@ export const HERO_CARDS = [
         color: '#f97316',
         icon: '📊',
         unlocksAtLevel: 2,
-        power: 12
+        power: 12,
+        tacticalQuestion: {
+            q: "Si aplicas FILATOR (COUNTROWS) en una tabla que está filtrada por 'Año=2024', ¿el recuento incluye las filas ocultas de 2023?",
+            options: [
+                "No, respeta el contexto de filtro actual (solo cuenta 2024).",
+                "Sí, siempre cuenta la tabla completa sin importar filtros.",
+                "Depende de si la tabla está conectada a otra."
+            ],
+            correct: "No, respeta el contexto de filtro actual (solo cuenta 2024)."
+        }
     },
     {
         id: 'unica',
@@ -101,7 +155,16 @@ export const HERO_CARDS = [
         color: '#ec4899',
         icon: '💎',
         unlocksAtLevel: 2,
-        power: 15
+        power: 15,
+        tacticalQuestion: {
+            q: "Alerta de duplicados: Tienes 'Cliente A' y 'Cliente A ' (con un espacio extra al final). ¿Cuántos valores únicos ve esta carta?",
+            options: [
+                "2 (El espacio cuenta, son valores distintos).",
+                "1 (Power BI normaliza los espacios automáticamente).",
+                "0 (Los marca como error)."
+            ],
+            correct: "2 (El espacio cuenta, son valores distintos)."
+        }
     },
     {
         id: 'decisor',
@@ -115,7 +178,16 @@ export const HERO_CARDS = [
         color: '#eab308',
         icon: '🔀',
         unlocksAtLevel: 3,
-        power: 15
+        power: 15,
+        tacticalQuestion: {
+            q: "Necesitas clasificar en 3 categorias: 'Alto', 'Medio' y 'Bajo'. ¿Cómo estructuras la táctica con DECISOR (IF)?",
+            options: [
+                "Anidando IFs: IF(val>100, 'Alto', IF(val>50, 'Medio', 'Bajo')).",
+                "Usando tres IFs separados uno tras otro.",
+                "IF(val>100 AND val>50, 'Alto', 'Bajo')."
+            ],
+            correct: "Anidando IFs: IF(val>100, 'Alto', IF(val>50, 'Medio', 'Bajo'))."
+        }
     },
     {
         id: 'conjuntor',
@@ -129,7 +201,16 @@ export const HERO_CARDS = [
         color: '#14b8a6',
         icon: '🔗',
         unlocksAtLevel: 3,
-        power: 15
+        power: 15,
+        tacticalQuestion: {
+            q: "Buscas clientes que sean 'VIP' Y ademas sean 'Nuevos'. Tienes 50 VIPs y 30 Nuevos. ¿Puede el resultado de CONJUNTOR (AND) ser 60?",
+            options: [
+                "Imposible, la intersección nunca puede ser mayor al grupo más pequeño (30).",
+                "Sí, si se suman los grupos.",
+                "Depende de los duplicados."
+            ],
+            correct: "Imposible, la intersección nunca puede ser mayor al grupo más pequeño (30)."
+        }
     },
     {
         id: 'alternador',
@@ -143,7 +224,16 @@ export const HERO_CARDS = [
         color: '#a855f7',
         icon: '⚡',
         unlocksAtLevel: 3,
-        power: 15
+        power: 15,
+        tacticalQuestion: {
+            q: "Cuidado: La condición es 'Ventas > 1000 OR Ganancia > 500'. Si una fila cumple AMBAS condiciones, ¿qué devuelve el ALTERNADOR?",
+            options: [
+                "Devuelve TRUE (Verdadero).",
+                "Devuelve FALSE (debe ser uno u otro, no ambos).",
+                "Da error de lógica circular."
+            ],
+            correct: "Devuelve TRUE (Verdadero)."
+        }
     }
 ];
 
@@ -216,43 +306,43 @@ export const MISSION_REQUIRED_CARDS = {
     'datarescue-1': {
         required: ['sumator', 'decisor'],
         optional: ['promediador'],
-        description: 'Usa SUM para calcular la Ganancia Total y IF para manejar valores nulos.',
+        description: 'Objetivo: Consolidar el rendimiento financiero global. Amenaza: Brechas de datos (nulos) detectadas en la columna de ingresos. Requerimiento: Una función para agregar el volumen total y otra para sanear los vacíos antes del cálculo.',
         villainAppears: true
     },
     'datarescue-2': {
         required: ['promediador'],
         optional: ['maximo', 'minimo'],
-        description: 'AVERAGE para calcular el peso promedio por país.',
+        description: 'Objetivo: Análisis de distribución de carga. El sistema requiere identificar el valor central representativo de los pesos de envío para calibrar los sensores de equilibrio.',
         villainAppears: false
     },
     'datarescue-3': {
         required: ['maximo', 'decisor'],
         optional: ['promediador', 'minimo'],
-        description: 'MAX para encontrar el CBM máximo y IF para detectar outliers.',
+        description: 'Objetivo: Auditoría de anomalías extremas. Se busca el pico más alto de volumen cúbico (CBM), pero existen ruidos en la señal. Aísla el valor extremo solo si cumple con los parámetros de validez.',
         villainAppears: true
     },
     'datarescue-4': {
         required: ['filator', 'unica'],
         optional: ['contador'],
-        description: 'COUNTROWS vs COUNT para entender duplicados, DISTINCTCOUNT para el conteo real.',
+        description: 'Objetivo: Auditoría de integridad. El dataset ha sido inflado con clones. Tu misión es doble: determina la magnitud del ataque (total de filas afectadas) y recupera la cifra real de entidades singulares (sin clones).',
         villainAppears: true
     },
     'datarescue-5': {
         required: ['unica'],
         optional: ['filator', 'contador'],
-        description: 'DISTINCTCOUNT para contar clientes únicos después de normalizar.',
+        description: 'Objetivo: Purga de identidades. La normalización de nombres ha fallado. Necesitamos un conteo estricto de clientes individuales, ignorando cualquier repetición o variación en el registro.',
         villainAppears: false
     },
     'datarescue-6': {
         required: ['decisor', 'alternador'],
         optional: ['conjuntor'],
-        description: 'IF + OR para clasificar operaciones de riesgo.',
+        description: 'Objetivo: Protocolo de Clasificación de Amenazas. Identifica transacciones que cumplan AL MENOS UNO de los dos criterios de peligro: "Monto Excesivo" o "Origen Desconocido". Etiquétalas para cuarentena.',
         villainAppears: true
     },
     'datarescue-7': {
         required: ['sumator', 'promediador', 'maximo', 'minimo', 'contador', 'filator', 'unica', 'decisor', 'conjuntor', 'alternador'],
         optional: [],
-        description: '¡Batalla Final! Necesitas dominar TODAS las funciones para vencer a Datacorruptor.',
+        description: 'Objetivo: DEFENSA TOTAL DEL NÚCLEO. Múltiples vectores de corrupción detectados: duplicidad masiva, nulos sistémicos y lógica invertida. Se requiere un despliegue de fuerza completa (Agregación, Conteo y Lógica) para restaurar el orden.',
         villainAppears: true,
         isBossBattle: true
     }
@@ -288,7 +378,7 @@ export const getCardById = (cardId) => {
 export const getCardsForMission = (missionId) => {
     const missionCards = MISSION_REQUIRED_CARDS[missionId];
     if (!missionCards) return null;
-    
+
     return {
         required: missionCards.required.map(id => getCardById(id)).filter(Boolean),
         optional: missionCards.optional.map(id => getCardById(id)).filter(Boolean),
@@ -305,11 +395,11 @@ export const getCardsForMission = (missionId) => {
 export const validateCardSelection = (missionId, selectedCardIds) => {
     const missionCards = MISSION_REQUIRED_CARDS[missionId];
     if (!missionCards) return { success: true, missing: [], feedback: 'Misión sin requisitos de cartas.' };
-    
+
     // El comodín puede sustituir cualquier carta
     const hasWildcard = selectedCardIds.includes('comodin');
     let wildcardUsed = false;
-    
+
     const missing = [];
     for (const requiredId of missionCards.required) {
         if (!selectedCardIds.includes(requiredId)) {
@@ -320,7 +410,7 @@ export const validateCardSelection = (missionId, selectedCardIds) => {
             }
         }
     }
-    
+
     if (missing.length === 0) {
         return {
             success: true,
@@ -328,7 +418,7 @@ export const validateCardSelection = (missionId, selectedCardIds) => {
             feedback: '¡Excelente! Has seleccionado las cartas correctas. ¡A la misión!'
         };
     }
-    
+
     const missingNames = missing.map(id => getCardById(id)?.name || id).join(', ');
     return {
         success: false,

@@ -1,0 +1,414 @@
+/* ==========================================================================
+   PREMIUM CARD EFFECTS - Efectos holográficos y premium para cartas
+   ========================================================================== */
+
+/* ======= HOLOGRAPHIC EFFECT ======= */
+.game-card.unlocked::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        125deg,
+        transparent 0%,
+        transparent 25%,
+        rgba(255, 255, 255, 0.1) 25%,
+        rgba(255, 255, 255, 0.1) 30%,
+        transparent 30%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.05) 55%,
+        transparent 55%,
+        transparent 75%,
+        rgba(255, 255, 255, 0.1) 75%,
+        rgba(255, 255, 255, 0.1) 80%,
+        transparent 80%
+    );
+    background-size: 200% 200%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 10;
+    border-radius: inherit;
+}
+
+.game-card.unlocked:hover::before {
+    opacity: 1;
+    animation: holo-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes holo-shimmer {
+    0% {
+        background-position: 200% 200%;
+    }
+    100% {
+        background-position: -200% -200%;
+    }
+}
+
+/* ======= RAINBOW HOLOGRAPHIC (para cartas legendarias/especiales) ======= */
+.game-card.special.unlocked::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+        45deg,
+        #ff0000,
+        #ff7f00,
+        #ffff00,
+        #00ff00,
+        #0000ff,
+        #4b0082,
+        #9400d3,
+        #ff0000
+    );
+    background-size: 400% 400%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: rainbow-flow 4s linear infinite;
+}
+
+.game-card.special.unlocked:hover::after {
+    opacity: 0.7;
+}
+
+@keyframes rainbow-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ======= FIRE AURA (para cartas recién desbloqueadas) ======= */
+.game-card.recently-unlocked {
+    animation: fire-pulse 2s ease-in-out infinite;
+}
+
+.game-card.recently-unlocked::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(
+        45deg,
+        #ff6b35,
+        #f7931e,
+        #ffcc00,
+        #ff6b35
+    );
+    background-size: 300% 300%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.6;
+    animation: fire-glow 1.5s ease-in-out infinite;
+    filter: blur(8px);
+}
+
+@keyframes fire-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+@keyframes fire-glow {
+    0%, 100% {
+        background-position: 0% 50%;
+        opacity: 0.4;
+    }
+    50% {
+        background-position: 100% 50%;
+        opacity: 0.7;
+    }
+}
+
+/* ======= FROST EFFECT (para cartas bloqueadas) ======= */
+.game-card.locked::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(135, 206, 235, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(173, 216, 230, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(176, 224, 230, 0.1) 0%, transparent 70%);
+    z-index: 5;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.game-card.locked .lock-overlay {
+    background: rgba(0, 20, 40, 0.85);
+    backdrop-filter: blur(4px);
+}
+
+.game-card.locked .lock-overlay svg {
+    animation: frost-shake 0.3s ease-in-out;
+}
+
+.game-card.locked:hover .lock-overlay svg {
+    animation: frost-shake 0.5s ease-in-out;
+}
+
+@keyframes frost-shake {
+    0%, 100% {
+        transform: translateX(0) rotate(0deg);
+    }
+    25% {
+        transform: translateX(-3px) rotate(-5deg);
+    }
+    75% {
+        transform: translateX(3px) rotate(5deg);
+    }
+}
+
+/* ======= ENERGY ORB (decoración en cartas de poder) ======= */
+.card-power-badge {
+    position: relative;
+    overflow: visible;
+}
+
+.card-power-badge::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    border-radius: inherit;
+    background: inherit;
+    opacity: 0;
+    z-index: -1;
+    transition: all 0.3s ease;
+}
+
+.game-card.unlocked:hover .card-power-badge::before {
+    width: 130%;
+    height: 130%;
+    opacity: 0.5;
+    filter: blur(8px);
+}
+
+/* ======= PARTICLE TRAIL (efecto de partículas al hover) ======= */
+.game-card.unlocked {
+    position: relative;
+}
+
+.card-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.game-card.unlocked:hover .card-particles {
+    opacity: 1;
+}
+
+.card-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--card-color, #00d2ff);
+    box-shadow: 0 0 6px var(--card-color, #00d2ff);
+    animation: card-particle-float 2s ease-in-out infinite;
+}
+
+.card-particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+.card-particle:nth-child(2) { left: 30%; animation-delay: 0.3s; }
+.card-particle:nth-child(3) { left: 50%; animation-delay: 0.6s; }
+.card-particle:nth-child(4) { left: 70%; animation-delay: 0.9s; }
+.card-particle:nth-child(5) { left: 90%; animation-delay: 1.2s; }
+
+@keyframes card-particle-float {
+    0%, 100% {
+        bottom: -10px;
+        opacity: 0;
+        transform: scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        bottom: 100%;
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
+
+/* ======= 3D TILT EFFECT ======= */
+.game-card.unlocked {
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.game-card.unlocked .card-content {
+    transform: translateZ(20px);
+}
+
+.game-card.unlocked .card-image-area {
+    transform: translateZ(10px);
+}
+
+.game-card.unlocked .card-power-badge {
+    transform: translateZ(30px);
+}
+
+/* ======= SHINE SWEEP ======= */
+.game-card.unlocked .card-image-area::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.game-card.unlocked:hover .card-image-area::after {
+    left: 100%;
+}
+
+/* ======= VILLAIN DARK AURA ======= */
+.game-card.villain.unlocked::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(
+        45deg,
+        #1a0000,
+        #330000,
+        #660000,
+        #330000,
+        #1a0000
+    );
+    background-size: 200% 200%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: villain-pulse 3s ease-in-out infinite;
+}
+
+.game-card.villain.unlocked:hover::after {
+    opacity: 0.6;
+}
+
+@keyframes villain-pulse {
+    0%, 100% {
+        background-position: 0% 50%;
+        filter: brightness(1);
+    }
+    50% {
+        background-position: 100% 50%;
+        filter: brightness(1.3);
+    }
+}
+
+/* ======= CARD FLIP ANIMATION ======= */
+.card-flip-enter {
+    animation: card-flip-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes card-flip-in {
+    0% {
+        transform: perspective(1000px) rotateY(-180deg) scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: perspective(1000px) rotateY(-90deg) scale(0.9);
+        opacity: 0.5;
+    }
+    100% {
+        transform: perspective(1000px) rotateY(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+/* ======= GLOW TEXT ======= */
+.game-card.unlocked .card-name {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    transition: text-shadow 0.3s ease;
+}
+
+.game-card.unlocked:hover .card-name {
+    text-shadow: 0 0 20px var(--card-color, rgba(255, 255, 255, 0.5));
+}
+
+/* ======= MOBILE OPTIMIZATIONS ======= */
+@media (max-width: 768px) {
+    /* Desactivar efectos pesados en móvil */
+    .game-card.unlocked::before,
+    .game-card.special.unlocked::after,
+    .game-card.recently-unlocked::after,
+    .game-card.villain.unlocked::after,
+    .card-particles {
+        display: none;
+    }
+    
+    /* Simplificar animaciones */
+    .game-card.unlocked:hover {
+        transform: translateY(-4px);
+    }
+    
+    .game-card.unlocked:hover .card-image-area::after {
+        display: none;
+    }
+}
+
+/* ======= REDUCED MOTION ======= */
+@media (prefers-reduced-motion: reduce) {
+    .game-card.unlocked::before,
+    .game-card.special.unlocked::after,
+    .game-card.recently-unlocked::after,
+    .game-card.villain.unlocked::after,
+    .card-particles,
+    .card-power-badge::before {
+        animation: none;
+        display: none;
+    }
+    
+    .game-card.unlocked:hover {
+        transform: translateY(-4px);
+    }
+}

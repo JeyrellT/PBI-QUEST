@@ -3,12 +3,24 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Sparkles, Zap, Shield, Brain, ZoomIn, Image } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
+import { useSound } from '../../context/SoundContext';
 import { HERO_CARDS, VILLAIN_CARDS, SPECIAL_CARDS, COVER_CARD, getUnlockedCards } from '../../data/pdfCards';
 import { getAssetPath } from '../../utils/assetPath';
 import '../../styles/CardDeck.css';
+import '../../styles/premium-cards.css';
+
+// Componente de partículas para cartas
+const CardParticles = () => (
+    <div className="card-particles">
+        {[...Array(5)].map((_, i) => (
+            <div key={i} className="card-particle" />
+        ))}
+    </div>
+);
 
 const CardDeck = ({ isOpen, onClose }) => {
     const { user } = useGame();
+    const { sounds } = useSound();
     const [selectedCard, setSelectedCard] = useState(null);
     const [viewingImage, setViewingImage] = useState(null); // Para ver imagen PDF a tamaño completo
     const [imageErrors, setImageErrors] = useState({}); // Track de errores de carga de imagen
@@ -17,6 +29,18 @@ const CardDeck = ({ isOpen, onClose }) => {
     // Función para manejar errores de carga de imagen
     const handleImageError = (cardId) => {
         setImageErrors(prev => ({ ...prev, [cardId]: true }));
+    };
+    
+    // Handler para seleccionar carta con sonido
+    const handleCardSelect = (card) => {
+        sounds.cardFlip();
+        setSelectedCard(card);
+    };
+    
+    // Handler para filtros con sonido
+    const handleFilterChange = (newFilter) => {
+        sounds.click();
+        setFilter(newFilter);
     };
     
     const unlockedCards = getUnlockedCards(user.level);
@@ -112,25 +136,25 @@ const CardDeck = ({ isOpen, onClose }) => {
                     <div className="card-filters">
                         <button 
                             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-                            onClick={() => setFilter('all')}
+                            onClick={() => handleFilterChange('all')}
                         >
                             Todas
                         </button>
                         <button 
                             className={`filter-btn ${filter === 'heroes' ? 'active' : ''}`}
-                            onClick={() => setFilter('heroes')}
+                            onClick={() => handleFilterChange('heroes')}
                         >
                             🦸 Héroes
                         </button>
                         <button 
                             className={`filter-btn ${filter === 'villains' ? 'active' : ''}`}
-                            onClick={() => setFilter('villains')}
+                            onClick={() => handleFilterChange('villains')}
                         >
                             👾 Villanos
                         </button>
                         <button 
                             className={`filter-btn ${filter === 'special' ? 'active' : ''}`}
-                            onClick={() => setFilter('special')}
+                            onClick={() => handleFilterChange('special')}
                         >
                             ✨ Especiales
                         </button>
@@ -152,14 +176,18 @@ const CardDeck = ({ isOpen, onClose }) => {
                                     whileHover={isUnlocked ? { 
                                         scale: 1.05, 
                                         rotateY: 5,
+                                        rotateX: 2,
                                         boxShadow: `0 20px 40px ${card.color}44`
                                     } : {}}
-                                    onClick={() => isUnlocked && setSelectedCard(card)}
+                                    onClick={() => isUnlocked && handleCardSelect(card)}
+                                    onMouseEnter={() => isUnlocked && sounds.hover()}
                                     style={{ 
                                         '--card-color': card.color,
                                         cursor: isUnlocked ? 'pointer' : 'not-allowed'
                                     }}
                                 >
+                                    {/* Partículas decorativas para cartas desbloqueadas */}
+                                    {isUnlocked && <CardParticles />}
                                     {/* Card Image / Icon */}
                                     <div className="card-image-area" style={{ backgroundColor: `${card.color}22` }}>
                                         {hasImage ? (

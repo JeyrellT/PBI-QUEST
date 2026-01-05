@@ -15,6 +15,7 @@ import { DailyTipBanner, MotivationalPopup } from './components/common/Motivatio
 import { getRandomMessage } from './utils/motivationalMessages';
 import { ToastProvider } from './context/ToastContext';
 import { GameProvider, useGame } from './context/GameContext';
+import { SoundProvider } from './context/SoundContext';
 
 const AppContent = () => {
   const { user } = useGame();
@@ -148,7 +149,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <GameProvider>
-      <AppContent />
+      <SoundProvider>
+        <AppContent />
+      </SoundProvider>
     </GameProvider>
   );
 };

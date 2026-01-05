@@ -38,6 +38,9 @@ const Achievements = () => {
         return true;
     });
 
+    // State for the selected achievement modal
+    const [selectedAchievement, setSelectedAchievement] = useState(null);
+
     return (
         <div className="achievements-page animate-fade-in">
             <div className="achievements-header">
@@ -100,6 +103,8 @@ const Achievements = () => {
                                     visible: { opacity: 1, scale: 1, rotateY: 0 }
                                 }}
                                 whileHover={{ y: -10, scale: 1.05 }}
+                                onClick={() => setSelectedAchievement(achievement)}
+                                style={{ cursor: 'pointer' }}
                             >
                                 <div className="card-face card-front">
                                     <div className="card-image-wrapper">
@@ -130,6 +135,88 @@ const Achievements = () => {
                     );
                 })}
             </motion.div>
+
+            {/* Achievement Detail Modal */}
+            {
+                selectedAchievement && (
+                    <div
+                        className="modal-overlay"
+                        onClick={() => setSelectedAchievement(null)}
+                        style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(0,0,0,0.85)', zIndex: 1000,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backdropFilter: 'blur(5px)',
+                            animation: 'fadeIn 0.3s ease'
+                        }}
+                    >
+                        <div
+                            className="achievement-modal glass"
+                            onClick={e => e.stopPropagation()}
+                            style={{
+                                maxWidth: '500px', width: '90%', padding: '30px',
+                                textAlign: 'center', borderRadius: '24px',
+                                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                                position: 'relative'
+                            }}
+                        >
+                            <div style={{ fontSize: '4rem', marginBottom: '20px' }}>
+                                {selectedAchievement.icon}
+                            </div>
+                            <h2 className="font-heading" style={{ color: 'var(--text-main)', fontSize: '2rem', marginBottom: '10px' }}>
+                                {selectedAchievement.title}
+                            </h2>
+                            <div className={`rarity-badge ${selectedAchievement.rarity}`} style={{ display: 'inline-flex', marginBottom: '20px' }}>
+                                {selectedAchievement.rarity.toUpperCase()}
+                            </div>
+                            <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '30px', lineHeight: '1.6' }}>
+                                {selectedAchievement.description}
+                            </p>
+
+                            {/* Requirement Condition Display - Simplified */}
+                            <div style={{
+                                background: 'rgba(0,0,0,0.2)',
+                                padding: '15px',
+                                borderRadius: '12px',
+                                marginBottom: '25px',
+                                border: '1px solid var(--border)'
+                            }}>
+                                <p style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>Requisito:</p>
+                                <p style={{ color: 'var(--text-muted)' }}>{selectedAchievement.description}</p>
+                            </div>
+
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: '15px',
+                                alignItems: 'center'
+                            }}>
+                                <div className="xp-pill" style={{ fontSize: '1.1rem', padding: '8px 16px' }}>
+                                    +{selectedAchievement.xp} XP
+                                </div>
+                                {user.achievements.includes(selectedAchievement.id) ? (
+                                    <div style={{ color: '#22c55e', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <Star size={20} fill="currentColor" /> ¡Completado!
+                                    </div>
+                                ) : (
+                                    <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <Lock size={18} /> Bloqueado
+                                    </div>
+                                )}
+                            </div>
+
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setSelectedAchievement(null)}
+                                style={{ marginTop: '30px', width: '100%' }}
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     );
 };

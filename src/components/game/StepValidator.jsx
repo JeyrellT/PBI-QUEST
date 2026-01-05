@@ -137,7 +137,7 @@ const StepValidator = ({
     const step = resolvedSteps[activeIndex];
     if (!step) return null;
 
-    const datasetMissing = resolvedSteps.some(s => s.expectedFrom) && !datasetSession;
+    const isStepDatasetMissing = step.expectedFrom && !datasetSession;
 
     return (
         <div style={{
@@ -162,7 +162,7 @@ const StepValidator = ({
                 )}
             </div>
 
-            {datasetMissing && (
+            {isStepDatasetMissing && (
                 <div style={{
                     marginTop: '12px',
                     padding: '10px 12px',
@@ -172,133 +172,142 @@ const StepValidator = ({
                     color: 'var(--text-main)',
                     fontSize: '0.85rem'
                 }}>
-                    Descarga el dataset de la misión primero para habilitar la verificación automática.
+                    Esta pregunta requiere valores del dataset generado. Por favor descarga el archivo .csv para habilitar la validación.
                 </div>
             )}
 
-            <div style={{ marginTop: '14px' }}>
-                <div style={{
-                    fontWeight: 600,
-                    color: 'var(--text-main)',
-                    marginBottom: '10px'
-                }}>
-                    {step.prompt}
-                </div>
-
-                {step.type === 'mcq' && (
-                    <div style={{ display: 'grid', gap: '8px' }}>
-                        {(step.options || []).map(opt => {
-                            const selected = answers[step.id] === opt;
-                            return (
-                                <button
-                                    key={opt}
-                                    className={`btn ${selected ? 'btn-primary' : 'btn-secondary'}`}
-                                    style={{ justifyContent: 'flex-start' }}
-                                    onClick={() => setAnswers(prev => ({ ...prev, [step.id]: opt }))}
-                                    disabled={datasetMissing}
-                                >
-                                    {opt}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {step.type === 'multiSelect' && (
-                    <div style={{ display: 'grid', gap: '8px' }}>
-                        {(step.options || []).map(opt => {
-                            const arr = Array.isArray(answers[step.id]) ? answers[step.id] : [];
-                            const selected = arr.includes(opt);
-                            return (
-                                <button
-                                    key={opt}
-                                    className={`btn ${selected ? 'btn-primary' : 'btn-secondary'}`}
-                                    style={{ justifyContent: 'flex-start' }}
-                                    onClick={() => {
-                                        setAnswers(prev => {
-                                            const cur = Array.isArray(prev[step.id]) ? prev[step.id] : [];
-                                            const next = selected ? cur.filter(x => x !== opt) : [...cur, opt];
-                                            return { ...prev, [step.id]: next };
-                                        });
-                                    }}
-                                    disabled={datasetMissing}
-                                >
-                                    {opt}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {(step.type === 'numeric' || step.type === 'text' || step.type === 'setMatch') && (
-                    <input
-                        value={answers[step.id] ?? ''}
-                        onChange={(e) => setAnswers(prev => ({ ...prev, [step.id]: e.target.value }))}
-                        type={step.type === 'numeric' ? 'number' : 'text'}
-                        placeholder={step.placeholder || ''}
-                        style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: '12px',
-                            border: '1px solid var(--border)',
-                            background: 'var(--bg)',
-                            color: 'var(--text-main)'
-                        }}
-                        disabled={datasetMissing}
-                    />
-                )}
-
-                {step.type === 'photo' && (
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={step.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ marginTop: '14px' }}
+                >
                     <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '12px',
-                        borderRadius: '12px',
-                        border: '1px dashed var(--border)',
-                        background: 'var(--bg)'
+                        fontWeight: 600,
+                        color: 'var(--text-main)',
+                        marginBottom: '10px'
                     }}>
-                        <UploadCloud size={20} />
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                                {answers[step.id]?.name || 'Sube una captura (simulación de revisión)'}
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                PNG/JPG. No se envía a servidor; se valida de forma simulada.
-                            </div>
-                        </div>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                setAnswers(prev => ({ ...prev, [step.id]: f || null }));
-                            }}
-                        />
+                        {step.prompt}
                     </div>
-                )}
 
-                <AnimatePresence>
-                    {stepStatus[step.id] && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            style={{
-                                marginTop: '10px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                color: stepStatus[step.id].passed ? '#22c55e' : '#ef4444',
-                                fontSize: '0.85rem'
-                            }}
-                        >
-                            {stepStatus[step.id].passed ? <CheckCircle size={16} /> : <XCircle size={16} />}
-                            <span>{stepStatus[step.id].message}</span>
-                        </motion.div>
+                    {step.type === 'mcq' && (
+                        <div style={{ display: 'grid', gap: '8px' }}>
+                            {(step.options || []).map(opt => {
+                                const selected = answers[step.id] === opt;
+                                return (
+                                    <button
+                                        key={opt}
+                                        className={`btn ${selected ? 'btn-primary' : 'btn-secondary'}`}
+                                        style={{ justifyContent: 'flex-start' }}
+                                        onClick={() => setAnswers(prev => ({ ...prev, [step.id]: opt }))}
+                                        disabled={isStepDatasetMissing}
+                                    >
+                                        {opt}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     )}
-                </AnimatePresence>
-            </div>
+
+                    {step.type === 'multiSelect' && (
+                        <div style={{ display: 'grid', gap: '8px' }}>
+                            {(step.options || []).map(opt => {
+                                const arr = Array.isArray(answers[step.id]) ? answers[step.id] : [];
+                                const selected = arr.includes(opt);
+                                return (
+                                    <button
+                                        key={opt}
+                                        className={`btn ${selected ? 'btn-primary' : 'btn-secondary'}`}
+                                        style={{ justifyContent: 'flex-start' }}
+                                        onClick={() => {
+                                            setAnswers(prev => {
+                                                const cur = Array.isArray(prev[step.id]) ? prev[step.id] : [];
+                                                const next = selected ? cur.filter(x => x !== opt) : [...cur, opt];
+                                                return { ...prev, [step.id]: next };
+                                            });
+                                        }}
+                                        disabled={isStepDatasetMissing}
+                                    >
+                                        {opt}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {(step.type === 'numeric' || step.type === 'text' || step.type === 'setMatch') && (
+                        <input
+                            value={answers[step.id] ?? ''}
+                            onChange={(e) => setAnswers(prev => ({ ...prev, [step.id]: e.target.value }))}
+                            type={step.type === 'numeric' ? 'number' : 'text'}
+                            placeholder={step.placeholder || ''}
+                            style={{
+                                width: '100%',
+                                padding: '10px 12px',
+                                borderRadius: '12px',
+                                border: '1px solid var(--border)',
+                                background: 'var(--bg)',
+                                color: 'var(--text-main)'
+                            }}
+                            disabled={isStepDatasetMissing}
+                        />
+                    )}
+
+                    {step.type === 'photo' && (
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '12px',
+                            borderRadius: '12px',
+                            border: '1px dashed var(--border)',
+                            background: 'var(--bg)'
+                        }}>
+                            <UploadCloud size={20} />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                                    {answers[step.id]?.name || 'Sube una captura (simulación de revisión)'}
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                    PNG/JPG. No se envía a servidor; se valida de forma simulada.
+                                </div>
+                            </div>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    setAnswers(prev => ({ ...prev, [step.id]: f || null }));
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    <AnimatePresence>
+                        {stepStatus[step.id] && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                style={{
+                                    marginTop: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    color: stepStatus[step.id].passed ? '#22c55e' : '#ef4444',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                {stepStatus[step.id].passed ? <CheckCircle size={16} /> : <XCircle size={16} />}
+                                <span>{stepStatus[step.id].message}</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+            </AnimatePresence>
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
                 <button
@@ -321,7 +330,7 @@ const StepValidator = ({
                             onComplete?.({ answers });
                         }
                     }}
-                    disabled={datasetMissing || isPhotoChecking}
+                    disabled={isStepDatasetMissing || isPhotoChecking}
                 >
                     {isPhotoChecking ? (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
