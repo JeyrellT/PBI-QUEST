@@ -1,0 +1,81 @@
+/* ============================================ */
+/* PAGE TRANSITIONS                             */
+/* Transiciones fluidas y premium              */
+/* ============================================ */
+
+.page-transition {
+  width: 100%;
+  min-height: 100%;
+  will-change: transform, opacity;
+}
+
+.section-transition {
+  will-change: transform, opacity;
+}
+
+.stagger-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stagger-item {
+  will-change: transform, opacity;
+}
+
+/* ======= MODAL TRANSITIONS ======= */
+
+.modal-transition {
+  position: relative;
+  z-index: 1001;
+  will-change: transform, opacity;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  cursor: pointer;
+  will-change: opacity, backdrop-filter;
+}
+
+/* ======= TAB TRANSITIONS ======= */
+
+.tab-transition {
+  width: 100%;
+  will-change: transform, opacity;
+}
+
+/* ======= REVEAL ANIMATIONS ======= */
+
+.reveal-scroll,
+.slide-reveal {
+  will-change: transform, opacity;
+}
+
+/* ======= PERFORMANCE OPTIMIZATIONS ======= */
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  .section-transition,
+  .stagger-item,
+  .modal-transition,
+  .tab-transition,
+  .reveal-scroll,
+  .slide-reveal,
+  .fade-in,
+  .scale-in,
+  .bounce-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Contenedor para transiciones de página completa */
+.page-transition-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}

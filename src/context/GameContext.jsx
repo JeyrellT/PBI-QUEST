@@ -4,64 +4,53 @@ import { useToast } from './ToastContext';
 import { getUnlockedCards, CARD_UNLOCK_PROGRESSION } from '../data/pdfCards';
 import { SCORING_PROFILES, WORLDS } from '../data/worlds';
 
-const GameContext = createContext();
+const GameContext = createContext(undefined);
 
-export const useGame = () => useContext(GameContext);
+// Constantes del sistema
+const SCHEMA_VERSION = 2;
+const STREAK_RESET_DAYS = 7; // Días de inactividad antes de resetear racha
+const SCORELOG_MAX_ENTRIES = 100; // Límite de entradas en scoreLog
+
+export const useGame = () => {
+    const context = useContext(GameContext);
+    if (context === undefined) {
+        throw new Error('useGame must be used within a GameProvider');
+    }
+    return context;
+};
 
 // ============================================
-// FUNCIONES DE CÁLCULO DE SCORING
+// MIGRACIÓN DE ESQUEMA DE DATOS
 // ============================================
 
 /**
- * Calcula el XP final de una misión con penalizaciones
- * @param {number} baseXP - XP base de la misión
- * @param {object} profile - Perfil de scoring del mundo
- * @param {object} stats - { hints, attempts, wrongAnswers, isPerfect }
- * @returns {object} { finalXP, multiplier, breakdown }
+ * Migra datos de usuario a la versión actual del esquema
+ * @param {object} data - Datos del usuario a migrar
+ * @returns {object} Datos migrados
  */
-export const calculateMissionScore = (baseXP, profileId, stats) => {
-    const profile = SCORING_PROFILES[profileId] || SCORING_PROFILES['office-standard'];
-
-    const { hints = 0, attempts = 0, wrongAnswers = 0 } = stats;
-
-    // Calcular penalizaciones
-    const hintPenalty = hints * profile.hintPenalty;
-    const attemptPenalty = Math.max(0, (attempts - 1) * profile.attemptPenalty);
-    const wrongPenalty = wrongAnswers * profile.wrongAnswerPenalty;
-
-    // Calcular multiplicador base
-    let multiplier = 1 - hintPenalty - attemptPenalty - wrongPenalty;
-
-    // Aplicar bonus por perfecto (sin errores, sin hints, primer intento)
-    const isPerfect = hints === 0 && attempts <= 1 && wrongAnswers === 0;
-    if (isPerfect) {
-        multiplier = profile.perfectBonus;
-    }
-
-    // Aplicar límite mínimo
-    multiplier = Math.max(profile.minMultiplier, multiplier);
-
-    const finalXP = Math.round(baseXP * multiplier);
-
-    return {
-        finalXP,
-        multiplier,
-        isPerfect,
-        breakdown: {
-            base: baseXP,
-            hintPenalty: Math.round(baseXP * hintPenalty),
-            attemptPenalty: Math.round(baseXP * attemptPenalty),
-            wrongPenalty: Math.round(baseXP * wrongPenalty),
-            perfectBonus: isPerfect ? Math.round(baseXP * (profile.perfectBonus - 1)) : 0
+const migrateUserData = (data) => {
+    if (!data.schemaVersion || data.schemaVersion < SCHEMA_VERSION) {
+        // Migración de v1 a v2
+        if (!data.schemaVersion) {
+            data.worldProgress = data.worldProgress || {};
+            data.worldSkills = data.worldSkills || {};
+            data.schemaVersion = 2;
         }
-    };
+    }
+    return data;
 };
+
+// calculateMissionScore moved to ../utils/calculateMissionScore.js for Fast Refresh compatibility
 
 export const GameProvider = ({ children }) => {
     const { showToast } = useToast();
     const [user, setUser] = useState(() => {
         const saved = localStorage.getItem('powerbi-quest-user');
-        return saved ? JSON.parse(saved) : {
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            return migrateUserData(parsed);
+        }
+        return {
             name: 'Analista Novato',
             level: 1,
             xp: 0,
@@ -102,9 +91,9 @@ export const GameProvider = ({ children }) => {
     }, [user]);
 
     // Helper to calculate level based on XP
-    // 400 XP por nivel para progresión más fluida y accesible
+    // 1200 XP por nivel para progresión más realista y pausada
     // Protección: nunca retorna nivel menor a 1, y XP negativo se trata como 0
-    const calculateLevel = (xp) => Math.max(1, Math.floor(Math.max(0, xp) / 400) + 1);
+    const calculateLevel = (xp) => Math.max(1, Math.floor(Math.max(0, xp) / 1200) + 1);
 
     // Auto-correct level if XP doesn't match on load
     useEffect(() => {
@@ -122,18 +111,34 @@ export const GameProvider = ({ children }) => {
         return 1.0;
     };
 
-    // Función para calcular días desde última actividad
+    // Función para calcular días desde última actividad (UTC normalizado)
     const getDaysSinceLastActive = (lastActive) => {
         const last = new Date(lastActive);
         const now = new Date();
-        // Normalizar a inicio del día para comparar solo fechas
-        last.setHours(0, 0, 0, 0);
-        now.setHours(0, 0, 0, 0);
-        const diffTime = now - last;
+
+        // Protección contra fechas inválidas
+        if (isNaN(last.getTime())) {
+            console.warn('getDaysSinceLastActive: fecha inválida, asumiendo hoy');
+            return 0;
+        }
+
+        // Normalizar a inicio del día en UTC para comparar solo fechas
+        const lastUTC = new Date(Date.UTC(
+            last.getUTCFullYear(),
+            last.getUTCMonth(),
+            last.getUTCDate()
+        ));
+        const nowUTC = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate()
+        ));
+
+        const diffTime = nowUTC - lastUTC;
         return Math.floor(diffTime / (1000 * 60 * 60 * 24));
     };
 
-    // Actualizar racha: incrementa si es nuevo día, resetea si 3+ días inactivo
+    // Actualizar racha: incrementa si es nuevo día, resetea si 7+ días inactivo
     const updateStreak = () => {
         const daysSinceActive = getDaysSinceLastActive(user.lastActive);
 
@@ -142,9 +147,9 @@ export const GameProvider = ({ children }) => {
             return;
         }
 
-        if (daysSinceActive >= 3) {
-            // 3+ días de inactividad: resetear racha
-            showToast('¡Racha perdida por inactividad! Tu racha se ha reiniciado.', 'error', { title: 'Racha Reiniciada' });
+        if (daysSinceActive >= STREAK_RESET_DAYS) {
+            // 7+ días de inactividad: resetear racha
+            showToast(`¡Racha perdida! ${daysSinceActive} días inactivo. Racha reiniciada.`, 'error', { title: 'Racha Reiniciada' });
             setUser(prev => ({
                 ...prev,
                 streak: 1,
@@ -164,7 +169,7 @@ export const GameProvider = ({ children }) => {
                 };
             });
         } else {
-            // 2 días sin actividad: mantener racha pero actualizar fecha
+            // 2-6 días sin actividad: mantener racha pero actualizar fecha (grace period)
             setUser(prev => ({
                 ...prev,
                 lastActive: new Date().toISOString()
@@ -172,16 +177,12 @@ export const GameProvider = ({ children }) => {
         }
     };
 
-    // Verificar racha al cargar la aplicación
+    // Verificar y actualizar racha al cargar la aplicación
     useEffect(() => {
         const daysSinceActive = getDaysSinceLastActive(user.lastActive);
-        if (daysSinceActive >= 3) {
-            showToast(`⚠️ Han pasado ${daysSinceActive} días. Tu racha se reiniciará.`, 'error', { title: 'Advertencia de Racha' });
-            setUser(prev => ({
-                ...prev,
-                streak: 1,
-                lastActive: new Date().toISOString()
-            }));
+        if (daysSinceActive > 0) {
+            // Llamar a updateStreak para manejar todos los casos
+            updateStreak();
         }
     }, []); // Solo al montar el componente
 
@@ -228,7 +229,7 @@ export const GameProvider = ({ children }) => {
             achievements: [...userState.achievements, ...newAchievements.map(a => a.id)],
             xp: newTotalXP,
             level: calculateLevel(newTotalXP),
-            scoreLog: [...(userState.scoreLog || []), ...newLogs]
+            scoreLog: [...(userState.scoreLog || []).slice(-SCORELOG_MAX_ENTRIES + newLogs.length), ...newLogs]
         };
     };
 
@@ -259,7 +260,7 @@ export const GameProvider = ({ children }) => {
                 ...prev,
                 xp: newXP,
                 level: newLevel,
-                scoreLog: [...(prev.scoreLog || []), {
+                scoreLog: [...(prev.scoreLog || []).slice(-SCORELOG_MAX_ENTRIES + 1), {
                     date: new Date().toISOString(),
                     type: 'bonus',
                     reason,
@@ -304,11 +305,11 @@ export const GameProvider = ({ children }) => {
                 if (newStreak === 3 || newStreak === 5 || newStreak === 7) {
                     setTimeout(() => showToast(`🔥 ¡Racha de ${newStreak} días! Multiplicador: ${getStreakMultiplier(newStreak)}x`, 'streak'), 500);
                 }
-            } else if (daysSinceActive >= 3) {
-                // Perdió la racha
+            } else if (daysSinceActive >= STREAK_RESET_DAYS) {
+                // Perdió la racha (7+ días)
                 newStreak = 1;
             }
-            // Si daysSinceActive === 0 o === 2, mantener racha actual
+            // Si daysSinceActive === 0 o entre 2-6, mantener racha actual (grace period)
 
             const multiplier = getStreakMultiplier(newStreak);
             // Asegurar que finalXP sea siempre positivo
@@ -336,7 +337,7 @@ export const GameProvider = ({ children }) => {
                 streak: newStreak,
                 lastActive: new Date().toISOString(),
                 completedMissions: [...prev.completedMissions, missionId],
-                scoreLog: [...(prev.scoreLog || []), {
+                scoreLog: [...(prev.scoreLog || []).slice(-SCORELOG_MAX_ENTRIES + 1), {
                     date: new Date().toISOString(),
                     type: 'mission',
                     reason: missionTitle,
@@ -384,7 +385,7 @@ export const GameProvider = ({ children }) => {
                 ...prev,
                 coins: newCoins,
                 unlockedWorlds: [...prev.unlockedWorlds, worldId],
-                scoreLog: [...(prev.scoreLog || []), {
+                scoreLog: [...(prev.scoreLog || []).slice(-SCORELOG_MAX_ENTRIES + 1), {
                     date: new Date().toISOString(),
                     type: 'unlock',
                     reason: `Desbloqueo de Mundo: ${worldId}`,
@@ -397,7 +398,7 @@ export const GameProvider = ({ children }) => {
 
     // Level Progress Logic
     const getLevelStats = () => {
-        const xpPerLevel = 400; // Mismo valor que calculateLevel
+        const xpPerLevel = 1200; // Mismo valor que calculateLevel
         const currentLevelXP = (user.level - 1) * xpPerLevel;
         const nextLevelXP = user.level * xpPerLevel;
         const xpInCurrentLevel = user.xp - currentLevelXP;
@@ -666,7 +667,7 @@ export const GameProvider = ({ children }) => {
                     nextUnlockDate: nextUnlock.toISOString(),
                     history: [...(prev.weeklyChallenge?.history || []), { week: weekNumber, date: new Date().toISOString() }]
                 },
-                scoreLog: [...(prev.scoreLog || []), {
+                scoreLog: [...(prev.scoreLog || []).slice(-SCORELOG_MAX_ENTRIES + 1), {
                     date: new Date().toISOString(),
                     type: 'challenge',
                     reason: `Reto Semanal #${weekNumber}`,

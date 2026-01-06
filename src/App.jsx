@@ -9,6 +9,7 @@ import Academy from './components/game/Academy';
 import Leaderboard from './components/game/Leaderboard';
 import LevelUpModal from './components/common/LevelUpModal';
 import OnboardingTutorial from './components/common/OnboardingTutorial';
+import { PageTransition } from './components/common/PageTransitions';
 import { useOnboarding } from './hooks/useOnboarding';
 import useResponsive from './hooks/useResponsive';
 import { DailyTipBanner, MotivationalPopup } from './components/common/MotivationalMessages';
@@ -16,6 +17,11 @@ import { getRandomMessage } from './utils/motivationalMessages';
 import { ToastProvider } from './context/ToastContext';
 import { GameProvider, useGame } from './context/GameContext';
 import { SoundProvider } from './context/SoundContext';
+
+// Importar estilos premium
+import './styles/premium-theme.css';
+import './styles/premium-effects.css';
+import './styles/premium-cards.css';
 
 const AppContent = () => {
   const { user } = useGame();
@@ -129,16 +135,9 @@ const AppContent = () => {
         <DailyTipBanner onAction={() => setActiveTab('academy')} />
         <div className="content-area" style={{ position: 'relative' }}>
           <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              style={{ width: '100%' }}
-            >
+            <PageTransition key={activeTab} variant="premium">
               {renderContent()}
-            </motion.div>
+            </PageTransition>
           </AnimatePresence>
         </div>
       </main>

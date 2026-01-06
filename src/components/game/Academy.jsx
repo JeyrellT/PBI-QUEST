@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, BookOpen, Zap, Target, Brain, Sparkles, Clock, TrendingUp, CheckCircle2, Star } from 'lucide-react';
+import { Lightbulb, BookOpen, Zap, Target, Brain, Sparkles, Clock, TrendingUp, CheckCircle2, Star, X } from 'lucide-react';
 import { academyCategories, academyLessons } from '../../data/academyData';
 import '../../styles/Academy.css';
 
@@ -49,6 +49,10 @@ const getDifficultyScore = (level) => {
 const Academy = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedLesson, setSelectedLesson] = useState(null);
+    const [showIntroModal, setShowIntroModal] = useState(() => {
+        const hasSeenIntro = localStorage.getItem('academy_intro_seen');
+        return !hasSeenIntro;
+    });
     const [readLessons, setReadLessons] = useState(() => {
         const saved = localStorage.getItem('academy_read_lessons');
         return saved ? JSON.parse(saved) : [];
@@ -85,8 +89,121 @@ const Academy = () => {
         markAsRead(lesson.id);
     };
 
+    // Cerrar modal de introducción
+    const closeIntroModal = () => {
+        setShowIntroModal(false);
+        localStorage.setItem('academy_intro_seen', 'true');
+    };
+
     return (
         <div className="academy-container">
+            {/* Modal de Introducción a la Academia */}
+            <AnimatePresence>
+                {showIntroModal && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={closeIntroModal}
+                    >
+                        <motion.div
+                            className="academy-intro-modal glass"
+                            initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.8, opacity: 0, y: 50 }}
+                            transition={{ type: 'spring', damping: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button className="modal-close-btn" onClick={closeIntroModal}>
+                                <X size={24} />
+                            </button>
+
+                            <div className="modal-header">
+                                <div className="modal-icon">
+                                    <BookOpen size={48} strokeWidth={1.5} />
+                                </div>
+                                <h2>¡Bienvenido a la Academia! 📚</h2>
+                                <p className="modal-subtitle">
+                                    Tu centro de conocimiento de Power BI
+                                </p>
+                            </div>
+
+                            <div className="modal-content">
+                                <div className="intro-section">
+                                    <div className="intro-highlight">
+                                        <Sparkles size={20} />
+                                        <span>¿Qué encontrarás aquí?</span>
+                                    </div>
+                                    <p className="intro-description">
+                                        La Academia es tu biblioteca personal de Power BI. Aquí encontrarás todo lo que necesitas 
+                                        para dominar cada concepto, desde lo más básico hasta técnicas avanzadas de DAX.
+                                    </p>
+                                </div>
+
+                                <div className="categories-preview">
+                                    {academyCategories.map((category) => (
+                                        <motion.div
+                                            key={category.id}
+                                            className="category-preview-card"
+                                            whileHover={{ scale: 1.05 }}
+                                            transition={{ type: 'spring', stiffness: 300 }}
+                                        >
+                                            <div className="category-icon" style={{ background: category.gradient }}>
+                                                <span>{category.icon}</span>
+                                            </div>
+                                            <div className="category-info">
+                                                <h4>{category.title}</h4>
+                                                <p>{category.description}</p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+
+                                <div className="intro-features">
+                                    <div className="feature-item">
+                                        <Brain size={24} className="feature-icon" />
+                                        <div>
+                                            <strong>Aprende a tu ritmo</strong>
+                                            <p>Lecciones cortas de 3-8 minutos con ejemplos prácticos</p>
+                                        </div>
+                                    </div>
+                                    <div className="feature-item">
+                                        <Target size={24} className="feature-icon" />
+                                        <div>
+                                            <strong>Conectado a las misiones</strong>
+                                            <p>Cada lección está vinculada a los mundos del juego</p>
+                                        </div>
+                                    </div>
+                                    <div className="feature-item">
+                                        <Zap size={24} className="feature-icon" />
+                                        <div>
+                                            <strong>Referencias rápidas</strong>
+                                            <p>Encuentra rápido funciones DAX, tips y soluciones</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="intro-tip">
+                                    <Lightbulb size={20} />
+                                    <div>
+                                        <strong>💡 Tip Pro:</strong> Si te atascas en una misión, busca la lección relacionada 
+                                        en la Academia. Cada misión incluye referencias a las lecciones que necesitas.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="modal-footer">
+                                <button className="btn btn-primary btn-large" onClick={closeIntroModal}>
+                                    <Sparkles size={20} />
+                                    ¡Empezar a Aprender!
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <AnimatePresence mode="wait">
                 {selectedLesson ? (
                     <motion.div

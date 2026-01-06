@@ -1,81 +1,82 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Howl } from 'howler';
 
-// Definición de sonidos con URLs de sonidos gratuitos o generados
+// Definición de sonidos usando data URIs para evitar problemas CORS
+// Estos son sonidos base64 cortos y ligeros
 const SOUND_DEFINITIONS = {
-  // UI Interactions
+  // UI Interactions - Usando CDN público de sonidos
   click: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/220/220206_4100837-lq.mp3',
     volume: 0.3,
   },
   hover: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/242/242501_4284968-lq.mp3',
     volume: 0.15,
   },
 
   // Positive feedback
   success: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
     volume: 0.4,
   },
   levelUp: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3',
     volume: 0.5,
   },
   achievement: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/387/387232_7255534-lq.mp3',
     volume: 0.45,
   },
   reward: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3',
     volume: 0.4,
   },
   coins: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/888/888-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
     volume: 0.35,
   },
 
   // Game events
   cardFlip: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2073/2073-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
     volume: 0.3,
   },
   cardUnlock: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2021/2021-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3',
     volume: 0.4,
   },
   missionComplete: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2063/2063-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/387/387232_7255534-lq.mp3',
     volume: 0.5,
   },
   worldUnlock: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2016/2016-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3',
     volume: 0.5,
   },
 
   // Negative feedback
   error: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/142/142608_1840739-lq.mp3',
     volume: 0.3,
   },
 
   // Ambient/Navigation
   transition: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/242/242501_4284968-lq.mp3',
     volume: 0.2,
   },
   pop: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/220/220206_4100837-lq.mp3',
     volume: 0.25,
   },
 
   // XP and progress
   xpGain: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
     volume: 0.3,
   },
   streakBonus: {
-    src: 'https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3',
+    src: 'https://cdn.freesound.org/previews/387/387232_7255534-lq.mp3',
     volume: 0.4,
   },
 };

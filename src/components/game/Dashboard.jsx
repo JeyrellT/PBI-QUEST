@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Trophy, Target, TrendingUp, Flame, Zap, Star, Clock } from 'lucide-react';
+import { Play, Trophy, Target, TrendingUp, Flame, Zap, Star, Clock, Download, Upload } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import useSound from '../../hooks/useSound';
 import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 import ParticleBackground from '../common/ParticleBackground';
 import { WORLDS } from '../../data/worlds';
 import { getAssetPath } from '../../utils/assetPath';
+import { useToast } from '../../context/ToastContext';
 
 // Animated Counter Component
 const AnimatedCounter = ({ value, duration = 1000 }) => {
@@ -72,6 +73,67 @@ const Dashboard = ({ setActiveTab }) => {
     const { user, getTier, getStreakMultiplier, levelStats } = useGame();
     const { sounds } = useSound();
     const { effectsConfig, canUseHeavyEffects } = useDeviceCapabilities();
+    const { showToast } = useToast();
+
+    // Funciones para exportar/importar progreso
+    const exportProgress = () => {
+        try {
+            const dataStr = JSON.stringify(user, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `pbi-quest-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('✅ Progreso exportado correctamente', 'success');
+            sounds.success?.();
+        } catch (error) {
+            console.error('Error exportando progreso:', error);
+            showToast('❌ Error al exportar progreso', 'error');
+        }
+    };
+
+    const importProgress = () => {
+        try {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+
+                        // Validación básica
+                        if (!importedData.name || typeof importedData.xp !== 'number') {
+                            throw new Error('Formato de archivo inválido');
+                        }
+
+                        // Confirmar importación
+                        if (window.confirm('⚠️ Esto reemplazará tu progreso actual. ¿Continuar?')) {
+                            localStorage.setItem('powerbi-quest-user', JSON.stringify(importedData));
+                            showToast('✅ Progreso importado. Recargando...', 'success');
+                            setTimeout(() => window.location.reload(), 1500);
+                        }
+                    } catch (error) {
+                        console.error('Error importando progreso:', error);
+                        showToast('❌ Archivo inválido o corrupto', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        } catch (error) {
+            console.error('Error en importación:', error);
+            showToast('❌ Error al importar progreso', 'error');
+        }
+    };
 
     // Safety check for user context
     if (!user) return <div className="p-8 text-center">Cargando datos del analista...</div>;
@@ -80,10 +142,10 @@ const Dashboard = ({ setActiveTab }) => {
 
     // Narrative Rank Logic
     const getRank = (level) => {
-        if (level <= 2) return { title: 'Analista Novato', icon: '🌱', color: '#94a3b8' };
-        if (level <= 5) return { title: 'Estratega de Datos', icon: '📊', color: '#38bdf8' };
-        if (level <= 8) return { title: 'Arquitecto de Insights', icon: '🏛️', color: '#818cf8' };
-        if (level <= 10) return { title: 'Maestro de la Visualización', icon: '🔮', color: '#fbbf24' };
+        if (level <= 4) return { title: 'Analista Novato', icon: '🌱', color: '#94a3b8' };
+        if (level <= 9) return { title: 'Estratega de Datos', icon: '📊', color: '#38bdf8' };
+        if (level <= 19) return { title: 'Arquitecto de Insights', icon: '🏛️', color: '#818cf8' };
+        if (level <= 29) return { title: 'Maestro de la Visualización', icon: '🔮', color: '#fbbf24' };
         return { title: 'Leyenda de los Datos', icon: '👑', color: '#f472b6' };
     };
 
@@ -224,7 +286,7 @@ const Dashboard = ({ setActiveTab }) => {
                             <span>{tier.icon} Rango {tier.name}</span>
                         </motion.div>
                     </div>
-                    <h1 className="hero-welcome font-heading">¡Hola, {user.name}!</h1>
+                    <h1 className="hero-welcome font-heading">¡Hola, {user.name === 'Analista Novato' ? rank.title : user.name}!</h1>
                     <p className="hero-subtitle">Tu viaje hacia la maestría de datos continúa. El mundo necesita tus insights.</p>
 
                     <div className="hero-stats-row">
@@ -338,6 +400,34 @@ const Dashboard = ({ setActiveTab }) => {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </section>
+
+                    {/* Sección de Backup/Restauración */}
+                    <section className="backup-section-modern glass" style={{ marginTop: '1.5rem' }}>
+                        <h3 className="font-heading">💾 Respaldo de Datos</h3>
+                        <p style={{ fontSize: '0.85rem', opacity: 0.8, marginBottom: '1rem' }}>
+                            Protege tu progreso exportándolo o restaura desde un archivo anterior.
+                        </p>
+                        <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+                            <button
+                                className="btn btn-secondary"
+                                onClick={exportProgress}
+                                onMouseEnter={() => sounds.hover()}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                            >
+                                <Download size={16} />
+                                <span>Exportar Progreso</span>
+                            </button>
+                            <button
+                                className="btn btn-outline"
+                                onClick={importProgress}
+                                onMouseEnter={() => sounds.hover()}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                            >
+                                <Upload size={16} />
+                                <span>Importar Progreso</span>
+                            </button>
                         </div>
                     </section>
                 </div>

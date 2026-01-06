@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import StepValidator from './StepValidator';
-import { calculateMissionScore } from '../../context/GameContext';
+import { calculateMissionScore } from '../../utils/calculateMissionScore';
 
 // eslint sometimes misses JSX member usage (<motion.div>)
 void motion;

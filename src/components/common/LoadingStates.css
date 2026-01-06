@@ -1,0 +1,433 @@
+/* ============================================ */
+/* LOADING STATES PREMIUM                       */
+/* Spinners, barras y skeletons elegantes      */
+/* ============================================ */
+
+/* ======= PREMIUM SPINNER ======= */
+
+.premium-spinner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.premium-spinner-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  -webkit-mask: radial-gradient(transparent 40%, black 40%);
+  mask: radial-gradient(transparent 40%, black 40%);
+}
+
+.premium-spinner-glow {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: inherit;
+  filter: blur(12px);
+  opacity: 0.5;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ======= LOADING DOTS ======= */
+
+.loading-dots {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.loading-dot {
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* ======= PROGRESS BAR ======= */
+
+.premium-progress-bar {
+  width: 100%;
+}
+
+.premium-progress-label {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.premium-progress-track {
+  position: relative;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.premium-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 0 12px rgba(79, 172, 254, 0.6);
+}
+
+.premium-progress-fill.animated::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: progress-shimmer 1.5s infinite;
+}
+
+@keyframes progress-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ======= CIRCULAR PROGRESS ======= */
+
+.circular-progress {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circular-progress-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.circular-progress-fill {
+  fill: none;
+  stroke: url(#circularGradient);
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  filter: drop-shadow(0 0 8px rgba(79, 172, 254, 0.6));
+}
+
+.circular-progress-text {
+  position: absolute;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+}
+
+/* Gradiente para el círculo */
+svg {
+  filter: drop-shadow(0 0 4px rgba(79, 172, 254, 0.3));
+}
+
+/* ======= SKELETON LOADER ======= */
+
+.skeleton-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-text,
+.skeleton-avatar,
+.skeleton-custom,
+.skeleton-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.skeleton-text {
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-avatar {
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  padding: 20px;
+  min-height: 200px;
+}
+
+.skeleton-card-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.skeleton-card-header .skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.skeleton-text-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-text-group .skeleton-text {
+  height: 12px;
+}
+
+.skeleton-text-group .skeleton-text:first-child {
+  width: 60%;
+}
+
+.skeleton-text-group .skeleton-text:last-child {
+  width: 40%;
+}
+
+.skeleton-card-content .skeleton-text {
+  height: 14px;
+  margin-bottom: 10px;
+}
+
+.skeleton-card-content .skeleton-text:nth-child(1) {
+  width: 90%;
+}
+
+.skeleton-card-content .skeleton-text:nth-child(2) {
+  width: 80%;
+}
+
+.skeleton-card-content .skeleton-text:nth-child(3) {
+  width: 70%;
+}
+
+/* Shimmer effect */
+.skeleton-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: skeleton-shimmer-anim 1.5s infinite;
+}
+
+@keyframes skeleton-shimmer-anim {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* ======= PULSE LOADER ======= */
+
+.pulse-loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-loader-circle {
+  border-radius: 50%;
+  box-shadow: 0 0 20px currentColor;
+}
+
+/* ======= FULLSCREEN LOADER ======= */
+
+.fullscreen-loader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(10, 10, 20, 0.95);
+  backdrop-filter: blur(20px);
+}
+
+.fullscreen-loader-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.fullscreen-loader-logo {
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-placeholder {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 24px;
+  font-weight: 800;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+}
+
+.fullscreen-loader-message {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.fullscreen-loader-background {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0.5;
+}
+
+/* ======= IMAGE LOADER ======= */
+
+.image-loader {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.image-loader-placeholder {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ======= LOADING OVERLAY ======= */
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  border-radius: inherit;
+}
+
+.loading-overlay.blur {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.loading-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-overlay-content p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+/* ======= TYPING INDICATOR ======= */
+
+.typing-indicator {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+}
+
+/* ======= RESPONSIVE ======= */
+
+@media (max-width: 768px) {
+  .fullscreen-loader-logo {
+    font-size: 36px;
+  }
+
+  .logo-placeholder {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+
+  .fullscreen-loader-message {
+    font-size: 14px;
+  }
+
+  .skeleton-card {
+    padding: 16px;
+  }
+}
+
+/* ======= ACCESSIBILITY ======= */
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-spinner-circle,
+  .loading-dot,
+  .premium-progress-fill.animated::after,
+  .skeleton-shimmer,
+  .pulse-loader-circle,
+  .fullscreen-loader-logo,
+  .typing-dot {
+    animation: none !important;
+  }
+
+  .loading-dots .loading-dot,
+  .typing-indicator .typing-dot {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ======= DARK MODE ======= */
+
+@media (prefers-color-scheme: dark) {
+  .fullscreen-loader {
+    background: rgba(5, 5, 10, 0.98);
+  }
+}

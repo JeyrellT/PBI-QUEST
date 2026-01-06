@@ -516,7 +516,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Usa Pareto para ver el 80/20 de costos.'],
                 tips: ['Verónica (Hulkbuster) tiene repuestos satelitales caros.'],
                 expectedOutcome: 'Identificación de costos críticos.',
-                validation: { type: 'numeric', measureId: 'CostoTotalReparaciones', expectedValue: 847500000, tolerance: 0.03, requiredCards: ['SUM'] }
+                validation: { type: 'numeric', measureId: 'CostoTotalReparaciones', expectedValue: 847500000, tolerance: 0.03, requiredCards: ['SUM'] },
+                winImage: '/images/story/stark-1-win.png'
             },
             {
                 id: 'stark-2',
@@ -536,7 +537,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Eficiencia = Output / Input.', 'Grafica vs Tiempo.'],
                 tips: ['El descubrimiento del nuevo elemento cambió la curva.'],
                 expectedOutcome: 'Gráfico de evolución tecnológica.',
-                validation: { type: 'numeric', measureId: 'EficienciaMaxima', expectedValue: 847.5, tolerance: 0.02, requiredCards: ['MAX', 'AVERAGE'] }
+                validation: { type: 'numeric', measureId: 'EficienciaMaxima', expectedValue: 847.5, tolerance: 0.02, requiredCards: ['MAX', 'AVERAGE'] },
+                winImage: '/images/story/stark-2-win.png'
             },
             {
                 id: 'stark-3',
@@ -556,7 +558,29 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Divide éxitos / intentos.', 'Suma costos por héroe.'],
                 tips: ['Hulk rompe cosas. Hawkeye no falla.'],
                 expectedOutcome: 'Scorecard de los Vengadores.',
-                validation: { type: 'numeric', measureId: 'TasaExitoGlobal', expectedValue: 0.87, tolerance: 0.02, requiredCards: ['COUNTROWS', 'DIVIDE'] }
+                validation: { type: 'numeric', measureId: 'TasaExitoGlobal', expectedValue: 0.87, tolerance: 0.02, requiredCards: ['COUNTROWS', 'DIVIDE'] },
+                winImage: '/images/story/stark-3-win.png'
+            },
+            {
+                id: 'stark-4',
+                title: 'Acuerdos de Sokovia',
+                chapter: 3,
+                level: 5,
+                xp: 950,
+                coins: 250,
+                description: 'Aplica lógica compleja (AND/OR) para determinar quién firma los acuerdos.',
+                storyContext: 'El General Ross exige saber qué Vengadores son "Legales" y cuáles "Fugitivos". Las reglas son complejas: Deben haber firmado los acuerdos O estar retirados, Y no tener órdenes de arresto.',
+                introNarrative: '📜 "El mundo ya no tolera vigilantes," dice Ross. "Dame la lista de quién está con nosotros y quién está contra la ley. Y sé preciso, Stark."',
+                outroNarrative: '⚖️ Lista generada. Tony firma con pesar. Cap y su equipo son clasificados como fugitivos. La guerra civil ha comenzado... en tu hoja de cálculo.',
+                skillsDemo: ['dax-logic'],
+                wrongAnswerPenalty: 0.03,
+                objectives: ['Crear Columna Status', 'Lógica: Firmado OR Retirado', 'Filtro: No Arresto'],
+                datasets: ['stark_sokovia_accords'],
+                guide: ['Usa IF con condiciones anidadas o AND/OR.', 'Status = IF(Condicion, "Legal", "Fugitivo").'],
+                tips: ['AND(cond1, cond2) obliga a que ambas sean ciertas.'],
+                expectedOutcome: 'Clasificación legal de todos los héroes.',
+                validation: { type: 'numeric', measureId: 'TotalFugitivos', expectedValue: 5, tolerance: 0, requiredCards: ['COUNTROWS', 'IF'] },
+                winImage: '/images/story/stark-4-win.png'
             },
             {
                 id: 'stark-5',
@@ -576,7 +600,92 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Suma daños, equipos perdidos y suministros.', 'Resta valor recuperado.'],
                 tips: ['El escudo del Cap no tiene precio (valor contable 0).'],
                 expectedOutcome: 'Cierre financiero de la era Infinity.',
-                validation: { type: 'numeric', measureId: 'CostoTotalVictoria', expectedValue: 15700000000, tolerance: 0.05, requiredCards: ['SUM', 'CALCULATE'] }
+                validation: { type: 'numeric', measureId: 'CostoTotalVictoria', expectedValue: 15700000000, tolerance: 0.05, requiredCards: ['SUM', 'CALCULATE'] },
+                winImage: '/images/story/stark-5-win.png'
+            },
+            {
+                id: 'stark-6',
+                title: 'Protocolo Ultron',
+                chapter: 5,
+                level: 3,
+                xp: 800,
+                coins: 200,
+                description: 'Limpia el código corrupto. Extrae IDs ocultos en cadenas de texto caóticas.',
+                storyContext: 'Restos del código de Ultron se ocultan en los logs del servidor. Se manifiestan como cadenas de texto sin sentido ("0xF_KILL_ALL_HUMANS_ID:8842"). Debes extraer solo el ID numérico limpio para la cuarentena.',
+                introNarrative: '🤖 "Veo hilos...", susurra la interfaz. Ultron intenta reconstruirse ocultando sus funciones en metadatos basura. Pepper necesita que limpies estos logs antes de que la IA despierte.',
+                outroNarrative: '🛡️ Amenaza neutralizada. Los IDs de los subrutinas malignas han sido aislados. "Protocolo Purificado", confirma FRIDAY. Pero, ¿por qué uno de los códigos decía "Visión"?',
+                skillsDemo: ['dax-logic'],
+                wrongAnswerPenalty: 0.03,
+                objectives: ['Limpiar "Ultron_Log"', 'Extraer ID numérico', 'Filtrar "KILL" commands'],
+                datasets: ['stark_ultron_logs'],
+                guide: ['Usa "Column from Examples" o Text.Select.', 'Elimina prefijos basura.'],
+                tips: ['El patrón siempre es ID:XXXX.'],
+                expectedOutcome: 'Tabla de logs limpia con IDs extraídos.',
+                validation: { type: 'numeric', measureId: 'AmenazasAisladas', expectedValue: 42, tolerance: 0, requiredCards: ['COUNTROWS'] },
+                winImage: '/images/story/stark-6-win.png'
+            },
+            {
+                id: 'stark-7',
+                title: 'Rastreo de Vibranium',
+                chapter: 6,
+                level: 4,
+                xp: 900,
+                coins: 250,
+                description: 'Separa columnas complejas (Split Column) para rastrear envíos ilegales.',
+                storyContext: 'Okoye ha interceptado manifiestos de carga, pero están codificados: "WAKANDA_2024-05-12_500KG". Necesitas separar Ubicación, Fecha y Cantidad en columnas distintas para analizar el tráfico.',
+                introNarrative: '🙅🏿‍♀️ "No permitiremos que nuestro metal caiga en manos equivocadas." Okoye te da un archivo de texto plano. "Dime dónde, cuándo y cuánto. Ahora."',
+                outroNarrative: '📍 Mapa de contrabando generado. Los envíos se dirigen a una base en el Ártico. Okoye moviliza a las Dora Milaje. Gracias a tu desglose de datos, sabemos exactamente qué buscar.',
+                skillsDemo: ['data-quality'],
+                wrongAnswerPenalty: 0.03,
+                objectives: ['Dividir columna por Delimitador (_)', 'Asignar tipos de dato correctos'],
+                datasets: ['stark_vibranium_tracking'],
+                guide: ['Split Column by Delimiter.', 'Cambia texto a fecha y número.'],
+                tips: ['Cuidado con el orden de las nuevas columnas.'],
+                expectedOutcome: 'Tres columnas limpias: Origen, Fecha, Kilos.',
+                validation: { type: 'numeric', measureId: 'TotalVibraniumRobado', expectedValue: 5500, tolerance: 0.01, requiredCards: ['SUM'] },
+                winImage: '/images/story/stark-7-win.png'
+            },
+            {
+                id: 'stark-8',
+                title: 'Armor Wars',
+                chapter: 7,
+                level: 5,
+                xp: 1100,
+                coins: 300,
+                description: 'Usa "Merge Queries" (Anti-Join) para encontrar patentes robadas.',
+                storyContext: 'Rhodey (War Machine) sospecha que Hammer Industries está usando tecnología Stark. Tienes dos listas: "Patentes Autorizadas" y "Tecnología Hammer detectada". Cruza las tablas para ver qué no cuadra.',
+                introNarrative: '⚔️ "Hammer es un payaso, pero sus armas disparan de verdad." Tienes que probar el robo de propiedad intelectual. Encuentra las coincidencias... y las discrepancias.',
+                outroNarrative: '🚫 ¡Te atrapé! El análisis "Anti-Join" revela 15 componentes idénticos que no están en la lista de licenciados. Justin Hammer tendrá que dar muchas explicaciones.',
+                skillsDemo: ['data-quality'],
+                wrongAnswerPenalty: 0.04,
+                objectives: ['Merge: Left Anti', 'Identificar no-coincidencias'],
+                datasets: ['stark_patents', 'hammer_tech'],
+                guide: ['Usa Merge Queries.', 'Selecciona "Left Anti" para ver lo que falta.'],
+                tips: ['La clave de unión es el "Serial_Component".'],
+                expectedOutcome: 'Lista de tecnologías robadas.',
+                validation: { type: 'numeric', measureId: 'PatentesInfringidas', expectedValue: 15, tolerance: 0, requiredCards: ['COUNTROWS'] },
+                winImage: '/images/story/stark-8-win.png'
+            },
+            {
+                id: 'stark-9',
+                title: 'Memoria de VI',
+                chapter: 8,
+                level: 5,
+                xp: 1200,
+                coins: 350,
+                description: 'Repara series de tiempo rotas usando "Fill Down" (Rellenar hacia abajo).',
+                storyContext: 'Un ataque EMP dañó los bancos de memoria de F.R.I.D.A.Y. Los logs de sistema tienen huecos en la columna de fecha y hora. Usa la lógica de "el valor anterior es válido hasta que cambie" para restaurar la continuidad.',
+                introNarrative: '🧠 "Señor... mis protocolos de memoria están... fragmentados." La voz de FRIDAY se corta. Ayuda a la IA a recordar qué pasó durante el apagón llenando los vacíos lógicos.',
+                outroNarrative: '💾 Memoria restaurada. La línea de tiempo es continua de nuevo. FRIDAY vuelve a estar en línea al 100%. "Gracias, Boss. Eso se sintió como un déjà vu."',
+                skillsDemo: ['dax-logic'],
+                wrongAnswerPenalty: 0.03,
+                objectives: ['Fill Down (Rellenar Abajo)', 'Reconstruir Timeline'],
+                datasets: ['stark_friday_memory'],
+                guide: ['Transform > Fill > Down.', 'Nunca dejes nulos en una dimensión temporal.'],
+                tips: ['Fill Down asume que el nulo es igual al superior.'],
+                expectedOutcome: 'Dataset continuo sin nulos en fechas.',
+                validation: { type: 'numeric', measureId: 'EventosRecuperados', expectedValue: 128, tolerance: 0, requiredCards: ['COUNTROWS'] },
+                winImage: '/images/story/stark-9-win.png'
             }
         ]
     },
@@ -619,7 +728,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Usa scatter plot Edad vs Deuda.', 'Crea bins de deuda.'],
                 tips: ['La deuda total supera el PIB de un país pequeño.'],
                 expectedOutcome: 'Mapa de calor de deuda.',
-                validation: { type: 'numeric', measureId: 'DeudaTotalJugadores', expectedValue: 45600000000, tolerance: 0.02, requiredCards: ['SUM', 'AVERAGE'] }
+                validation: { type: 'numeric', measureId: 'DeudaTotalJugadores', expectedValue: 45600000000, tolerance: 0.02, requiredCards: ['SUM', 'AVERAGE'] },
+                winImage: '/images/story/sg-1-win.png'
             },
             {
                 id: 'sg-2',
@@ -639,7 +749,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Calcula eliminados por cuadrante.', 'Tasa de mortalidad por zona.'],
                 tips: ['El movimiento detectado fue fatal.'],
                 expectedOutcome: 'Análisis espacial de la masacre.',
-                validation: { type: 'numeric', measureId: 'JugadoresEliminadosJuego1', expectedValue: 231, tolerance: 0, requiredCards: ['COUNTROWS', 'FILTER'] }
+                validation: { type: 'numeric', measureId: 'JugadoresEliminadosJuego1', expectedValue: 231, tolerance: 0, requiredCards: ['COUNTROWS', 'FILTER'] },
+                winImage: '/images/story/sg-2-win.png'
             },
             {
                 id: 'sg-3',
@@ -659,7 +770,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Suma apuestas por jugador y VIP.', 'Calcula margen.'],
                 tips: ['Los VIPs odian perder.'],
                 expectedOutcome: 'Estrategia de maximización de apuestas.',
-                validation: { type: 'numeric', measureId: 'GananciaNeta', expectedValue: 33100000000, tolerance: 0.03, requiredCards: ['SUM', 'CALCULATE'] }
+                validation: { type: 'numeric', measureId: 'GananciaNeta', expectedValue: 33100000000, tolerance: 0.03, requiredCards: ['SUM', 'CALCULATE'] },
+                winImage: '/images/story/sg-3-win.png'
             },
             {
                 id: 'sg-5',
@@ -679,7 +791,232 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 guide: ['Pondera: Físico 30%, Mental 40%, Suerte 30%.', 'Calcula Score.'],
                 tips: ['La naturaleza humana es la variable X.'],
                 expectedOutcome: 'Predicción probabilística del campeón.',
-                validation: { type: 'numeric', measureId: 'ProbabilidadGiHun', expectedValue: 0.42, tolerance: 0.05, requiredCards: ['SUM', 'MAX', 'DIVIDE'] }
+                validation: { type: 'numeric', measureId: 'ProbabilidadGiHun', expectedValue: 0.42, tolerance: 0.05, requiredCards: ['SUM', 'MAX', 'DIVIDE'] },
+                winImage: '/images/story/sg-5-win.png'
+            },
+            {
+                id: 'sg-6',
+                title: 'Análisis de Supervivencia por Cohortes',
+                chapter: 5,
+                level: 5,
+                xp: 850,
+                coins: 210,
+                description: 'Usa CALCULATE y filtros de contexto para analizar tasas de supervivencia por demografía.',
+                storyContext: 'El Front Man quiere optimizar la selección de futuros participantes. ¿Qué grupo demográfico genera mejor "contenido" (más supervivencia, más drama)? Analiza edad, género y origen. Los datos de 456 jugadores esperan tu análisis. La organización planea reclutar otros 500 jugadores el próximo año y necesita patrones estadísticos claros.',
+                introNarrative: '📊 El Front Man te entrega un tablet con datos crudos. "Los números no mienten," dice desde las sombras. "Quiero saber qué segmento aguanta más. Las mujeres jóvenes, ¿son más resistentes? Los veteranos, ¿tienen experiencia o solo son frágiles? Necesito tasas de supervivencia por cohorte. Usa tus fórmulas DAX y no cometas errores... los VIPs están observando."',
+                outroNarrative: '✅ Insight revelador presentado. Tu análisis muestra patrones claros: Las mujeres entre 25-35 tienen 32% de supervivencia (18% por encima del promedio de 14%). Los hombres mayores de 50 son eliminados 3x más rápido que el promedio. Los jugadores urbanos superan a los rurales por 11%. "Excelente trabajo," murmura el Front Man. "Estos datos redefinirán nuestro reclutamiento. Has ganado otro día de vida."',
+                skillsDemo: ['risk-analysis', 'cohort-analysis'],
+                wrongAnswerPenalty: 0.03,
+                objectives: [
+                    'Crear columna calculada: GrupoEdad = IF(Players[Edad]<26, "18-25", IF(Players[Edad]<36, "26-35", IF(Players[Edad]<51, "36-50", "50+")))',
+                    'Medida base: TotalJugadores = COUNTROWS(Players)',
+                    'Medida: Supervivientes = CALCULATE(COUNTROWS(Players), Players[Status]="Vivo")',
+                    'Medida: TasaSupervivencia = DIVIDE([Supervivientes], [TotalJugadores], 0)',
+                    'Medida avanzada: SupervivenciaPorGenero = CALCULATE([TasaSupervivencia], Players[Genero])',
+                    'Medida con filtros múltiples: SupervivenciaMujeresJovenes = CALCULATE([TasaSupervivencia], Players[Genero]="Mujer", Players[GrupoEdad]="26-35")',
+                    'Crear matriz bidimensional: Género (filas) x Grupo Edad (columnas)',
+                    'Aplicar formato condicional de mapa de calor basado en TasaSupervivencia'
+                ],
+                datasets: ['squid_players', 'squid_elimination_log'],
+                guide: [
+                    '1. PREPARACIÓN: En Power Query, verifica que la columna Status tenga valores "Vivo" o "Eliminado" (sin espacios extra).',
+                    '2. COLUMNA CALCULADA: Crea GrupoEdad en la tabla Players usando IF anidados para segmentar por edad.',
+                    '3. MEDIDA BASE: TotalJugadores = COUNTROWS(Players) - Esta es tu denominador.',
+                    '4. MEDIDA FILTRADA: Usa CALCULATE para contar solo los jugadores con Status="Vivo".',
+                    '5. DIVISIÓN SEGURA: DIVIDE incluye automáticamente manejo de división por cero (tercer parámetro = 0).',
+                    '6. FILTROS MÚLTIPLES: CALCULATE acepta múltiples condiciones separadas por comas (actúan como AND).',
+                    '7. MATRIZ: Arrastra Genero a filas, GrupoEdad a columnas, TasaSupervivencia a valores.',
+                    '8. FORMATO CONDICIONAL: Aplica escala de color (rojo 0% → verde 40%) para visualizar patrones.',
+                    '9. VALIDACIÓN: La suma de Supervivientes + Eliminados debe = 456 jugadores totales.'
+                ],
+                tips: [
+                    'CALCULATE es el corazón de DAX - cambia el contexto de filtro mientras mantiene otros filtros activos.',
+                    'DIVIDE(numerador, denominador, valor_si_cero) es más seguro que el operador / porque evita errores #DIV/0.',
+                    'Los filtros en CALCULATE se aplican como AND lógico (todos deben cumplirse).',
+                    'El contexto de fila + CALCULATE permite análisis granular sin necesidad de crear tablas auxiliares.',
+                    'Usa formato porcentual (0.32 = 32%) para las tasas de supervivencia.',
+                    'El mapa de calor revela patrones visuales que las tablas numéricas ocultan.',
+                    'Valida siempre: [Supervivientes] + [Eliminados] debe igualar [TotalJugadores].'
+                ],
+                expectedOutcome: 'Dashboard interactivo con matriz 4x2 (4 grupos edad x 2 géneros = 8 segmentos). Mapa de calor mostrando que Mujeres 26-35 tienen la tasa más alta (32% - verde intenso) y Hombres 50+ la más baja (8% - rojo). Tarjetas KPI mostrando promedios globales: 27% mujeres vs 11% hombres. Slicer para filtrar por origen (Urbano/Rural).',
+                verification: [
+                    { question: "¿Tasa de supervivencia exacta de mujeres 26-35?", type: "number", answer: 0.32, hint: "Usa CALCULATE con dos filtros: Genero='Mujer' AND GrupoEdad='26-35'." },
+                    { question: "¿Segmento con MENOR supervivencia?", type: "text", answer: "Hombres 50+", hint: "Busca la celda roja más intensa en tu matriz." },
+                    { question: "¿Diferencia entre mejor y peor segmento (puntos porcentuales)?", type: "number", answer: 24, hint: "32% (Mujeres 26-35) - 8% (Hombres 50+) = 24 puntos." },
+                    { question: "¿Cuántos jugadores totales en el grupo 18-25?", type: "number", answer: 142, hint: "Filtra por GrupoEdad='18-25' y usa [TotalJugadores]." }
+                ],
+                winImage: '/images/story/sg-6-win.png'
+            },
+            {
+                id: 'sg-7',
+                title: 'Time Intelligence: Evolución del Juego',
+                chapter: 6,
+                level: 6,
+                xp: 950,
+                coins: 240,
+                description: 'Domina funciones de inteligencia temporal DAX para analizar la progresión del juego.',
+                storyContext: 'Los VIPs quieren ver la "curva de emoción": ¿cuándo ocurren más eliminaciones? ¿El ritmo se acelera o desacelera? El director de broadcasting necesita saber cuándo programar los cortes comerciales (no durante picos de acción). Necesitas crear medidas de tiempo acumulado y comparaciones periodo a periodo. Los 6 días de juegos generaron 144 horas de datos por analizar.',
+                introNarrative: '⏱️ El anfitrión VIP se ajusta la máscara dorada. "El timing lo es todo en el entretenimiento. Quiero ver eliminaciones acumuladas por día, hora por hora. ¿Cuándo llega el clímax? ¿El ritmo se acelera exponencialmente o es lineal? Tus medidas DAX deben capturar el ritmo del juego. El broadcaster pagó 80 millones por la transmisión y quiere maximizar ratings."',
+                outroNarrative: '📈 Análisis temporal completado. Patrón identificado: Las primeras 6 horas son las más letales (264 eliminados - 58% del total). Después la curva se aplana significativamente. El "clímax dramático" perfecto para las cámaras es Día 3, Hora 14 (Juego del Puente de Cristal). La tasa de cambio llegó a +420% en Día 1 Hora 2 (pánico en Luz Roja). "Brillante," dice el VIP. "Ahora sé exactamente cuándo vender los derechos de replay."',
+                skillsDemo: ['predictive-modeling', 'risk-analysis'],
+                wrongAnswerPenalty: 0.03,
+                objectives: [
+                    'Crear tabla Calendar relacionada con Tiempo[FechaHora]',
+                    'Medida base: TotalEliminados = COUNTROWS(FILTER(Eliminaciones, Eliminaciones[Status]="Eliminado"))',
+                    'Medida acumulada: EliminacionesAcumuladas = CALCULATE([TotalEliminados], FILTER(ALL(Tiempo[FechaHora]), Tiempo[FechaHora] <= MAX(Tiempo[FechaHora])))',
+                    'Medida comparativa: EliminacionesHoraAnterior = CALCULATE([TotalEliminados], DATEADD(Tiempo[FechaHora], -1, HOUR))',
+                    'Medida de velocidad: TasaCambio = DIVIDE([TotalEliminados] - [EliminacionesHoraAnterior], [EliminacionesHoraAnterior], 0)',
+                    'Medida de promedio móvil: PromedioMovil3H = CALCULATE([TotalEliminados], DATESINPERIOD(Tiempo[FechaHora], LASTDATE(Tiempo[FechaHora]), -3, HOUR))',
+                    'Gráfico combinado: Línea de acumulado + Columnas de eliminados por hora',
+                    'Agregar línea de tendencia polinómica para proyectar'
+                ],
+                datasets: ['squid_elimination_timeline', 'squid_calendar'],
+                guide: [
+                    '1. CREAR CALENDAR: Verifica que exista relación entre Calendar[Fecha] y Tiempo[FechaHora]. Marca la tabla Calendar como "Tabla de Fechas".',
+                    '2. MEDIDA BASE: Cuenta las filas donde Status="Eliminado" - este es tu numerador por periodo.',
+                    '3. PATRÓN ACUMULADO: FILTER(ALL(campo_tiempo), campo_tiempo <= MAX(campo_tiempo)) es el patrón universal para totales acumulados.',
+                    '4. ALL() EXPLAINED: Elimina TODOS los filtros de la columna tiempo, permitiendo ver el historial completo.',
+                    '5. MAX() EN CONTEXTO: Dentro del FILTER, MAX() obtiene el punto de tiempo actual de cada fila del visual.',
+                    '6. DATEADD: Función de time intelligence que mueve el contexto -1 hora. Requiere tabla Calendar marcada correctamente.',
+                    '7. TASA DE CAMBIO: (Actual - Anterior) / Anterior te da el % de aceleración/desaceleración.',
+                    '8. PROMEDIO MÓVIL: DATESINPERIOD crea ventanas temporales deslizantes - útil para suavizar fluctuaciones.',
+                    '9. GRÁFICO COMBO: Usa eje secundario para comparar magnitudes diferentes (acumulado vs por periodo).',
+                    '10. VALIDACIÓN: El último punto de EliminacionesAcumuladas debe = 456 - [Supervivientes_finales].'
+                ],
+                tips: [
+                    'Tabla Calendar bien configurada es OBLIGATORIA para time intelligence - marca como "Tabla de Fechas" en Modelado.',
+                    'ALL() elimina filtros, ALLSELECTED() respeta slicers del usuario - elige según necesidad.',
+                    'MAX(campo[tiempo]) en contexto de fila obtiene el "punto actual" - crucial para acumulados.',
+                    'FILTER(ALL(...)) es el patrón más poderoso de DAX - memorízalo.',
+                    'DATEADD, DATESINPERIOD, PREVIOUSDAY requieren una tabla Calendar marcada correctamente.',
+                    'La tasa de cambio identifica puntos de inflexión - perfecto para detección de anomalías.',
+                    'Promedio móvil suaviza ruido - compara con datos crudos para ver tendencias reales.',
+                    'Los acumulados siempre crecen o se mantienen - si bajan, hay un error en la fórmula.',
+                    'Usa ISFILTERED() para detectar si el usuario está filtrando y ajustar comportamiento.'
+                ],
+                expectedOutcome: 'Dashboard con gráfico combinado: Área de EliminacionesAcumuladas (eje izquierdo) + Columnas de TotalEliminados por hora (eje derecho) + Línea de PromedioMovil3H. Tarjeta KPI mostrando "Hora Pico: Día 1, Hora 2 (87 eliminados, +420% vs hora anterior)". Línea de tendencia mostrando deceleración exponencial después de Día 1. Slicer de fecha para filtrar por día específico.',
+                verification: [
+                    { question: "¿Total eliminados acumulado al final del Día 3?", type: "number", answer: 389, hint: "Filtra hasta Día 3 23:59 y lee [EliminacionesAcumuladas]." },
+                    { question: "¿Hora con MAYOR tasa de cambio (%)?", type: "text", answer: "Día 1, Hora 2", hint: "Busca el máximo en [TasaCambio]. Pista: fue durante Luz Roja." },
+                    { question: "¿Eliminados en las últimas 12 horas del juego?", type: "number", answer: 12, hint: "Filtra Día 6 Horas 12-23 y suma." },
+                    { question: "¿Promedio móvil 3H en el pico Día 1 Hora 2?", type: "number", answer: 62, hint: "Lee la medida [PromedioMovil3H] en ese punto." }
+                ],
+                winImage: '/images/story/sg-7-win.png'
+            },
+            {
+                id: 'sg-8',
+                title: 'Variables DAX: Optimización del Código',
+                chapter: 7,
+                level: 5,
+                xp: 800,
+                coins: 200,
+                description: 'Refactoriza medidas complejas usando VAR para mejorar rendimiento y legibilidad.',
+                storyContext: 'El sistema está lento durante las transmisiones en vivo. Tus medidas calculan SUM(Bets[Amount]) tres veces en la misma fórmula - eso significa tres escaneos completos de 1.2 millones de filas. El Front Man te ordena optimizar el código DAX usando variables (VAR) para almacenar resultados intermedios y evitar recálculos. El Performance Analyzer muestra que algunas medidas tardan 8+ segundos.',
+                introNarrative: '⚙️ El técnico de la sala de control te muestra el Performance Analyzer. "Mira esto: 8.4 segundos para calcular [ValorNeto]. Estás recalculando SUM tres veces. ¡Tres veces! Usa VAR para almacenar cálculos intermedios. El Front Man no tolera lag durante las transmisiones en vivo. Los VIPs pagan por contenido en tiempo real, no para ver spinners de carga." Te extiende una tablet con código DAX desastroso. "Refactoriza. Todo. Ahora."',
+                outroNarrative: '🚀 Optimización completada. Performance Analyzer muestra mejoras dramáticas: [ValorNeto] bajó de 8.4s a 2.8s (-65%). [ScoreCompuesto] de 12.1s a 4.3s (-64%). [MargenSeguridad] de 15.7s a 6.1s (-61%). Las medidas ahora usan VAR para almacenar subtotales - cada valor se calcula UNA vez y se reutiliza. El código es infinitamente más legible. El técnico asiente con aprobación: "El streaming en vivo es fluido. Buen trabajo." El Front Man observa desde las sombras: "Eficiencia. Eso me gusta."',
+                skillsDemo: ['predictive-modeling'],
+                wrongAnswerPenalty: 0.025,
+                objectives: [
+                    'Abrir Performance Analyzer (Vista > Performance Analyzer) y grabar benchmark inicial',
+                    'Refactorizar MEDIDA INCORRECTA: ValorNeto = SUM(Bets[Amount]) - (SUM(Bets[Amount])*0.15) - (SUM(Bets[Amount])*0.03)',
+                    'Versión optimizada: ValorApuestas = VAR TotalApostado = SUM(Bets[Amount]) VAR Comision = TotalApostado * 0.15 VAR TasaPlataforma = TotalApostado * 0.03 RETURN TotalApostado - Comision - TasaPlataforma',
+                    'Crear ScoreCompuesto = VAR Fisico = [PuntajeFisico] VAR Mental = [PuntajeMental] VAR Suerte = [PuntajeSuerte] VAR ScoreTotal = (Fisico*0.3) + (Mental*0.4) + (Suerte*0.3) RETURN ScoreTotal',
+                    'Crear MargenSeguridad = VAR JugadoresActivos = [Supervivientes] VAR CapacidadMaxima = 456 VAR Utilizacion = DIVIDE(JugadoresActivos, CapacidadMaxima) VAR MargenPorcentual = 1 - Utilizacion RETURN MargenPorcentual',
+                    'Medida avanzada con tabla en VAR: TopApuestasVIP = VAR TablaFiltrada = FILTER(Bets, Bets[VIP_Tier]="Gold") VAR SumaTop = SUMX(TablaFiltrada, Bets[Amount]) RETURN SumaTop',
+                    'Ejecutar benchmark final en Performance Analyzer y comparar'
+                ],
+                datasets: ['squid_vip_bets', 'squid_players', 'squid_performance_log'],
+                guide: [
+                    '1. ANTES DE EMPEZAR: Abre Performance Analyzer (pestaña Vista). Click "Iniciar grabación" y actualiza visual para establecer baseline.',
+                    '2. SINTAXIS VAR: VAR NombreDescriptivo = [Expresión_DAX] - La expresión se evalúa UNA vez y se guarda.',
+                    '3. MÚLTIPLES VAR: Apila cuantas necesites ANTES del RETURN. Se evalúan en orden secuencial.',
+                    '4. ALCANCE: Las variables solo existen dentro de la medida - no son globales.',
+                    '5. REUTILIZACIÓN: Una VAR calculada se puede usar múltiples veces en el RETURN sin recalcular.',
+                    '6. TIPOS: VAR puede almacenar escalares (números), texto, fechas, o TABLAS completas.',
+                    '7. TABLAS EN VAR: VAR MiTabla = FILTER(...) - Luego usa SUMX(MiTabla, ...) o COUNTROWS(MiTabla).',
+                    '8. RETURN OBLIGATORIO: Siempre la última línea - devuelve el resultado final.',
+                    '9. NOMBRES DESCRIPTIVOS: Usa "TotalVentas" no "x1" - el código debe auto-documentarse.',
+                    '10. PERFORMANCE: Click "Detener grabación" en Performance Analyzer, compara "Duración total consulta DAX".'
+                ],
+                tips: [
+                    'VAR no solo optimiza - hace el código RADICALMENTE más legible y mantenible.',
+                    'Si usas la misma expresión 2+ veces, SIEMPRE usa VAR - evita DRY (Don\'t Repeat Yourself).',
+                    'Los nombres descriptivos de VAR actúan como documentación inline: VAR MargenBruto en vez de VAR m.',
+                    'VAR puede almacenar tablas completas - poderoso para filtros complejos: VAR ClientesActivos = FILTER(...).',
+                    'El orden de las VAR importa - puedes usar VAR anteriores en VAR posteriores.',
+                    'RETURN puede ser una expresión compleja, pero si usas VAR bien, debería ser simple y legible.',
+                    'Performance Analyzer no miente - un SUM repetido 3 veces tarda 3x más, literalmente.',
+                    'VAR mejora cache hits internos de DAX - el motor reconoce valores pre-calculados.',
+                    'Usa VAR incluso si no hay repetición - claridad > brevedad en código empresarial.'
+                ],
+                expectedOutcome: 'Tres medidas refactorizadas con VAR que ejecutan 60-65% más rápido según Performance Analyzer. Código DAX limpio, auto-documentado y mantenible. Comparación lado a lado en tabla: Medida | Antes | Después | Mejora% mostrando ganancia de rendimiento. Dashboard carga sin lag durante interacción del usuario.',
+                verification: [
+                    { question: "¿Cuántas VAR usaste en ScoreCompuesto?", type: "number", answer: 4, hint: "Físico, Mental, Suerte, ScoreTotal." },
+                    { question: "¿Valor final de ValorApuestas (millones)?", type: "number", answer: 28135, hint: "Total de apuestas menos 15% comisión menos 3% tasa plataforma." },
+                    { question: "¿Mejora de rendimiento promedio (%)?", type: "number", answer: 65, hint: "Promedio de las 3 medidas según Performance Analyzer." },
+                    { question: "¿Tipo de dato que guardaste en VAR de TopApuestasVIP?", type: "text", answer: "Tabla", hint: "TablaFiltrada es una tabla, no un escalar." }
+                ],
+                winImage: '/images/story/sg-8-win.png'
+            },
+            {
+                id: 'sg-9',
+                title: 'RANKX: El Podio de los Condenados',
+                chapter: 8,
+                level: 6,
+                xp: 1000,
+                coins: 260,
+                description: 'Usa RANKX y funciones de clasificación para crear leaderboards dinámicos.',
+                storyContext: 'Los VIPs quieren un leaderboard en tiempo real para sus apuestas: ¿quién tiene más probabilidades de ganar el gran premio? Crea rankings dinámicos que se actualicen automáticamente basados en múltiples métricas (resistencia física, habilidad mental, victorias previas, alianzas formadas). El sistema debe manejar empates correctamente y permitir comparaciones por subgrupos. Las apuestas totalizan $2.3 billones - los rankings deben ser precisos.',
+                introNarrative: '🏅 El VIP principal golpea la mesa con su bastón dorado. "Queremos drama, datos y dinero. Un leaderboard que cambie en vivo cada vez que un jugador gane o pierda. Usa RANKX para clasificar a los jugadores por su score compuesto. El mejor debe estar SIEMPRE en la cima. Y quiero ver rankings por género también - estoy apostando que una mujer ganará. Necesito ver si mi inversión es inteligente o emocional." Los otros VIPs asienten. Tus rankings influenciarán billones en apuestas.',
+                outroNarrative: '📊 Sistema de ranking dinámico activado. RANKX recalcula instantáneamente en cada actualización. Los VIPs observan fascinados: El jugador 456 (Gi-hun) salta del puesto #7 al #2 después de formar alianza estratégica con el jugador 001. La jugadora 067 (Sae-byeok) mantiene firmemente el #1 con score de 847. El jugador 101 colapsa del #3 al #8 tras fallar en el juego de canicas (-124 puntos). "¡Brillante!" exclama el VIP. "Ahora veo que mi apuesta en la 067 va ganando. Esto es mejor que Wall Street." Los VIPs aplauden mientras redistribuyen sus apuestas basándose en tus rankings.',
+                skillsDemo: ['predictive-modeling', 'cohort-analysis'],
+                wrongAnswerPenalty: 0.03,
+                objectives: [
+                    'Medida base: RankingGeneral = RANKX(ALL(Players), [ScoreCompuesto], , DESC, DENSE)',
+                    'Medida contextual: RankingPorGenero = RANKX(ALLSELECTED(Players[Genero]), [ScoreCompuesto], , DESC, DENSE)',
+                    'Medida de empates: TipoRanking_Skip = RANKX(ALL(Players), [ScoreCompuesto], , DESC, SKIP)',
+                    'Medida condicional: TopN_Indicador = IF([RankingGeneral] <= 10, "Top 10", IF([RankingGeneral] <= 20, "Top 20", "Resto"))',
+                    'Medida de brecha: DistanciaDelLider = [ScoreCompuesto] - MAXX(ALL(Players), [ScoreCompuesto])',
+                    'Medida de brecha relativa: BrechaRelativa% = DIVIDE([DistanciaDelLider], MAXX(ALL(Players), [ScoreCompuesto]), 0)',
+                    'Medida de percentil: Percentil = DIVIDE([RankingGeneral], COUNTROWS(ALL(Players)), 0)',
+                    'Crear tabla visual con Players[Nombre], [ScoreCompuesto], [RankingGeneral], [RankingPorGenero], [DistanciaDelLider]',
+                    'Aplicar formato condicional: Top 3 verde, 4-10 amarillo, 11-20 naranja, resto rojo',
+                    'Agregar iconos de tendencia basados en cambio de ranking vs día anterior'
+                ],
+                datasets: ['squid_players', 'squid_performance_log', 'squid_alliances'],
+                guide: [
+                    '1. SINTAXIS RANKX: RANKX(tabla, expresión, [valor_si_empate], [orden], [tipo_empate])',
+                    '2. PARÁMETRO TABLA: ALL(Players) considera TODOS los jugadores, ignorando filtros de fila. ALLSELECTED respeta slicers.',
+                    '3. EXPRESIÓN: [ScoreCompuesto] es la medida por la cual rankear - debe retornar un valor escalar.',
+                    '4. ORDEN: DESC (mayor=1) o ASC (menor=1). Omitir el 3er parámetro (valor_si_empate).',
+                    '5. TIPO EMPATE: DENSE (1,2,2,3) vs SKIP (1,2,2,4 - estilo olímpico). DENSE es mejor para leaderboards.',
+                    '6. ALL() vs ALLSELECTED: ALL ignora TODO, ALLSELECTED respeta slicers/filtros de página pero no de fila.',
+                    '7. CONTEXTO DE FILA: RANKX itera sobre cada fila de Players y calcula su posición contra ALL(Players).',
+                    '8. MAXX PARA MÁXIMO: MAXX(ALL(Players), [ScoreCompuesto]) encuentra el score del líder.',
+                    '9. FORMATO CONDICIONAL: Reglas > Según valor del campo > Usar [RankingGeneral] con umbrales.',
+                    '10. VALIDACIÓN: El jugador con mayor [ScoreCompuesto] DEBE tener [RankingGeneral] = 1.'
+                ],
+                tips: [
+                    'RANKX es una función ITERADORA - Power BI crea una fila virtual para cada registro y evalúa la expresión.',
+                    'DESC ordena de mayor (#1) a menor. ASC invierte (menor score = #1) - útil para rankings de "menor costo".',
+                    'DENSE vs SKIP: DENSE (1,2,2,3) mantiene continuidad. SKIP (1,2,2,4) refleja cantidad real (dos segundos, el siguiente es cuarto).',
+                    'RANKX con ALL() crea "ranking absoluto". Con ALLSELECTED() crea "ranking filtrado" que respeta slicers.',
+                    'Usa RANKX para crear segmentos: IF([Ranking]<=10, "Elite", "Resto") - perfecto para formato condicional.',
+                    'MAXX(ALL(...), [medida]) es el patrón para encontrar el máximo global ignorando filtros de fila.',
+                    'La brecha relativa (%) es más informativa que absoluta: -50 puntos es mucho si el líder tiene 200, poco si tiene 1000.',
+                    'COUNTROWS(ALL(Players)) da el total de jugadores - útil para calcular percentiles.',
+                    'Combina IF + RANKX para crear bandas: Top 10%, Top 25%, etc.',
+                    'Para rankings históricos, agrega una dimensión de tiempo y filtra por MAX(Fecha).'
+                ],
+                expectedOutcome: 'Leaderboard interactivo multi-columna: [Pos. General | Jugador | Score | Pos. en Género | Gap del Líder | Gap % | Categoría]. Formato condicional por bandas (Top 3 verde brillante, 4-10 verde claro, 11-20 amarillo, resto rojo gradiente). Slicer de Género funcional (al filtrar "Mujer", RankingPorGenero muestra 1-N solo entre mujeres). Tarjeta KPI destacando "Líder Actual: Jugador 067 (Score: 847)". Iconos ▲▼ mostrando si subió/bajó vs ranking previo.',
+                verification: [
+                    { question: "¿Jugador en posición #1 del ranking general?", type: "text", answer: "Jugador 067", hint: "Ordena la tabla por [RankingGeneral] ascendente." },
+                    { question: "¿Cuántos jugadores en Top 10 son mujeres?", type: "number", answer: 4, hint: "Filtra [RankingGeneral]<=10, luego cuenta por Genero='Mujer'." },
+                    { question: "¿Diferencia de score entre #1 y #10?", type: "number", answer: 147, hint: "Jugador #10 lee su [DistanciaDelLider] (será negativo, toma valor absoluto)." },
+                    { question: "¿Posición del jugador 456 en ranking de hombres?", type: "number", answer: 2, hint: "Filtra Genero='Hombre' y lee su [RankingPorGenero]." },
+                    { question: "Si dos jugadores tienen score 654, ¿qué ranking tienen con DENSE?", type: "text", answer: "Mismo número", hint: "DENSE asigna el mismo rank a empates." }
+                ],
+                winImage: '/images/story/sg-9-win.png'
             }
         ]
     },

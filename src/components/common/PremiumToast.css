@@ -1,0 +1,338 @@
+/* ============================================ */
+/* PREMIUM TOAST NOTIFICATIONS                  */
+/* Glassmorphism + Animaciones fluidas          */
+/* ============================================ */
+
+.premium-toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 320px;
+  max-width: 420px;
+  padding: 16px 20px;
+  background: rgba(20, 20, 40, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  z-index: 10000;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-toast:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Efecto de brillo sutil */
+.premium-toast::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: toast-shine 3s infinite;
+}
+
+@keyframes toast-shine {
+  0% {
+    left: -100%;
+  }
+  20%, 100% {
+    left: 100%;
+  }
+}
+
+/* ======= TOAST POSITIONS ======= */
+
+.toast-position-top-right {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+}
+
+.toast-position-top-center {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.toast-position-bottom-right {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+}
+
+.toast-position-bottom-center {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ======= TOAST ICON ======= */
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--toast-gradient);
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  flex-shrink: 0;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 20px var(--toast-color);
+  position: relative;
+}
+
+.toast-icon::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  background: var(--toast-gradient);
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+/* ======= TOAST CONTENT ======= */
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-message {
+  margin: 0;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+/* ======= CLOSE BUTTON ======= */
+
+.toast-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transform: scale(1.1);
+}
+
+.toast-close:active {
+  transform: scale(0.95);
+}
+
+/* ======= PROGRESS BAR ======= */
+
+.toast-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.toast-progress-bar {
+  height: 100%;
+  background: var(--toast-gradient);
+  box-shadow: 0 0 10px var(--toast-color);
+  transition: width 0.1s linear;
+}
+
+/* Efecto de brillo en la barra */
+.toast-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  animation: progress-shine 1s infinite;
+}
+
+@keyframes progress-shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ======= TOAST CONTAINER ======= */
+
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast-container > * {
+  pointer-events: auto;
+}
+
+/* ======= RESPONSIVE ======= */
+
+@media (max-width: 768px) {
+  .premium-toast {
+    min-width: calc(100vw - 48px);
+    max-width: calc(100vw - 48px);
+  }
+
+  .toast-position-top-right,
+  .toast-position-bottom-right {
+    right: 16px;
+  }
+
+  .toast-position-top-right,
+  .toast-position-top-center {
+    top: 16px;
+  }
+
+  .toast-position-bottom-right,
+  .toast-position-bottom-center {
+    bottom: 16px;
+  }
+
+  .toast-container {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+  }
+
+  .toast-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .toast-message {
+    font-size: 13px;
+  }
+}
+
+/* ======= DARK MODE SPECIFIC ======= */
+
+@media (prefers-color-scheme: dark) {
+  .premium-toast {
+    background: rgba(20, 20, 40, 0.98);
+  }
+}
+
+/* ======= LIGHT MODE VARIANT (si se necesita) ======= */
+
+.premium-toast.light {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.premium-toast.light .toast-message {
+  color: #1a1a2e;
+}
+
+.premium-toast.light .toast-close {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.premium-toast.light .toast-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+/* ======= ACCESSIBILITY ======= */
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-toast::before,
+  .toast-icon::after,
+  .toast-progress-bar::after {
+    animation: none;
+  }
+
+  .premium-toast {
+    transition: none;
+  }
+}
+
+/* ======= STACKING EFFECT ======= */
+
+.toast-container > *:not(:last-child) {
+  margin-bottom: 12px;
+}
+
+/* ======= HOVER STATE FOR CONTAINER ======= */
+
+.toast-container:hover .premium-toast {
+  opacity: 1 !important;
+}
+
+/* Efecto de transparencia cuando hay múltiples toasts */
+.toast-container > *:not(:hover) {
+  opacity: 0.95;
+}
