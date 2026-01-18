@@ -4,6 +4,7 @@ import { Trophy, Medal, Star, TrendingUp, Users, Activity, Zap, Lock, Clock, Che
 import { useGame } from '../../context/GameContext';
 import { WEEKLY_CHALLENGES } from '../../data/weeklyChallenges';
 import { getAssetPath } from '../../utils/assetPath';
+import Portal from '../common/Portal';
 import '../../styles/Leaderboard.css';
 
 const Leaderboard = () => {
@@ -258,6 +259,7 @@ const Leaderboard = () => {
             {/* Quiz Modal Overlay */}
             <AnimatePresence>
                 {showQuiz && currentWeekData && (
+                    <Portal>
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -379,6 +381,7 @@ const Leaderboard = () => {
                             )}
                         </motion.div>
                     </motion.div>
+                    </Portal>
                 )}
             </AnimatePresence>
 

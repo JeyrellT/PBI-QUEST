@@ -6,6 +6,7 @@ import { useGame } from '../../context/GameContext';
 import useSound from '../../hooks/useSound';
 import { HERO_CARDS, VILLAIN_CARDS, SPECIAL_CARDS, COVER_CARD, getUnlockedCards } from '../../data/pdfCards';
 import { getAssetPath } from '../../utils/assetPath';
+import Portal from '../common/Portal';
 import '../../styles/CardDeck.css';
 import '../../styles/premium-cards.css';
 
@@ -95,22 +96,23 @@ const CardDeck = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     
     return (
-        <AnimatePresence>
-            <motion.div 
-                className="card-deck-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={onClose}
-            >
+        <Portal>
+            <AnimatePresence>
                 <motion.div 
-                    className="card-deck-modal glass"
-                    initial={{ opacity: 0, scale: 0.9, y: 50 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 50 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                    onClick={(e) => e.stopPropagation()}
+                    className="card-deck-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={onClose}
                 >
+                    <motion.div 
+                        className="card-deck-modal glass"
+                        initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 50 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
                     {/* Header */}
                     <div className="card-deck-header">
                         <div className="deck-title-section">
@@ -423,6 +425,7 @@ const CardDeck = ({ isOpen, onClose }) => {
                 </AnimatePresence>
             </motion.div>
         </AnimatePresence>
+        </Portal>
     );
 };
 

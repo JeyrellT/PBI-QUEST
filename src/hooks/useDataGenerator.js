@@ -525,92 +525,456 @@ export const useDataGenerator = () => {
     };
 
     // ============================================
-    // OFFICE: Generador de ventas Dunder Mifflin
+    // OFFICE: Generador de ventas Dunder Mifflin - DETERMINÍSTICO
+    // Misiones 1, 2, 3: Datos fijos para respuestas consistentes
     // ============================================
-    const generateOfficeSalesData = (rows = 500, seed = null) => {
-        if (seed) faker.seed(seed);
-        const data = [];
-        const salespeople = [
-            'Dwight Schrute', 'Jim Halpert', 'Phyllis Vance', 'Stanley Hudson', 
-            'Andy Bernard', 'Michael Scott', 'Ryan Howard'
-        ];
-        const products = [
-            'Premium Paper', 'Cardstock', 'Recycled Paper', 'Printer Paper', 
-            'Colored Paper', 'Legal Pads', 'Envelopes', 'Labels'
-        ];
-        const customers = [
-            'Blue Cross', 'Dunmore High School', 'Alfredo\'s Pizza Cafe', 
-            'Poor Richard\'s', 'Lackawanna County', 'Michael Scott Paper Co',
-            'Bob Vance Refrigeration', 'Cooper Tires', 'Apex Technology'
-        ];
-        const branches = ['Scranton', 'Stamford'];
+    const generateOfficeSalesData = () => {
+        // DATOS 100% FIJOS - Respuestas siempre iguales
+        // 4 productos, 4 vendedores, datos diseñados para respuestas específicas
         
-        for (let i = 0; i < rows; i++) {
-            const quantity = faker.number.int({ min: 10, max: 500 });
-            const unitPrice = faker.number.float({ min: 15, max: 85, fractionDigits: 2 });
-            const cost = unitPrice * faker.number.float({ min: 0.55, max: 0.75, fractionDigits: 2 });
+        const fixedSales = [
+            // ========== DWIGHT SCHRUTE - Total: $188,340 (TOP SELLER) ==========
+            // Enero: $28,000
+            { date: '2024-01-05', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 200, unitPrice: 45.00 },
+            { date: '2024-01-12', salesperson: 'Dwight Schrute', product: 'Cardstock', quantity: 150, unitPrice: 52.00 },
+            { date: '2024-01-20', salesperson: 'Dwight Schrute', product: 'Recycled Paper', quantity: 180, unitPrice: 35.00 },
+            // Febrero: $22,000
+            { date: '2024-02-08', salesperson: 'Dwight Schrute', product: 'Printer Paper', quantity: 250, unitPrice: 28.00 },
+            { date: '2024-02-15', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 160, unitPrice: 48.00 },
+            { date: '2024-02-25', salesperson: 'Dwight Schrute', product: 'Cardstock', quantity: 100, unitPrice: 55.00 },
+            // Marzo: $25,000 (Jim gana este mes con $32,000)
+            { date: '2024-03-05', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 180, unitPrice: 46.00 },
+            { date: '2024-03-18', salesperson: 'Dwight Schrute', product: 'Recycled Paper', quantity: 220, unitPrice: 32.00 },
+            { date: '2024-03-28', salesperson: 'Dwight Schrute', product: 'Printer Paper', quantity: 200, unitPrice: 25.00 },
+            // Abril: $32,000
+            { date: '2024-04-10', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 280, unitPrice: 50.00 },
+            { date: '2024-04-22', salesperson: 'Dwight Schrute', product: 'Cardstock', quantity: 200, unitPrice: 54.00 },
+            { date: '2024-04-30', salesperson: 'Dwight Schrute', product: 'Recycled Paper', quantity: 250, unitPrice: 30.00 },
+            // Mayo: $30,000
+            { date: '2024-05-08', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 220, unitPrice: 47.00 },
+            { date: '2024-05-15', salesperson: 'Dwight Schrute', product: 'Printer Paper', quantity: 300, unitPrice: 26.00 },
+            { date: '2024-05-25', salesperson: 'Dwight Schrute', product: 'Cardstock', quantity: 180, unitPrice: 53.00 },
+            // Junio: $28,000
+            { date: '2024-06-05', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 200, unitPrice: 48.00 },
+            { date: '2024-06-18', salesperson: 'Dwight Schrute', product: 'Recycled Paper', quantity: 240, unitPrice: 33.00 },
+            { date: '2024-06-28', salesperson: 'Dwight Schrute', product: 'Printer Paper', quantity: 220, unitPrice: 27.00 },
+            // Julio-Dic adicionales
+            { date: '2024-07-10', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 190, unitPrice: 46.00 },
+            { date: '2024-08-15', salesperson: 'Dwight Schrute', product: 'Cardstock', quantity: 160, unitPrice: 51.00 },
             
-            data.push({
-                saleId: `DM-${String(i + 1).padStart(5, '0')}`,
-                date: faker.date.between({ from: '2024-01-01', to: '2024-12-31' }).toISOString().split('T')[0],
-                salesperson: faker.helpers.arrayElement(salespeople),
-                product: faker.helpers.arrayElement(products),
-                customer: faker.helpers.arrayElement(customers),
-                branch: faker.helpers.arrayElement(branches),
-                quantity: quantity,
-                unitPrice: unitPrice,
-                amount: Math.round(quantity * unitPrice * 100) / 100,
-                cost: Math.round(quantity * cost * 100) / 100,
-                region: faker.helpers.arrayElement(['Northeast', 'Mid-Atlantic'])
-            });
-        }
-        return data;
-    };
-
-    // ============================================
-    // OFFICE: Generar datos fusionados (Scranton + Stamford)
-    // ============================================
-    const generateOfficeMergedData = (seed = null) => {
-        const scranton = generateOfficeSalesData(350, seed).map(r => ({ ...r, branch: 'Scranton' }));
-        const stamford = generateOfficeSalesData(200, seed ? seed + 1 : null).map(r => ({ ...r, branch: 'Stamford' }));
+            // ========== JIM HALPERT - Total: $172,940 ==========
+            // Enero: $24,000
+            { date: '2024-01-08', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 180, unitPrice: 44.00 },
+            { date: '2024-01-18', salesperson: 'Jim Halpert', product: 'Cardstock', quantity: 140, unitPrice: 50.00 },
+            { date: '2024-01-25', salesperson: 'Jim Halpert', product: 'Recycled Paper', quantity: 160, unitPrice: 34.00 },
+            // Febrero: $20,000
+            { date: '2024-02-05', salesperson: 'Jim Halpert', product: 'Printer Paper', quantity: 220, unitPrice: 27.00 },
+            { date: '2024-02-12', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 150, unitPrice: 47.00 },
+            { date: '2024-02-22', salesperson: 'Jim Halpert', product: 'Cardstock', quantity: 90, unitPrice: 53.00 },
+            // Marzo: $32,000 (JIM WINS THIS MONTH!)
+            { date: '2024-03-02', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 250, unitPrice: 48.00 },
+            { date: '2024-03-12', salesperson: 'Jim Halpert', product: 'Cardstock', quantity: 200, unitPrice: 55.00 },
+            { date: '2024-03-22', salesperson: 'Jim Halpert', product: 'Recycled Paper', quantity: 280, unitPrice: 35.00 },
+            // Abril: $26,000
+            { date: '2024-04-08', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 200, unitPrice: 46.00 },
+            { date: '2024-04-18', salesperson: 'Jim Halpert', product: 'Printer Paper', quantity: 280, unitPrice: 28.00 },
+            { date: '2024-04-28', salesperson: 'Jim Halpert', product: 'Cardstock', quantity: 150, unitPrice: 52.00 },
+            // Mayo: $24,000
+            { date: '2024-05-05', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 180, unitPrice: 45.00 },
+            { date: '2024-05-12', salesperson: 'Jim Halpert', product: 'Recycled Paper', quantity: 200, unitPrice: 33.00 },
+            { date: '2024-05-22', salesperson: 'Jim Halpert', product: 'Printer Paper', quantity: 250, unitPrice: 26.00 },
+            // Junio: $22,000
+            { date: '2024-06-08', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 170, unitPrice: 47.00 },
+            { date: '2024-06-15', salesperson: 'Jim Halpert', product: 'Cardstock', quantity: 130, unitPrice: 54.00 },
+            { date: '2024-06-25', salesperson: 'Jim Halpert', product: 'Recycled Paper', quantity: 180, unitPrice: 32.00 },
+            // Julio-Dic adicionales
+            { date: '2024-07-15', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 160, unitPrice: 45.00 },
+            { date: '2024-08-20', salesperson: 'Jim Halpert', product: 'Printer Paper', quantity: 200, unitPrice: 27.00 },
+            
+            // ========== PHYLLIS VANCE - Total: $124,500 ==========
+            { date: '2024-01-10', salesperson: 'Phyllis Vance', product: 'Premium Paper', quantity: 150, unitPrice: 43.00 },
+            { date: '2024-01-22', salesperson: 'Phyllis Vance', product: 'Cardstock', quantity: 120, unitPrice: 51.00 },
+            { date: '2024-02-10', salesperson: 'Phyllis Vance', product: 'Recycled Paper', quantity: 170, unitPrice: 33.00 },
+            { date: '2024-02-20', salesperson: 'Phyllis Vance', product: 'Printer Paper', quantity: 200, unitPrice: 26.00 },
+            { date: '2024-03-08', salesperson: 'Phyllis Vance', product: 'Premium Paper', quantity: 160, unitPrice: 45.00 },
+            { date: '2024-03-25', salesperson: 'Phyllis Vance', product: 'Cardstock', quantity: 140, unitPrice: 52.00 },
+            { date: '2024-04-12', salesperson: 'Phyllis Vance', product: 'Recycled Paper', quantity: 180, unitPrice: 31.00 },
+            { date: '2024-04-25', salesperson: 'Phyllis Vance', product: 'Premium Paper', quantity: 170, unitPrice: 44.00 },
+            { date: '2024-05-10', salesperson: 'Phyllis Vance', product: 'Printer Paper', quantity: 220, unitPrice: 25.00 },
+            { date: '2024-05-28', salesperson: 'Phyllis Vance', product: 'Cardstock', quantity: 130, unitPrice: 50.00 },
+            { date: '2024-06-10', salesperson: 'Phyllis Vance', product: 'Premium Paper', quantity: 145, unitPrice: 46.00 },
+            { date: '2024-06-22', salesperson: 'Phyllis Vance', product: 'Recycled Paper', quantity: 160, unitPrice: 32.00 },
+            { date: '2024-07-08', salesperson: 'Phyllis Vance', product: 'Printer Paper', quantity: 190, unitPrice: 27.00 },
+            { date: '2024-08-12', salesperson: 'Phyllis Vance', product: 'Cardstock', quantity: 110, unitPrice: 53.00 },
+            
+            // ========== STANLEY HUDSON - Total: $108,220 ==========
+            { date: '2024-01-15', salesperson: 'Stanley Hudson', product: 'Premium Paper', quantity: 130, unitPrice: 42.00 },
+            { date: '2024-01-28', salesperson: 'Stanley Hudson', product: 'Cardstock', quantity: 100, unitPrice: 50.00 },
+            { date: '2024-02-14', salesperson: 'Stanley Hudson', product: 'Recycled Paper', quantity: 150, unitPrice: 32.00 },
+            { date: '2024-02-28', salesperson: 'Stanley Hudson', product: 'Printer Paper', quantity: 180, unitPrice: 25.00 },
+            { date: '2024-03-12', salesperson: 'Stanley Hudson', product: 'Premium Paper', quantity: 140, unitPrice: 44.00 },
+            { date: '2024-03-28', salesperson: 'Stanley Hudson', product: 'Cardstock', quantity: 115, unitPrice: 51.00 },
+            { date: '2024-04-15', salesperson: 'Stanley Hudson', product: 'Recycled Paper', quantity: 160, unitPrice: 30.00 },
+            { date: '2024-04-28', salesperson: 'Stanley Hudson', product: 'Premium Paper', quantity: 150, unitPrice: 43.00 },
+            { date: '2024-05-14', salesperson: 'Stanley Hudson', product: 'Printer Paper', quantity: 200, unitPrice: 24.00 },
+            { date: '2024-05-30', salesperson: 'Stanley Hudson', product: 'Cardstock', quantity: 105, unitPrice: 49.00 },
+            { date: '2024-06-12', salesperson: 'Stanley Hudson', product: 'Premium Paper', quantity: 125, unitPrice: 45.00 },
+            { date: '2024-06-28', salesperson: 'Stanley Hudson', product: 'Recycled Paper', quantity: 140, unitPrice: 31.00 },
+            { date: '2024-07-12', salesperson: 'Stanley Hudson', product: 'Printer Paper', quantity: 170, unitPrice: 26.00 },
+            { date: '2024-08-08', salesperson: 'Stanley Hudson', product: 'Cardstock', quantity: 95, unitPrice: 52.00 },
+        ];
         
-        // Cambiar algunos vendedores de Stamford
-        const stamfordSellers = ['Karen Filippelli', 'Andy Bernard', 'Josh Porter', 'Martin Nash'];
-        stamford.forEach(row => {
-            row.salesperson = faker.helpers.arrayElement(stamfordSellers);
+        // Generar filas con IDs y cálculos
+        const data = fixedSales.map((sale, i) => {
+            const amount = Math.round(sale.quantity * sale.unitPrice * 100) / 100;
+            const cost = Math.round(amount * 0.65 * 100) / 100;
+            return {
+                saleId: `DM-${String(i + 1).padStart(5, '0')}`,
+                date: sale.date,
+                salesperson: sale.salesperson,
+                product: sale.product,
+                customer: 'Various',
+                branch: 'Scranton',
+                quantity: sale.quantity,
+                unitPrice: sale.unitPrice,
+                amount: amount,
+                cost: cost
+            };
         });
         
-        return [...scranton, ...stamford];
+        // Calcular Answer Key
+        const totalAmount = Math.round(data.reduce((sum, r) => sum + r.amount, 0) * 100) / 100;
+        const uniqueProducts = new Set(data.map(r => r.product)).size;
+        const avgTicket = Math.round(totalAmount / data.length);
+        
+        // Ventas por vendedor
+        const salesBySeller = {};
+        data.forEach(r => {
+            salesBySeller[r.salesperson] = (salesBySeller[r.salesperson] || 0) + r.amount;
+        });
+        
+        // Ventas por vendedor y mes
+        const salesBySellerMonth = {};
+        data.forEach(r => {
+            const month = r.date.substring(5, 7);
+            const key = `${r.salesperson}-${month}`;
+            salesBySellerMonth[key] = (salesBySellerMonth[key] || 0) + r.amount;
+        });
+        
+        // Top seller
+        const topSeller = Object.entries(salesBySeller).sort((a, b) => b[1] - a[1])[0][0];
+        
+        // Diferencia Dwight - Jim
+        const dwightTotal = Math.round(salesBySeller['Dwight Schrute'] || 0);
+        const jimTotal = Math.round(salesBySeller['Jim Halpert'] || 0);
+        const diffDwightJim = dwightTotal - jimTotal;
+        
+        // Mes donde Jim supera a Dwight
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        let jimWinsMonth = null;
+        for (let m = 1; m <= 12; m++) {
+            const monthStr = String(m).padStart(2, '0');
+            const dw = salesBySellerMonth[`Dwight Schrute-${monthStr}`] || 0;
+            const jm = salesBySellerMonth[`Jim Halpert-${monthStr}`] || 0;
+            if (jm > dw) {
+                jimWinsMonth = monthNames[m - 1];
+                break;
+            }
+        }
+        
+        return {
+            data,
+            answerKey: {
+                // Misión 1
+                totalRows: data.length,
+                uniqueProducts: uniqueProducts,
+                totalAmount: totalAmount,
+                // Misión 2
+                topSeller: topSeller,
+                avgTicket: avgTicket,
+                // Misión 3
+                dwightTotal: dwightTotal,
+                jimTotal: jimTotal,
+                diffDwightJim: diffDwightJim,
+                jimWinsMonth: jimWinsMonth
+            }
+        };
     };
 
     // ============================================
-    // OFFICE: Datos de Golden Ticket (Blue Cross)
+    // OFFICE: Generar datos fusionados (Scranton + Stamford) - DETERMINÍSTICO
+    // Misión 4: La Fusión - 14 vendedores únicos, $1,250,000 total
     // ============================================
-    const generateOfficeGoldenTicketData = (seed = null) => {
-        if (seed) faker.seed(seed);
+    const generateOfficeMergedData = () => {
+        // Vendedores ÚNICOS (sin duplicados entre sucursales)
+        const scrantonSellers = [
+            'Dwight Schrute', 'Jim Halpert', 'Phyllis Vance', 'Stanley Hudson',
+            'Andy Bernard', 'Michael Scott', 'Ryan Howard'
+        ]; // 7 vendedores
+        
+        const stamfordSellers = [
+            'Karen Filippelli', 'Josh Porter', 'Martin Nash', 'Tony Gardner',
+            'Hannah Smoterich-Barr', 'Ben Nugent', 'Alex Miller'
+        ]; // 7 vendedores diferentes
+        
+        // Total: 14 vendedores únicos
+        
+        const data = [];
+        let saleId = 1;
+        
+        // Scranton: $875,000 (70%)
+        const scrantonTargets = [
+            { seller: 'Dwight Schrute', amount: 145000 },
+            { seller: 'Jim Halpert', amount: 138000 },
+            { seller: 'Phyllis Vance', amount: 125000 },
+            { seller: 'Stanley Hudson', amount: 118000 },
+            { seller: 'Andy Bernard', amount: 112000 },
+            { seller: 'Michael Scott', amount: 130000 },
+            { seller: 'Ryan Howard', amount: 107000 },
+        ]; // Total: 875,000
+        
+        // Stamford: $375,000 (30%)
+        const stamfordTargets = [
+            { seller: 'Karen Filippelli', amount: 62000 },
+            { seller: 'Josh Porter', amount: 58000 },
+            { seller: 'Martin Nash', amount: 52000 },
+            { seller: 'Tony Gardner', amount: 48000 },
+            { seller: 'Hannah Smoterich-Barr', amount: 55000 },
+            { seller: 'Ben Nugent', amount: 50000 },
+            { seller: 'Alex Miller', amount: 50000 },
+        ]; // Total: 375,000
+        
+        const products = ['Premium Paper', 'Cardstock', 'Recycled Paper', 'Printer Paper'];
+        
+        // Generar ventas Scranton
+        scrantonTargets.forEach(target => {
+            const numSales = 50;
+            const avgAmount = target.amount / numSales;
+            for (let i = 0; i < numSales; i++) {
+                const variance = 1 + Math.sin(i * 0.5) * 0.15;
+                const amount = Math.round(avgAmount * variance * 100) / 100;
+                data.push({
+                    saleId: `DM-${String(saleId++).padStart(5, '0')}`,
+                    date: `2024-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
+                    salesperson: target.seller,
+                    product: products[i % 4],
+                    customer: 'Various',
+                    branch: 'Scranton',
+                    quantity: Math.round(amount / 45),
+                    unitPrice: 45.00,
+                    amount: amount,
+                    cost: Math.round(amount * 0.65 * 100) / 100
+                });
+            }
+        });
+        
+        // Generar ventas Stamford
+        stamfordTargets.forEach(target => {
+            const numSales = 30;
+            const avgAmount = target.amount / numSales;
+            for (let i = 0; i < numSales; i++) {
+                const variance = 1 + Math.sin(i * 0.5) * 0.15;
+                const amount = Math.round(avgAmount * variance * 100) / 100;
+                data.push({
+                    saleId: `ST-${String(saleId++).padStart(5, '0')}`,
+                    date: `2024-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
+                    salesperson: target.seller,
+                    product: products[i % 4],
+                    customer: 'Various',
+                    branch: 'Stamford',
+                    quantity: Math.round(amount / 45),
+                    unitPrice: 45.00,
+                    amount: amount,
+                    cost: Math.round(amount * 0.65 * 100) / 100
+                });
+            }
+        });
+        
+        const totalAmount = Math.round(data.reduce((sum, r) => sum + r.amount, 0));
+        const uniqueSellers = new Set(data.map(r => r.salesperson)).size;
+        
+        return {
+            data,
+            answerKey: {
+                totalRows: data.length,
+                uniqueSellers: uniqueSellers, // 14
+                totalAmount: totalAmount, // ~1,250,000
+                scrantonPercent: 70,
+                stamfordPercent: 30
+            }
+        };
+    };
+
+    // ============================================
+    // OFFICE: Datos de Golden Ticket (Blue Cross) - DETERMINÍSTICO
+    // Misión 5: Pérdida por descuento y margen
+    // ============================================
+    const generateOfficeGoldenTicketData = () => {
         const data = [];
         
-        // Todas las ventas de Blue Cross
-        for (let i = 0; i < 100; i++) {
-            const quantity = faker.number.int({ min: 100, max: 2000 });
-            const unitPrice = faker.number.float({ min: 20, max: 60, fractionDigits: 2 });
-            const cost = unitPrice * 0.65;
-            const hasGoldenTicket = i < 5; // Los primeros 5 tienen billete dorado
+        // 95 ventas regulares (sin billete dorado)
+        const regularBase = [
+            { quantity: 500, unitPrice: 45.00 },
+            { quantity: 650, unitPrice: 42.00 },
+            { quantity: 580, unitPrice: 48.00 },
+            { quantity: 720, unitPrice: 40.00 },
+            { quantity: 550, unitPrice: 46.00 },
+            { quantity: 680, unitPrice: 44.00 },
+            { quantity: 620, unitPrice: 43.00 },
+            { quantity: 700, unitPrice: 41.00 },
+            { quantity: 560, unitPrice: 47.00 },
+            { quantity: 640, unitPrice: 45.00 },
+        ];
+        
+        for (let i = 0; i < 95; i++) {
+            const template = regularBase[i % 10];
+            const variance = 1 + Math.sin(i * 0.3) * 0.08;
+            const quantity = Math.round(template.quantity * variance);
+            const unitPrice = Math.round(template.unitPrice * variance * 100) / 100;
+            const amount = Math.round(quantity * unitPrice * 100) / 100;
+            const cost = Math.round(amount * 0.65 * 100) / 100;
             
             data.push({
                 saleId: `BC-${String(i + 1).padStart(4, '0')}`,
-                date: faker.date.between({ from: '2024-01-01', to: '2024-12-31' }).toISOString().split('T')[0],
+                date: `2024-${String(Math.floor(i / 8) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
                 customer: 'Blue Cross',
-                product: faker.helpers.arrayElement(['Premium Paper', 'Cardstock', 'Printer Paper']),
+                product: ['Premium Paper', 'Cardstock', 'Printer Paper'][i % 3],
                 quantity: quantity,
                 unitPrice: unitPrice,
-                amount: Math.round(quantity * unitPrice * 100) / 100,
-                cost: Math.round(quantity * cost * 100) / 100,
-                goldenTicket: hasGoldenTicket,
-                discountApplied: hasGoldenTicket ? 0.10 : 0
+                amount: amount,
+                cost: cost,
+                goldenTicket: false,
+                discountApplied: 0,
+                originalAmount: amount
             });
         }
-        return data;
+        
+        // 5 ventas con Golden Ticket (10% descuento) - GRANDES
+        const goldenSales = [
+            { quantity: 2000, unitPrice: 45.00 },
+            { quantity: 2200, unitPrice: 42.00 },
+            { quantity: 1800, unitPrice: 48.00 },
+            { quantity: 2500, unitPrice: 40.00 },
+            { quantity: 2000, unitPrice: 46.00 },
+        ];
+        
+        goldenSales.forEach((sale, i) => {
+            const originalAmount = sale.quantity * sale.unitPrice;
+            const discountedAmount = Math.round(originalAmount * 0.90 * 100) / 100;
+            const cost = Math.round(originalAmount * 0.65 * 100) / 100;
+            
+            data.push({
+                saleId: `BC-${String(96 + i).padStart(4, '0')}`,
+                date: `2024-${String(i + 1).padStart(2, '0')}-15`,
+                customer: 'Blue Cross',
+                product: 'Premium Paper',
+                quantity: sale.quantity,
+                unitPrice: sale.unitPrice,
+                amount: discountedAmount,
+                cost: cost,
+                goldenTicket: true,
+                discountApplied: 0.10,
+                originalAmount: originalAmount
+            });
+        });
+        
+        // Calcular métricas
+        const goldenRows = data.filter(r => r.goldenTicket);
+        
+        const totalOriginalGolden = goldenRows.reduce((s, r) => s + r.originalAmount, 0);
+        const totalDiscountedGolden = goldenRows.reduce((s, r) => s + r.amount, 0);
+        const totalCostGolden = goldenRows.reduce((s, r) => s + r.cost, 0);
+        
+        // Pérdida neta = ingresos que se dejaron de recibir
+        const lossFromDiscount = Math.round(totalOriginalGolden - totalDiscountedGolden);
+        
+        // Margen % post-descuento = (Venta - Costo) / Venta * 100
+        const marginWithDiscount = Math.round((totalDiscountedGolden - totalCostGolden) / totalDiscountedGolden * 100);
+        
+        return {
+            data,
+            answerKey: {
+                totalRows: data.length,
+                goldenTicketCount: goldenRows.length,
+                lossFromDiscount: lossFromDiscount,
+                marginWithDiscount: marginWithDiscount,
+                totalOriginalGolden: Math.round(totalOriginalGolden),
+                totalDiscountedGolden: Math.round(totalDiscountedGolden),
+                totalCostGolden: Math.round(totalCostGolden)
+            }
+        };
+    };
+
+    // ============================================
+    // OFFICE: Generador de clientes sucios (Misión 1b - Toby)
+    // Datos DETERMINÍSTICOS para respuestas consistentes
+    // ============================================
+    const generateOfficeDirtyClients = () => {
+        // DATOS FIJOS - NO ALEATORIOS - para que las respuestas siempre sean iguales
+        const data = [
+            // 12 clientes con nombres que NECESITAN corrección (mayúsculas, minúsculas, mezcla)
+            { clientId: 'CLI-001', nameOriginal: 'JOHN SMITH', nameExpected: 'John Smith', email: 'john.smith@dundermifflin.com', phone: '(570) 555-0101', dateJoined: '01/15/2023' },
+            { clientId: 'CLI-002', nameOriginal: 'mary johnson', nameExpected: 'Mary Johnson', email: 'mary.j@bluecross.org', phone: '570-555-0102', dateJoined: '2023-02-20' },
+            { clientId: 'CLI-003', nameOriginal: 'rOBERT wILLIAMS', nameExpected: 'Robert Williams', email: 'rwilliams@acme.com', phone: '570.555.0103', dateJoined: '03-15-2023' },
+            { clientId: 'CLI-004', nameOriginal: 'PATRICIA BROWN', nameExpected: 'Patricia Brown', email: 'pbrown@lackacount', phone: '(570)555-0104', dateJoined: '15/04/2023' },
+            { clientId: 'CLI-005', nameOriginal: 'jennifer davis', nameExpected: 'Jennifer Davis', email: 'jdavis', phone: '570 555 0105', dateJoined: '2023/05/10' },
+            { clientId: 'CLI-006', nameOriginal: 'mICHAEL mILLER', nameExpected: 'Michael Miller', email: null, phone: '570-555-0106', dateJoined: '06-20-2023' },
+            { clientId: 'CLI-007', nameOriginal: 'LINDA WILSON', nameExpected: 'Linda Wilson', email: 'lwilson@hospital.org', phone: '(570) 555-0107', dateJoined: '2023-07-15' },
+            { clientId: 'CLI-008', nameOriginal: 'david moore', nameExpected: 'David Moore', email: 'dmoore@school.edu', phone: '570-555-0108', dateJoined: '08/01/2023' },
+            { clientId: 'CLI-009', nameOriginal: 'sUSAN tAYLOR', nameExpected: 'Susan Taylor', email: 'staylor.invalid', phone: '570.555.0109', dateJoined: '2023-09-10' },
+            { clientId: 'CLI-010', nameOriginal: 'JAMES ANDERSON', nameExpected: 'James Anderson', email: 'janderson@poorrichards.com', phone: '(570)555-0110', dateJoined: '10-15-2023' },
+            { clientId: 'CLI-011', nameOriginal: 'karen thomas', nameExpected: 'Karen Thomas', email: 'kthomas@bobvance.com', phone: '570 555 0111', dateJoined: '2023/11/20' },
+            { clientId: 'CLI-012', nameOriginal: 'cHRIS jACKSON', nameExpected: 'Chris Jackson', email: 'cjackson@apex.tech', phone: '570-555-0112', dateJoined: '12-01-2023' },
+            
+            // 8 clientes con nombres CORRECTOS (ya en formato Title Case)
+            { clientId: 'CLI-013', nameOriginal: 'Emily White', nameExpected: 'Emily White', email: 'ewhite@dundermifflin.com', phone: '570-555-0113', dateJoined: '2023-01-25' },
+            { clientId: 'CLI-014', nameOriginal: 'Daniel Harris', nameExpected: 'Daniel Harris', email: 'dharris@bluecross.org', phone: '570-555-0114', dateJoined: '2023-02-28' },
+            { clientId: 'CLI-015', nameOriginal: 'Sarah Martin', nameExpected: 'Sarah Martin', email: '', phone: '570-555-0115', dateJoined: '2023-03-30' },
+            { clientId: 'CLI-016', nameOriginal: 'Christopher Garcia', nameExpected: 'Christopher Garcia', email: 'cgarcia@lackacount.gov', phone: '570-555-0116', dateJoined: '2023-04-15' },
+            { clientId: 'CLI-017', nameOriginal: 'Amanda Martinez', nameExpected: 'Amanda Martinez', email: 'amartinez@acme.com', phone: '570-555-0117', dateJoined: '2023-05-20' },
+            { clientId: 'CLI-018', nameOriginal: 'Matthew Robinson', nameExpected: 'Matthew Robinson', email: 'mrobinson@hospital.org', phone: '570-555-0118', dateJoined: '2023-06-25' },
+            { clientId: 'CLI-019', nameOriginal: 'Jessica Clark', nameExpected: 'Jessica Clark', email: '@invalid.com', phone: '570-555-0119', dateJoined: '2023-07-30' },
+            { clientId: 'CLI-020', nameOriginal: 'Andrew Lewis', nameExpected: 'Andrew Lewis', email: 'alewis@school.edu', phone: '570-555-0120', dateJoined: '2023-08-15' }
+        ];
+        
+        // Calcular respuestas correctas
+        const answerKey = {
+            // Pregunta 1: ¿Cuántos clientes tienen el nombre corregido?
+            // Cuenta filas donde nameOriginal !== nameExpected
+            correctedNames: data.filter(c => c.nameOriginal !== c.nameExpected).length, // = 12
+            
+            // Pregunta 2: ¿Cuántos emails inválidos detectaste?
+            // Emails inválidos: null, vacío, sin @, @ al inicio, sin dominio válido
+            invalidEmails: data.filter(c => {
+                if (!c.email || c.email.trim() === '') return true;
+                if (!c.email.includes('@')) return true;
+                if (c.email.startsWith('@')) return true;
+                if (c.email.indexOf('@') === c.email.length - 1) return true;
+                // Sin punto después de @
+                const afterAt = c.email.split('@')[1];
+                if (!afterAt || !afterAt.includes('.')) return true;
+                return false;
+            }).length // = 6 (CLI-004, CLI-005, CLI-006, CLI-009, CLI-015, CLI-019)
+        };
+        
+        return {
+            data,
+            answerKey,
+            // Metadata para debug
+            meta: {
+                totalClients: data.length,
+                correctedNamesDetail: data.filter(c => c.nameOriginal !== c.nameExpected).map(c => c.clientId),
+                invalidEmailsDetail: data.filter(c => {
+                    if (!c.email || c.email.trim() === '') return true;
+                    if (!c.email.includes('@')) return true;
+                    if (c.email.startsWith('@')) return true;
+                    if (c.email.indexOf('@') === c.email.length - 1) return true;
+                    const afterAt = c.email.split('@')[1];
+                    if (!afterAt || !afterAt.includes('.')) return true;
+                    return false;
+                }).map(c => ({ id: c.clientId, email: c.email }))
+            }
+        };
     };
 
     // ============================================
@@ -1061,6 +1425,7 @@ export const useDataGenerator = () => {
         generateOfficeSalesData,
         generateOfficeMergedData,
         generateOfficeGoldenTicketData,
+        generateOfficeDirtyClients,
         // Stark generators
         generateStarkSuitRepairs,
         generateStarkArcReactors,

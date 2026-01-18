@@ -9,6 +9,7 @@ import {
     validateCardSelection,
     VILLAIN_CARDS
 } from '../../data/pdfCards';
+import Portal from '../common/Portal';
 import '../../styles/CardDeck.css';
 
 const MissionCardSelector = ({
@@ -124,19 +125,20 @@ const MissionCardSelector = ({
     const villain = missionCardInfo.villain;
 
     return (
-        <motion.div
-            className="card-selector-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-        >
+        <Portal>
             <motion.div
-                className="card-selector-modal glass"
-                initial={{ opacity: 0, scale: 0.9, y: 50 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 50 }}
-                transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                className="card-selector-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
             >
+                <motion.div
+                    className="card-selector-modal glass"
+                    initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 50 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                >
                 {/* QUIZ OVERLAY - ANÁLISIS TÁCTICO */}
                 <AnimatePresence>
                     {quizActive && quizCard && (
@@ -456,6 +458,7 @@ const MissionCardSelector = ({
                 </div>
             </motion.div>
         </motion.div>
+        </Portal>
     );
 };
 

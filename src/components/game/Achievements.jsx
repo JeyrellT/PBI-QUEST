@@ -4,6 +4,7 @@ import { Trophy, Lock, Star, Filter } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { ACHIEVEMENTS } from '../../data/achievements';
 import { getAssetPath } from '../../utils/assetPath';
+import Portal from '../common/Portal';
 import '../../styles/Achievements.css';
 
 const AchievementImage = ({ src, alt, icon }) => {
@@ -139,6 +140,7 @@ const Achievements = () => {
             {/* Achievement Detail Modal */}
             {
                 selectedAchievement && (
+                    <Portal>
                     <div
                         className="modal-overlay"
                         onClick={() => setSelectedAchievement(null)}
@@ -215,6 +217,7 @@ const Achievements = () => {
                             </button>
                         </div>
                     </div>
+                    </Portal>
                 )
             }
         </div>

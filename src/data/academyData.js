@@ -1564,5 +1564,87 @@ Este video es **esencial** para las misiones:
     `,
     officialLink: 'https://youtu.be/gpApeeNAYcY',
     gameRelevance: ['office', 'datarescue']
+  },
+  {
+    id: 'video-dashboard-design-historia-datos',
+    categoryId: 'videos',
+    title: 'Diseño de Dashboards en Power BI: ¡Que tus datos cuenten una historia! 📊',
+    duration: 'Video',
+    level: 'Intermedio',
+    description: 'Buenas prácticas de visualización: regla de 5 segundos, carga cognitiva y uso estratégico del color.',
+    isVideo: true,
+    youtubeUrl: 'https://youtu.be/WA4jZrGYayc',
+    youtubeId: 'WA4jZrGYayc',
+    relatedLessons: ['chart-types', 'card-kpi', 'filters-slicers', 'quick-wins'],
+    content: `
+### 🎬 Buenas Prácticas de Visualización (Regla de 5 segundos)
+
+Este video se enfoca en **cómo comunicar con claridad** y evitar dashboards confusos. No se trata de “hacerlo bonito”, sino de **hacerlo entendible** rápido.
+
+---
+
+### Lo esencial que vas a aplicar
+
+- **Regla de los 5 segundos:** ¿Se entiende el objetivo del dashboard casi de inmediato?
+- **Carga cognitiva:** Menos ruido visual = más decisiones rápidas.
+- **Uso del color:** Resalta lo importante, evita el arcoíris.
+- **Tooltips inteligentes:** Detalle sin contaminar la vista principal.
+
+---
+
+### Errores comunes que se corrigen
+
+- Saturación de gráficos y KPIs
+- Paletas sin jerarquía visual
+- Pie charts usados donde no aplican
+
+---
+
+### 🎮 Relevancia para el Juego
+
+Ideal para mejorar tus reportes en:
+- **Dunder Mifflin:** KPIs claros para operaciones
+- **Stark Industries:** dashboards ejecutivos
+- **Gringotts:** visuales limpios para auditoría
+    `,
+    officialLink: 'https://youtu.be/WA4jZrGYayc',
+    gameRelevance: ['office', 'stark', 'hogwarts']
+  },
+  {
+    id: 'video-dax-motor-powerbi',
+    categoryId: 'videos',
+    title: 'DAX: el motor de Power BI (Medidas vs Columnas)',
+    duration: 'Video',
+    level: 'Intermedio',
+    description: 'Qué es DAX, cómo funciona el contexto y por qué las medidas son clave para reportes rápidos.',
+    isVideo: true,
+    youtubeUrl: 'https://youtu.be/uIIdFFY8c2k',
+    youtubeId: 'uIIdFFY8c2k',
+    relatedLessons: ['dax-intro', 'calculate-filter', 'sum-average-count', 'divide-safe'],
+    content: `
+### 🎬 DAX: el motor de Power BI
+
+Si Power BI fuera un carro deportivo, **DAX es el motor**. Este video explica el **contexto** como la diferencia clave frente a Excel y cuándo usar **Medidas** vs **Columnas Calculadas**.
+
+---
+
+### Lo que vas a entender
+
+- **DAX vs Excel:** cálculo por celdas vs cálculo por tablas
+- **Motor de cálculo:** cómo se evalúan filtros y contexto
+- **Medidas vs Columnas:** performance, memoria y escalabilidad
+- **Inteligencia de Tiempo:** comparar periodos con facilidad
+
+---
+
+### 🎮 Relevancia para el Juego
+
+Fundamental para:
+- **Stark Industries:** medidas avanzadas y CALCULATE
+- **Squid Game:** análisis estadístico con contexto
+- **Gringotts:** modelos optimizados y reportes rápidos
+    `,
+    officialLink: 'https://youtu.be/uIIdFFY8c2k',
+    gameRelevance: ['stark', 'squid-game', 'hogwarts']
   }
 ];

@@ -76,9 +76,9 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 ],
                 expectedOutcome: 'Modelo limpio con ~500 transacciones y medidas base.',
                 verification: [
-                    { question: "¿Cuántas filas totales de ventas cargaste?", type: "number", answer: 500, hint: "Usa COUNTROWS." },
-                    { question: "¿Cuántos tipos de papel vendemos?", type: "number", answer: 12, hint: "DISTINCTCOUNT de Producto." },
-                    { question: "¿Cuál es el total bruto de ventas?", type: "number", answer: 847500, hint: "SUM(Amount)." }
+                    { question: "¿Cuántas filas totales de ventas cargaste?", type: "number", answer: 68, hint: "Usa COUNTROWS." },
+                    { question: "¿Cuántos tipos de papel vendemos?", type: "number", answer: 4, hint: "DISTINCTCOUNT de Producto." },
+                    { question: "¿Cuál es el total bruto de ventas?", type: "number", answer: 472245, hint: "SUM(Amount)." }
                 ],
                 winImage: '/images/story/office-1-win.png'
             },
@@ -113,8 +113,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 ],
                 expectedOutcome: 'Tabla de clientes 100% normalizada y lista para relacionar.',
                 verification: [
-                    { question: "¿Cuántos clientes tienen el nombre corregido?", type: "number", answer: 45, hint: "Verifica Text.Proper." },
-                    { question: "¿Cuántos emails inválidos detectaste?", type: "number", answer: 3, hint: "Busca los que no tienen '@'." }
+                    { question: "¿Cuántos clientes tienen el nombre corregido?", type: "number", answer: 12, hint: "Compara nameOriginal vs nameExpected usando Text.Proper()." },
+                    { question: "¿Cuántos emails inválidos detectaste?", type: "number", answer: 6, hint: "Busca emails sin '@', vacíos, nulos o con formato incorrecto." }
                 ],
                 winImage: '/images/story/office-1b-win.png'
             },
@@ -150,7 +150,7 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 expectedOutcome: 'Ranking claro: Dwight #1 en volumen, Jim buen ticket promedio.',
                 verification: [
                     { question: "¿Quién tiene la mayor venta TOTAL?", type: "text", answer: "Dwight Schrute", hint: "Ordena por suma de Amount." },
-                    { question: "¿Cuál es el ticket promedio global?", type: "number", answer: 1695, hint: "Toda la tabla." }
+                    { question: "¿Cuál es el ticket promedio global?", type: "number", answer: 6945, hint: "Toda la tabla." }
                 ],
                 winImage: '/images/story/office-2-win.png'
             },
@@ -184,8 +184,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 ],
                 expectedOutcome: 'Dwight gana en total, Jim gana en meses específicos.',
                 verification: [
-                    { question: "¿Diferencia exacta ($) entre Dwight y Jim?", type: "number", answer: 15400, hint: "[VentasDwight] - [VentasJim]" },
-                    { question: "¿Mes donde Jim superó a Dwight?", type: "text", answer: "Febrero", hint: "Mira el gráfico de líneas." }
+                    { question: "¿Diferencia exacta ($) entre Dwight y Jim?", type: "number", answer: 13610, hint: "[VentasDwight] - [VentasJim]" },
+                    { question: "¿Mes donde Jim superó a Dwight?", type: "text", answer: "Marzo", hint: "Mira el gráfico de líneas." }
                 ],
                 winImage: '/images/story/office-3-win.png'
             },
@@ -221,7 +221,7 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 expectedOutcome: 'Reporte consolidado. Scranton aporta 70%, Stamford 30%.',
                 verification: [
                     { question: "¿Total de vendedores únicos tras la fusión?", type: "number", answer: 14, hint: "DISTINCTCOUNT de Salesperson." },
-                    { question: "¿Ventas totales combinadas?", type: "number", answer: 1250000, hint: "SUM total." }
+                    { question: "¿Ventas totales combinadas?", type: "number", answer: 1256070, hint: "SUM total." }
                 ],
                 winImage: '/images/story/office-4-win.png'
             },
@@ -255,8 +255,8 @@ Dwight te ha otorgado el título honorario de "Asistente del Asistente del Geren
                 ],
                 expectedOutcome: 'Defensa financiera sólida. La pérdida fue mínima vs el riesgo de perder el cliente.',
                 verification: [
-                    { question: "¿Pérdida neta exacta por el descuento?", type: "number", answer: 24500, hint: "Diferencia de márgenes." },
-                    { question: "¿Margen % post-descuento?", type: "number", answer: 35, hint: "Nuevo Margen / Nueva Venta." }
+                    { question: "¿Pérdida neta exacta por el descuento?", type: "number", answer: 46080, hint: "Diferencia de márgenes." },
+                    { question: "¿Margen % post-descuento?", type: "number", answer: 28, hint: "Nuevo Margen / Nueva Venta." }
                 ],
                 winImage: '/images/story/office-5-win.png'
             }

@@ -6,6 +6,7 @@ import { useGame } from '../../context/GameContext';
 import useSound from '../../hooks/useSound';
 import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 import ParticleBackground from '../common/ParticleBackground';
+import Portal from '../common/Portal';
 import { WORLDS } from '../../data/worlds';
 import { getAssetPath } from '../../utils/assetPath';
 import { useDataGenerator } from '../../hooks/useDataGenerator';
@@ -429,6 +430,7 @@ const WorldMap = () => {
 
                                             {/* Victory Modal Overlay */}
                                             {showVictoryModal && (
+                                                <Portal>
                                                 <motion.div
                                                     className="victory-modal-overlay"
                                                     initial={{ opacity: 0 }}
@@ -561,6 +563,7 @@ const WorldMap = () => {
                                                         </button>
                                                     </motion.div>
                                                 </motion.div>
+                                                </Portal>
                                             )}
                                         </div>
                                     </div>
@@ -875,6 +878,7 @@ const WorldMap = () => {
             {/* NUEVO: Modal de Narrativa de Transición */}
             <AnimatePresence>
                 {showNarrativeModal && currentNarrative && (
+                    <Portal>
                     <motion.div
                         className="narrative-modal-overlay"
                         initial={{ opacity: 0 }}
@@ -952,12 +956,14 @@ const WorldMap = () => {
                             </button>
                         </motion.div>
                     </motion.div>
+                    </Portal>
                 )}
             </AnimatePresence>
 
             {/* NUEVO: Modal de Epílogo del Mundo */}
             <AnimatePresence>
                 {showEpilogueModal && epilogueWorld && (
+                    <Portal>
                     <motion.div
                         className="epilogue-modal-overlay"
                         initial={{ opacity: 0 }}
@@ -1264,12 +1270,14 @@ const WorldMap = () => {
                             </motion.div>
                         </motion.div>
                     </motion.div>
+                    </Portal>
                 )}
             </AnimatePresence>
 
             {/* NUEVO: Modal de Modo Repaso */}
             <AnimatePresence>
                 {showReviewMode && reviewQuestions.length > 0 && (
+                    <Portal>
                     <motion.div
                         className="review-modal-overlay"
                         initial={{ opacity: 0 }}
@@ -1463,6 +1471,7 @@ const WorldMap = () => {
                             )}
                         </motion.div>
                     </motion.div>
+                    </Portal>
                 )}
             </AnimatePresence>
         </div >
