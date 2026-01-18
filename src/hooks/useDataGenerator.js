@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { makeCompanyEmail, isValidEmail } from '../utils/emailUtils.js';
 
 // =====================================================
 // DATARESCUE: Utilidades determinísticas (seeded)
@@ -22,6 +23,21 @@ const DATARESCUE_CATALOGS = {
     incoterms: ['FOB', 'CIF', 'EXW'],
     movementTypes: ['Importación', 'Exportación']
 };
+
+// ============================================
+// EMAILS: Generador y validador (sanitiza apóstrofes y caracteres problemáticos)
+// ============================================
+const generateClientsWithEmails = (domain = 'company.com') => {
+    return DATARESCUE_CATALOGS.clients.map(name => {
+        const email = makeCompanyEmail(name, domain);
+        return {
+            nameOriginal: name,
+            email,
+            valid: isValidEmail(email)
+        };
+    });
+};
+
 
 // Corrupciones del villano Corruptex
 const CORRUPTIONS = {
@@ -1426,6 +1442,8 @@ export const useDataGenerator = () => {
         generateOfficeMergedData,
         generateOfficeGoldenTicketData,
         generateOfficeDirtyClients,
+        // Utility: generar emails desde nombres de clientes (sanitiza apostrofes)
+        generateClientsWithEmails,
         // Stark generators
         generateStarkSuitRepairs,
         generateStarkArcReactors,
