@@ -148,8 +148,7 @@ export const ACHIEVEMENTS = [
             return officeMissions.every(m => user.completedMissions.includes(m));
         },
         xp: 1500,
-        rarity: 'legendary',
-        image: '/images/achievements/dunder-mifflin-master.png'
+        rarity: 'legendary'
     },
     {
         id: 'dunder-mifflin-perfect',
@@ -162,8 +161,7 @@ export const ACHIEVEMENTS = [
             return progress.totalWrongAnswers === 0;
         },
         xp: 2500,
-        rarity: 'legendary',
-        image: '/images/achievements/dunder-mifflin-perfect.png'
+        rarity: 'legendary'
     },
     {
         id: 'dax-rookie',

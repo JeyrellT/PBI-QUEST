@@ -117,7 +117,8 @@ const CORRUPTIONS = {
 const DATARESCUE_FIXED_SPECS = {
     datarescue_corrupted: { rows: 120, difficulty: 'medium', seed: 20240103 },
     datarescue_full_challenge: { rows: 200, difficulty: 'hard', seed: 20240103 },
-    datarescue_duplicated: { rows: 120, duplicateRate: 0.12, difficulty: 'medium', seed: 20240103 }
+    datarescue_duplicated: { rows: 120, duplicateRate: 0.12, difficulty: 'medium', seed: 20240103 },
+    datarescue_date_chaos: { rows: 100, seed: 20240103 }
 };
 
 const safeParseNumber = (v) => {
@@ -401,11 +402,97 @@ export const useDataGenerator = () => {
     // ============================================
     const getDataRescueFixedSpec = (datasetName) => DATARESCUE_FIXED_SPECS[datasetName] || null;
 
+    // ============================================
+    // DATARESCUE: Generador de datos con caos de fechas
+    // ============================================
+    const generateDataRescueDateChaosBundle = (rows = 100, seed = null) => {
+        if (seed) faker.seed(seed);
+        
+        const truthData = [];
+        const playData = [];
+        const startDate = new Date('2024-01-01');
+        const endDate = new Date('2024-12-31');
+        
+        // Formatos de fecha para corromper
+        const dateFormats = [
+            (d) => `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`, // MM/DD/YYYY (US)
+            (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`, // DD/MM/YYYY (EU)
+            (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, // ISO
+            (d) => `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`, // M/D/YYYY (US sin padding)
+        ];
+        
+        // Fechas inválidas para corrupción
+        const invalidDates = ['78/45/5276', '00/00/0000', 'FECHA', '2024-99-99', 'invalid', 'N/A', '---', ''];
+        
+        let validDateCount = 0;
+        
+        for (let i = 0; i < rows; i++) {
+            const realDate = faker.date.between({ from: startDate, to: endDate });
+            const client = faker.helpers.arrayElement(DATARESCUE_CATALOGS.clients);
+            const country = faker.helpers.arrayElement(DATARESCUE_CATALOGS.countries);
+            const amount = faker.number.float({ min: 1000, max: 50000, fractionDigits: 2 });
+            
+            truthData.push({
+                id: `TXN-${String(i + 1).padStart(4, '0')}`,
+                date: realDate.toISOString().split('T')[0], // ISO format (truth)
+                client,
+                country,
+                amount
+            });
+            
+            // Corromper la fecha
+            let corruptedDate;
+            const corruptionChance = faker.number.float({ min: 0, max: 1 });
+            
+            if (corruptionChance < 0.05) {
+                // 5% fechas completamente inválidas
+                corruptedDate = faker.helpers.arrayElement(invalidDates);
+            } else {
+                // 95% fechas válidas pero con formato mixto
+                const formatFn = faker.helpers.arrayElement(dateFormats);
+                corruptedDate = formatFn(realDate);
+                validDateCount++;
+            }
+            
+            playData.push({
+                id: `TXN-${String(i + 1).padStart(4, '0')}`,
+                date: corruptedDate,
+                client,
+                country,
+                amount
+            });
+        }
+        
+        const answerKey = {
+            FechasValidas: validDateCount,
+            TotalRegistros: rows,
+            FechasInvalidas: rows - validDateCount
+        };
+        
+        const stepKey = {
+            usFormat: playData.filter(r => /^\d{2}\/\d{2}\/\d{4}$/.test(r.date) && parseInt(r.date.split('/')[0]) <= 12).length,
+            euFormat: playData.filter(r => /^\d{2}\/\d{2}\/\d{4}$/.test(r.date) && parseInt(r.date.split('/')[0]) > 12).length,
+            isoFormat: playData.filter(r => /^\d{4}-\d{2}-\d{2}$/.test(r.date)).length,
+            invalidFormat: playData.filter(r => ['78/45/5276', '00/00/0000', 'FECHA', '2024-99-99', 'invalid', 'N/A', '---', ''].includes(r.date)).length
+        };
+        
+        return {
+            seed: seed || Date.now(),
+            truthRows: truthData,
+            playRows: playData,
+            answerKey,
+            stepKey
+        };
+    };
+
     const generateDataRescueFixedDataset = (datasetName) => {
         const spec = getDataRescueFixedSpec(datasetName);
         if (!spec) return null;
         if (datasetName === 'datarescue_duplicated') {
             return generateDataRescueDuplicatedBundle(spec.rows, spec.duplicateRate, spec.difficulty, spec.seed);
+        }
+        if (datasetName === 'datarescue_date_chaos') {
+            return generateDataRescueDateChaosBundle(spec.rows, spec.seed);
         }
         return generateDataRescueBundle(spec.rows, spec.difficulty, spec.seed);
     };
@@ -549,7 +636,7 @@ export const useDataGenerator = () => {
         // 4 productos, 4 vendedores, datos diseñados para respuestas específicas
         
         const fixedSales = [
-            // ========== DWIGHT SCHRUTE - Total: $188,340 (TOP SELLER) ==========
+            // ========== DWIGHT SCHRUTE - Total: $163,940 (TOP SELLER) ==========
             // Enero: $28,000
             { date: '2024-01-05', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 200, unitPrice: 45.00 },
             { date: '2024-01-12', salesperson: 'Dwight Schrute', product: 'Cardstock', quantity: 150, unitPrice: 52.00 },
@@ -578,7 +665,7 @@ export const useDataGenerator = () => {
             { date: '2024-07-10', salesperson: 'Dwight Schrute', product: 'Premium Paper', quantity: 190, unitPrice: 46.00 },
             { date: '2024-08-15', salesperson: 'Dwight Schrute', product: 'Cardstock', quantity: 160, unitPrice: 51.00 },
             
-            // ========== JIM HALPERT - Total: $172,940 ==========
+            // ========== JIM HALPERT - Total: $150,330 ==========
             // Enero: $24,000
             { date: '2024-01-08', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 180, unitPrice: 44.00 },
             { date: '2024-01-18', salesperson: 'Jim Halpert', product: 'Cardstock', quantity: 140, unitPrice: 50.00 },
@@ -607,7 +694,7 @@ export const useDataGenerator = () => {
             { date: '2024-07-15', salesperson: 'Jim Halpert', product: 'Premium Paper', quantity: 160, unitPrice: 45.00 },
             { date: '2024-08-20', salesperson: 'Jim Halpert', product: 'Printer Paper', quantity: 200, unitPrice: 27.00 },
             
-            // ========== PHYLLIS VANCE - Total: $124,500 ==========
+            // ========== PHYLLIS VANCE - Total: $85,670 ==========
             { date: '2024-01-10', salesperson: 'Phyllis Vance', product: 'Premium Paper', quantity: 150, unitPrice: 43.00 },
             { date: '2024-01-22', salesperson: 'Phyllis Vance', product: 'Cardstock', quantity: 120, unitPrice: 51.00 },
             { date: '2024-02-10', salesperson: 'Phyllis Vance', product: 'Recycled Paper', quantity: 170, unitPrice: 33.00 },
@@ -623,7 +710,7 @@ export const useDataGenerator = () => {
             { date: '2024-07-08', salesperson: 'Phyllis Vance', product: 'Printer Paper', quantity: 190, unitPrice: 27.00 },
             { date: '2024-08-12', salesperson: 'Phyllis Vance', product: 'Cardstock', quantity: 110, unitPrice: 53.00 },
             
-            // ========== STANLEY HUDSON - Total: $108,220 ==========
+            // ========== STANLEY HUDSON - Total: $72,305 ==========
             { date: '2024-01-15', salesperson: 'Stanley Hudson', product: 'Premium Paper', quantity: 130, unitPrice: 42.00 },
             { date: '2024-01-28', salesperson: 'Stanley Hudson', product: 'Cardstock', quantity: 100, unitPrice: 50.00 },
             { date: '2024-02-14', salesperson: 'Stanley Hudson', product: 'Recycled Paper', quantity: 150, unitPrice: 32.00 },

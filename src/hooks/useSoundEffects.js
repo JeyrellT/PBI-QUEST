@@ -10,7 +10,7 @@ const SOUND_DEFINITIONS = {
     volume: 0.3,
   },
   hover: {
-    src: 'https://cdn.freesound.org/previews/242/242501_4284968-lq.mp3',
+    src: 'https://cdn.freesound.org/previews/220/220206_4100837-lq.mp3',
     volume: 0.15,
   },
 
@@ -24,7 +24,7 @@ const SOUND_DEFINITIONS = {
     volume: 0.5,
   },
   achievement: {
-    src: 'https://cdn.freesound.org/previews/387/387232_7255534-lq.mp3',
+    src: 'https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3',
     volume: 0.45,
   },
   reward: {
@@ -46,7 +46,7 @@ const SOUND_DEFINITIONS = {
     volume: 0.4,
   },
   missionComplete: {
-    src: 'https://cdn.freesound.org/previews/387/387232_7255534-lq.mp3',
+    src: 'https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3',
     volume: 0.5,
   },
   worldUnlock: {
@@ -62,7 +62,7 @@ const SOUND_DEFINITIONS = {
 
   // Ambient/Navigation
   transition: {
-    src: 'https://cdn.freesound.org/previews/242/242501_4284968-lq.mp3',
+    src: 'https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3',
     volume: 0.2,
   },
   pop: {
@@ -76,8 +76,53 @@ const SOUND_DEFINITIONS = {
     volume: 0.3,
   },
   streakBonus: {
-    src: 'https://cdn.freesound.org/previews/387/387232_7255534-lq.mp3',
+    src: 'https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3',
     volume: 0.4,
+  },
+
+  // =============================================
+  // MICRO-VICTORIAS (Neurociencia: Dopamina)
+  // Sonidos cortos para feedback instantáneo
+  // =============================================
+  
+  // Checkpoints y progreso
+  checkpoint: {
+    src: 'https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3',
+    volume: 0.35,
+  },
+  microSuccess: {
+    src: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+    volume: 0.25,
+  },
+  
+  // Sonidos mágicos/especiales
+  magicSparkle: {
+    src: 'https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3',
+    volume: 0.3,
+  },
+  chime: {
+    src: 'https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3',
+    volume: 0.3,
+  },
+  
+  // Victoria grande
+  victory: {
+    src: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
+    volume: 0.5,
+  },
+  celebration: {
+    src: 'https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3',
+    volume: 0.45,
+  },
+  
+  // Feedback suave
+  softClick: {
+    src: 'https://cdn.freesound.org/previews/220/220206_4100837-lq.mp3',
+    volume: 0.2,
+  },
+  hint: {
+    src: 'https://cdn.freesound.org/previews/220/220206_4100837-lq.mp3',
+    volume: 0.25,
   },
 };
 
@@ -209,6 +254,41 @@ export const useSoundEffects = () => {
     // XP
     xpGain: () => play('xpGain'),
     streakBonus: () => play('streakBonus'),
+    
+    // =============================================
+    // MICRO-VICTORIAS (Para sistema pedagógico)
+    // =============================================
+    checkpoint: () => play('checkpoint'),
+    microSuccess: () => play('microSuccess'),
+    magicSparkle: () => playSequence(['pop', 'magicSparkle'], 100),
+    chime: () => play('chime'),
+    victory: () => playSequence(['success', 'victory', 'celebration'], 150),
+    celebration: () => play('celebration'),
+    softClick: () => play('softClick'),
+    hint: () => play('hint'),
+    
+    // Secuencias especiales para micro-victorias
+    microVictory: (type) => {
+      switch(type) {
+        case 'file-download':
+          play('softClick');
+          break;
+        case 'pbi-open':
+          playSequence(['chime', 'pop'], 100);
+          break;
+        case 'data-loaded':
+          playSequence(['magicSparkle', 'success'], 150);
+          break;
+        case 'first-measure':
+          playSequence(['pop', 'achievement', 'celebration'], 150);
+          break;
+        case 'checkpoint':
+          play('checkpoint');
+          break;
+        default:
+          play('microSuccess');
+      }
+    },
   };
 
   return {

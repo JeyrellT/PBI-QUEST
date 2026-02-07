@@ -20,7 +20,6 @@ import { SoundProvider } from './context/SoundContext';
 
 // Importar estilos premium
 import './styles/premium-theme.css';
-import './styles/premium-effects.css';
 import './styles/premium-cards.css';
 
 const AppContent = () => {
@@ -147,11 +146,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <GameProvider>
-      <SoundProvider>
-        <AppContent />
-      </SoundProvider>
-    </GameProvider>
+    <ToastProvider>
+      <GameProvider>
+        <SoundProvider>
+          <AppContent />
+        </SoundProvider>
+      </GameProvider>
+    </ToastProvider>
   );
 };
 

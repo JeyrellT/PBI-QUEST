@@ -1,7 +1,21 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, BookOpen, Zap, Target, Brain, Sparkles, Clock, TrendingUp, CheckCircle2, Star, X } from 'lucide-react';
-import { academyCategories, academyLessons } from '../../data/academyData';
+import { 
+    Lightbulb, BookOpen, Zap, Target, Brain, Sparkles, Clock, TrendingUp, 
+    CheckCircle2, Star, X, Search, Filter, Award, ChevronRight, 
+    GraduationCap, Route, BookMarked, Bookmark, BookmarkCheck,
+    Info, AlertCircle, Trophy
+} from 'lucide-react';
+import { useGame } from '../../context/GameContext';
+import { 
+    academyCategories, 
+    academyLessons, 
+    learningPaths, 
+    quickTips, 
+    glossary,
+    lessonQuizzes 
+} from '../../data/academyData';
+import AcademyQuiz from '../common/AcademyQuiz';
 import '../../styles/Academy.css';
 
 // Images
@@ -46,7 +60,17 @@ const getDifficultyScore = (level) => {
     return levels[level] || 1;
 };
 
+// XP rewards for lesson completion
+const LESSON_XP = {
+    'Principiante': 10,
+    'Intermedio': 15,
+    'Avanzado': 20,
+    'Todos': 10
+};
+
 const Academy = () => {
+    const { addXP } = useGame();
+    
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [showIntroModal, setShowIntroModal] = useState(() => {
@@ -57,10 +81,51 @@ const Academy = () => {
         const saved = localStorage.getItem('academy_read_lessons');
         return saved ? JSON.parse(saved) : [];
     });
+    const [completedQuizzes, setCompletedQuizzes] = useState(() => {
+        const saved = localStorage.getItem('academy_completed_quizzes');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [bookmarkedLessons, setBookmarkedLessons] = useState(() => {
+        const saved = localStorage.getItem('academy_bookmarks');
+        return saved ? JSON.parse(saved) : [];
+    });
+    
+    // New state for filters and search
+    const [searchQuery, setSearchQuery] = useState('');
+    const [difficultyFilter, setDifficultyFilter] = useState('all');
+    const [activeTab, setActiveTab] = useState('lessons'); // 'lessons', 'paths', 'glossary'
 
-    const filteredLessons = selectedCategory === 'all'
-        ? academyLessons
-        : academyLessons.filter(lesson => lesson.categoryId === selectedCategory);
+    // Filter lessons
+    const filteredLessons = useMemo(() => {
+        let lessons = selectedCategory === 'all'
+            ? academyLessons
+            : academyLessons.filter(lesson => lesson.categoryId === selectedCategory);
+        
+        // Search filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            lessons = lessons.filter(lesson => 
+                lesson.title.toLowerCase().includes(query) ||
+                lesson.description.toLowerCase().includes(query) ||
+                lesson.content.toLowerCase().includes(query)
+            );
+        }
+        
+        // Difficulty filter
+        if (difficultyFilter !== 'all') {
+            lessons = lessons.filter(lesson => lesson.level === difficultyFilter);
+        }
+        
+        return lessons;
+    }, [selectedCategory, searchQuery, difficultyFilter]);
+
+    // Get contextual tips for current category
+    const currentTips = useMemo(() => {
+        if (selectedCategory === 'all') {
+            return Object.values(quickTips).flat().slice(0, 3);
+        }
+        return quickTips[selectedCategory] || quickTips.basics;
+    }, [selectedCategory]);
 
     // Estadísticas de progreso
     const stats = useMemo(() => {
@@ -71,28 +136,129 @@ const Academy = () => {
         const completedMinutes = academyLessons
             .filter(l => readLessons.includes(l.id))
             .reduce((acc, l) => acc + parseInt(l.duration) || 0, 0);
-        return { totalLessons, completedLessons, progress, totalMinutes, completedMinutes };
-    }, [readLessons]);
+        const quizzesCompleted = completedQuizzes.length;
+        const totalQuizzes = Object.keys(lessonQuizzes).length;
+        return { totalLessons, completedLessons, progress, totalMinutes, completedMinutes, quizzesCompleted, totalQuizzes };
+    }, [readLessons, completedQuizzes]);
 
-    // Marcar lección como leída
-    const markAsRead = (lessonId) => {
+    // Marcar lección como leída y dar XP
+    const markAsRead = useCallback((lessonId, lesson) => {
         if (!readLessons.includes(lessonId)) {
             const updated = [...readLessons, lessonId];
             setReadLessons(updated);
             localStorage.setItem('academy_read_lessons', JSON.stringify(updated));
+            
+            // Award XP for reading
+            const xpAmount = LESSON_XP[lesson.level] || 10;
+            addXP(xpAmount, `Lección: ${lesson.title}`);
         }
-    };
+    }, [readLessons, addXP]);
+
+    // Handle quiz completion
+    const handleQuizComplete = useCallback((lessonId, passed, correctCount, xpBonus) => {
+        if (passed && !completedQuizzes.includes(lessonId)) {
+            const updated = [...completedQuizzes, lessonId];
+            setCompletedQuizzes(updated);
+            localStorage.setItem('academy_completed_quizzes', JSON.stringify(updated));
+            
+            // Award bonus XP
+            addXP(xpBonus, `Quiz completado: ${selectedLesson?.title}`);
+        }
+    }, [completedQuizzes, addXP, selectedLesson]);
+
+    // Toggle bookmark
+    const toggleBookmark = useCallback((lessonId) => {
+        const updated = bookmarkedLessons.includes(lessonId)
+            ? bookmarkedLessons.filter(id => id !== lessonId)
+            : [...bookmarkedLessons, lessonId];
+        setBookmarkedLessons(updated);
+        localStorage.setItem('academy_bookmarks', JSON.stringify(updated));
+    }, [bookmarkedLessons]);
 
     // Al abrir una lección, marcarla como leída
     const handleSelectLesson = (lesson) => {
         setSelectedLesson(lesson);
-        markAsRead(lesson.id);
+        markAsRead(lesson.id, lesson);
+    };
+
+    // Learning path progress
+    const getPathProgress = (path) => {
+        const completed = path.lessons.filter(id => readLessons.includes(id)).length;
+        return Math.round((completed / path.lessons.length) * 100);
     };
 
     // Cerrar modal de introducción
     const closeIntroModal = () => {
         setShowIntroModal(false);
         localStorage.setItem('academy_intro_seen', 'true');
+    };
+
+    // Render content with improved formatting
+    const renderContent = (content) => {
+        return content.split('\n').map((line, index) => {
+            const trimmed = line.trim();
+
+            // Helper to render bold text
+            const renderFormattedText = (text) => {
+                const parts = text.split(/\*\*([^*]+)\*\*/g);
+                return parts.map((part, i) =>
+                    i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+                );
+            };
+
+            // Headers
+            if (trimmed.startsWith('###')) {
+                return <h3 key={index}>{trimmed.replace('###', '').trim()}</h3>;
+            }
+
+            // Game tips (special styling)
+            if (trimmed.startsWith('🎮')) {
+                return <p key={index} className="game-tip-highlight">{renderFormattedText(trimmed)}</p>;
+            }
+
+            // Bullet points
+            if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
+                return <li key={index}>{renderFormattedText(trimmed.replace(/^[-•]/, '').trim())}</li>;
+            }
+
+            // Numbered lists
+            if (/^[0-9]+\./.test(trimmed)) {
+                return <li key={index}>{renderFormattedText(trimmed)}</li>;
+            }
+
+            // Code blocks (DAX)
+            if (trimmed.includes(' = ') && (trimmed.includes('SUM(') || trimmed.includes('CALCULATE(') || trimmed.includes('IF(') || trimmed.includes('AVERAGE(') || trimmed.includes('COUNTROWS(') || trimmed.includes('DIVIDE(') || trimmed.includes('DISTINCTCOUNT(') || trimmed.includes('MAX(') || trimmed.includes('MIN(') || trimmed.includes('COUNT(') || trimmed.includes('OR(') || trimmed.includes('AND(') || trimmed.includes('SWITCH('))) {
+                return (
+                    <pre key={index} className="code-block dax-code">
+                        <code>{trimmed}</code>
+                    </pre>
+                );
+            }
+
+            // M code (Power Query)
+            if (trimmed.startsWith('=') && !trimmed.startsWith('==')) {
+                return (
+                    <pre key={index} className="code-block m-code">
+                        <code>{trimmed}</code>
+                    </pre>
+                );
+            }
+
+            // Tables (lines with |)
+            if (trimmed.includes('|') && trimmed.startsWith('|')) {
+                const cells = trimmed.split('|').filter(c => c.trim());
+                const isHeader = index > 0 && content.split('\n')[index - 1]?.includes('|');
+                return (
+                    <div key={index} className={`table-row ${!isHeader ? 'table-header' : ''}`}>
+                        {cells.map((cell, i) => (
+                            <span key={i} className="table-cell">{renderFormattedText(cell.trim())}</span>
+                        ))}
+                    </div>
+                );
+            }
+
+            return trimmed ? <p key={index}>{renderFormattedText(trimmed)}</p> : <br key={index} />;
+        });
     };
 
     return (
@@ -316,71 +482,51 @@ const Academy = () => {
                                 )}
 
                                 <div className="rich-content">
-                                    {selectedLesson.content.split('\n').map((line, index) => {
-                                        const trimmed = line.trim();
-
-                                        // Helper to render bold text
-                                        const renderFormattedText = (text) => {
-                                            const parts = text.split(/\*\*([^*]+)\*\*/g);
-                                            return parts.map((part, i) =>
-                                                i % 2 === 1 ? <strong key={i}>{part}</strong> : part
-                                            );
-                                        };
-
-                                        // Headers
-                                        if (trimmed.startsWith('###')) {
-                                            return <h3 key={index}>{trimmed.replace('###', '').trim()}</h3>;
-                                        }
-
-                                        // Game tips (special styling)
-                                        if (trimmed.startsWith('🎮')) {
-                                            return <p key={index} className="game-tip-highlight">{renderFormattedText(trimmed)}</p>;
-                                        }
-
-                                        // Bullet points
-                                        if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-                                            return <li key={index}>{renderFormattedText(trimmed.replace(/^[-•]/, '').trim())}</li>;
-                                        }
-
-                                        // Numbered lists
-                                        if (/^[0-9]+\./.test(trimmed)) {
-                                            return <li key={index}>{renderFormattedText(trimmed)}</li>;
-                                        }
-
-                                        // Code blocks (lines starting with specific patterns)
-                                        if (trimmed.includes(' = ') && (trimmed.includes('SUM(') || trimmed.includes('CALCULATE(') || trimmed.includes('IF(') || trimmed.includes('AVERAGE(') || trimmed.includes('COUNTROWS(') || trimmed.includes('DIVIDE(') || trimmed.includes('DISTINCTCOUNT(') || trimmed.includes('MAX(') || trimmed.includes('MIN(') || trimmed.includes('COUNT(') || trimmed.includes('OR(') || trimmed.includes('AND('))) {
-                                            return (
-                                                <pre key={index} className="code-block dax-code">
-                                                    <code>{trimmed}</code>
-                                                </pre>
-                                            );
-                                        }
-
-                                        // M code (Power Query)
-                                        if (trimmed.startsWith('=') && !trimmed.startsWith('==')) {
-                                            return (
-                                                <pre key={index} className="code-block m-code">
-                                                    <code>{trimmed}</code>
-                                                </pre>
-                                            );
-                                        }
-
-                                        // Tables (lines with |)
-                                        if (trimmed.includes('|') && trimmed.startsWith('|')) {
-                                            const cells = trimmed.split('|').filter(c => c.trim());
-                                            const isHeader = index > 0 && selectedLesson.content.split('\n')[index - 1]?.includes('|');
-                                            return (
-                                                <div key={index} className={`table-row ${!isHeader ? 'table-header' : ''}`}>
-                                                    {cells.map((cell, i) => (
-                                                        <span key={i} className="table-cell">{renderFormattedText(cell.trim())}</span>
-                                                    ))}
-                                                </div>
-                                            );
-                                        }
-
-                                        return trimmed ? <p key={index}>{renderFormattedText(trimmed)}</p> : <br key={index} />;
-                                    })}
+                                    {renderContent(selectedLesson.content)}
                                 </div>
+
+                                {/* Quiz Section */}
+                                {lessonQuizzes[selectedLesson.id] && (
+                                    <motion.div 
+                                        className="quiz-section"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                    >
+                                        <div className="quiz-section-header">
+                                            <Award size={24} />
+                                            <div>
+                                                <h3>¡Pon a prueba tu conocimiento!</h3>
+                                                <p>Completa el quiz opcional para ganar XP bonus</p>
+                                            </div>
+                                            {completedQuizzes.includes(selectedLesson.id) && (
+                                                <span className="quiz-completed-badge">
+                                                    <CheckCircle2 size={16} /> Completado
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        {!completedQuizzes.includes(selectedLesson.id) ? (
+                                            <AcademyQuiz 
+                                                quiz={lessonQuizzes[selectedLesson.id]}
+                                                lessonTitle={selectedLesson.title}
+                                                onComplete={(passed, correctCount) => 
+                                                    handleQuizComplete(
+                                                        selectedLesson.id, 
+                                                        passed, 
+                                                        correctCount, 
+                                                        lessonQuizzes[selectedLesson.id].xpBonus
+                                                    )
+                                                }
+                                            />
+                                        ) : (
+                                            <div className="quiz-already-completed">
+                                                <Trophy size={32} />
+                                                <p>¡Ya completaste este quiz y ganaste +{lessonQuizzes[selectedLesson.id].xpBonus} XP!</p>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
 
                                 {/* Game Relevance Badge */}
                                 {selectedLesson.gameRelevance && (
@@ -478,12 +624,16 @@ const Academy = () => {
                                     <h1>Academia Power BI</h1>
                                     <p>Aprende paso a paso con la guía oficial de Microsoft</p>
                                 </div>
-                                {/* Neuroaprendizaje: Barra de progreso global */}
                                 <div className="progress-stats-container">
                                     <div className="progress-stat-item">
                                         <Sparkles size={18} className="stat-icon gold" />
                                         <span className="stat-value">{stats.completedLessons}</span>
                                         <span className="stat-label">/ {stats.totalLessons} lecciones</span>
+                                    </div>
+                                    <div className="progress-stat-item mini">
+                                        <Award size={16} className="stat-icon" />
+                                        <span className="stat-value">{stats.quizzesCompleted}</span>
+                                        <span className="stat-label">/ {stats.totalQuizzes} quizzes</span>
                                     </div>
                                     <div className="progress-bar-container">
                                         <motion.div 
@@ -498,121 +648,413 @@ const Academy = () => {
                             </div>
                         </header>
 
-                        {/* Cuadro de Tips Rápidos */}
-                        <motion.div 
-                            className="tips-box glass"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <div className="tips-header">
-                                <Lightbulb size={24} className="tips-icon" />
-                                <h3>Tips Rápidos para Aprender</h3>
-                            </div>
-                            <div className="tips-grid">
-                                <div className="tip-item">
-                                    <div className="tip-icon-wrapper" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
-                                        <BookOpen size={18} />
-                                    </div>
-                                    <div className="tip-content">
-                                        <strong>Lee antes de jugar</strong>
-                                        <p>Revisa la lección correspondiente antes de cada misión para entender los conceptos.</p>
-                                    </div>
-                                </div>
-                                <div className="tip-item">
-                                    <div className="tip-icon-wrapper" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-                                        <Zap size={18} />
-                                    </div>
-                                    <div className="tip-content">
-                                        <strong>Practica con atajos</strong>
-                                        <p><kbd>Ctrl+Enter</kbd> ejecuta DAX • <kbd>Ctrl+S</kbd> guarda • <kbd>Alt+F4</kbd> para emergencias 😅</p>
-                                    </div>
-                                </div>
-                                <div className="tip-item">
-                                    <div className="tip-icon-wrapper" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
-                                        <Target size={18} />
-                                    </div>
-                                    <div className="tip-content">
-                                        <strong>Enfócate por categoría</strong>
-                                        <p>Completa todos los temas de una categoría antes de pasar a la siguiente.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        <nav className="categories-tabs">
-                            <motion.button
-                                className={`category-tab ${selectedCategory === 'all' ? 'active' : ''}`}
-                                onClick={() => setSelectedCategory('all')}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                        {/* Tab Navigation */}
+                        <div className="academy-tabs-nav">
+                            <button 
+                                className={`tab-btn ${activeTab === 'lessons' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('lessons')}
                             >
-                                🎓 Todos
-                            </motion.button>
-                            {academyCategories.map(cat => (
-                                <motion.button
-                                    key={cat.id}
-                                    className={`category-tab ${selectedCategory === cat.id ? 'active' : ''}`}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                                <BookOpen size={18} /> Lecciones
+                            </button>
+                            <button 
+                                className={`tab-btn ${activeTab === 'paths' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('paths')}
+                            >
+                                <Route size={18} /> Rutas de Aprendizaje
+                            </button>
+                            <button 
+                                className={`tab-btn ${activeTab === 'glossary' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('glossary')}
+                            >
+                                <BookMarked size={18} /> Glosario
+                            </button>
+                            {bookmarkedLessons.length > 0 && (
+                                <button 
+                                    className={`tab-btn ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('bookmarks')}
                                 >
-                                    {cat.icon} {cat.title}
-                                </motion.button>
-                            ))}
-                        </nav>
+                                    <Bookmark size={18} /> Favoritos ({bookmarkedLessons.length})
+                                </button>
+                            )}
+                        </div>
 
-                        <motion.div
-                            className="lessons-grid"
-                            initial="hidden"
-                            animate="visible"
-                            key={selectedCategory} // Re-animate on category change
-                            variants={{
-                                hidden: { opacity: 0 },
-                                visible: {
-                                    opacity: 1,
-                                    transition: { staggerChildren: 0.05 }
-                                }
-                            }}
-                        >
-                            {filteredLessons.map(lesson => {
-                                const category = academyCategories.find(c => c.id === lesson.categoryId);
-                                const isCompleted = readLessons.includes(lesson.id);
-                                return (
-                                    <motion.div
-                                        key={lesson.id}
-                                        className={`lesson-card glass ${lesson.isVideo ? 'is-video' : ''} ${isCompleted ? 'completed' : ''}`}
-                                        onClick={() => handleSelectLesson(lesson)}
-                                        variants={{
-                                            hidden: { opacity: 0, y: 20 },
-                                            visible: { opacity: 1, y: 0 }
-                                        }}
-                                        whileHover={{ scale: 1.02, y: -5, boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)" }}
-                                        whileTap={{ scale: 0.98 }}
-                                    >
-                                        <div className="lesson-card-header" style={{ background: category?.gradient, height: '6px', width: '100%', position: 'absolute', top: 0, left: 0 }}></div>
-                                        {isCompleted && (
-                                            <div className="lesson-completed-badge" title="Ya leíste esta lección">
-                                                <CheckCircle2 size={20} />
-                                            </div>
+                        {/* ============ LESSONS TAB ============ */}
+                        {activeTab === 'lessons' && (
+                            <>
+                                {/* Search and Filter Bar */}
+                                <div className="search-filter-bar glass">
+                                    <div className="search-input-wrapper">
+                                        <Search size={20} />
+                                        <input 
+                                            type="text"
+                                            placeholder="Buscar lecciones, DAX, Power Query..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="search-input"
+                                        />
+                                        {searchQuery && (
+                                            <button className="clear-search" onClick={() => setSearchQuery('')}>
+                                                <X size={16} />
+                                            </button>
                                         )}
-                                        <div style={{ marginTop: '10px' }}>
-                                            <h3>{lesson.isVideo && '🎬 '}{lesson.title}</h3>
-                                            <p>{lesson.description}</p>
+                                    </div>
+                                    <div className="filter-buttons">
+                                        <Filter size={18} />
+                                        {['all', 'Principiante', 'Intermedio', 'Avanzado'].map(level => (
+                                            <button 
+                                                key={level}
+                                                className={`filter-btn ${difficultyFilter === level ? 'active' : ''}`}
+                                                onClick={() => setDifficultyFilter(level)}
+                                            >
+                                                {level === 'all' ? 'Todos' : level}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Quick Tips Panel */}
+                                <motion.div 
+                                    className="tips-box glass"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                >
+                                    <div className="tips-header">
+                                        <Lightbulb size={24} className="tips-icon" />
+                                        <h3>
+                                            {selectedCategory === 'all' ? 'Tips Rápidos' : `Tips de ${academyCategories.find(c => c.id === selectedCategory)?.title}`}
+                                        </h3>
+                                    </div>
+                                    <div className="tips-grid">
+                                        {currentTips.map((tip, idx) => (
+                                            <div key={idx} className="tip-item">
+                                                <div className="tip-icon-wrapper" style={{ 
+                                                    background: `linear-gradient(135deg, ${['#10b981', '#f59e0b', '#8b5cf6'][idx % 3]}, ${['#059669', '#d97706', '#7c3aed'][idx % 3]})`
+                                                }}>
+                                                    <span style={{ fontSize: '1.1rem' }}>{tip.icon}</span>
+                                                </div>
+                                                <div className="tip-content">
+                                                    <p>{tip.tip}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+
+                                {/* Categories Tabs */}
+                                <nav className="categories-tabs">
+                                    <motion.button
+                                        className={`category-tab ${selectedCategory === 'all' ? 'active' : ''}`}
+                                        onClick={() => setSelectedCategory('all')}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        🎓 Todos
+                                    </motion.button>
+                                    {academyCategories.map(cat => (
+                                        <motion.button
+                                            key={cat.id}
+                                            className={`category-tab ${selectedCategory === cat.id ? 'active' : ''}`}
+                                            onClick={() => setSelectedCategory(cat.id)}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            {cat.icon} {cat.title}
+                                            {cat.lessonCount && <span className="tab-count">{cat.lessonCount}</span>}
+                                        </motion.button>
+                                    ))}
+                                </nav>
+
+                                {/* Search Results Info */}
+                                {(searchQuery || difficultyFilter !== 'all') && (
+                                    <div className="search-results-info">
+                                        <Info size={16} />
+                                        <span>
+                                            {filteredLessons.length} {filteredLessons.length === 1 ? 'lección encontrada' : 'lecciones encontradas'}
+                                            {searchQuery && ` para "${searchQuery}"`}
+                                            {difficultyFilter !== 'all' && ` (${difficultyFilter})`}
+                                        </span>
+                                        <button 
+                                            className="clear-filters"
+                                            onClick={() => { setSearchQuery(''); setDifficultyFilter('all'); }}
+                                        >
+                                            Limpiar filtros
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Lessons Grid */}
+                                <motion.div
+                                    className="lessons-grid"
+                                    initial="hidden"
+                                    animate="visible"
+                                    key={selectedCategory + searchQuery + difficultyFilter}
+                                    variants={{
+                                        hidden: { opacity: 0 },
+                                        visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+                                    }}
+                                >
+                                    {filteredLessons.length === 0 ? (
+                                        <div className="no-results">
+                                            <AlertCircle size={48} />
+                                            <h3>No se encontraron lecciones</h3>
+                                            <p>Intenta con otros términos de búsqueda o filtros</p>
                                         </div>
-                                        <div className="lesson-meta">
-                                            <span className="lesson-duration">{lesson.isVideo ? '▶️' : '⏱️'} {lesson.duration}</span>
-                                            <span className={`lesson-level-badge lesson-badge ${lesson.level.toLowerCase()}`} style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>
-                                                {[...Array(getDifficultyScore(lesson.level))].map((_, i) => (
-                                                    <Star key={i} size={10} fill="currentColor" style={{ marginRight: '2px' }} />
-                                                ))}
-                                                {lesson.level}
-                                            </span>
+                                    ) : (
+                                        filteredLessons.map(lesson => {
+                                            const category = academyCategories.find(c => c.id === lesson.categoryId);
+                                            const isCompleted = readLessons.includes(lesson.id);
+                                            const hasQuiz = lessonQuizzes[lesson.id];
+                                            const quizCompleted = completedQuizzes.includes(lesson.id);
+                                            const isBookmarked = bookmarkedLessons.includes(lesson.id);
+                                            
+                                            return (
+                                                <motion.div
+                                                    key={lesson.id}
+                                                    className={`lesson-card glass ${lesson.isVideo ? 'is-video' : ''} ${isCompleted ? 'completed' : ''}`}
+                                                    onClick={() => handleSelectLesson(lesson)}
+                                                    variants={{
+                                                        hidden: { opacity: 0, y: 20 },
+                                                        visible: { opacity: 1, y: 0 }
+                                                    }}
+                                                    whileHover={{ scale: 1.02, y: -5, boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)" }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                >
+                                                    <div className="lesson-card-header" style={{ background: category?.gradient, height: '6px', width: '100%', position: 'absolute', top: 0, left: 0 }}></div>
+                                                    
+                                                    <div className="lesson-badges">
+                                                        {isCompleted && (
+                                                            <div className="lesson-completed-badge" title="Ya completaste esta lección">
+                                                                <CheckCircle2 size={18} />
+                                                            </div>
+                                                        )}
+                                                        {hasQuiz && (
+                                                            <div className={`lesson-quiz-badge ${quizCompleted ? 'completed' : ''}`} title={quizCompleted ? 'Quiz completado' : 'Tiene quiz disponible'}>
+                                                                <Award size={16} />
+                                                            </div>
+                                                        )}
+                                                        {isBookmarked && (
+                                                            <div className="lesson-bookmark-badge" title="En favoritos">
+                                                                <Bookmark size={16} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div style={{ marginTop: '10px' }}>
+                                                        <h3>{lesson.isVideo && '🎬 '}{lesson.title}</h3>
+                                                        <p>{lesson.description}</p>
+                                                    </div>
+                                                    
+                                                    <div className="lesson-meta">
+                                                        <span className="lesson-duration">{lesson.isVideo ? '▶️' : '⏱️'} {lesson.duration}</span>
+                                                        <span className={`lesson-level-badge lesson-badge ${lesson.level.toLowerCase()}`}>
+                                                            {[...Array(getDifficultyScore(lesson.level))].map((_, i) => (
+                                                                <Star key={i} size={10} fill="currentColor" style={{ marginRight: '2px' }} />
+                                                            ))}
+                                                            {lesson.level}
+                                                        </span>
+                                                        <span className="lesson-xp-badge">
+                                                            +{LESSON_XP[lesson.level] || 10} XP
+                                                        </span>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })
+                                    )}
+                                </motion.div>
+                            </>
+                        )}
+
+                        {/* ============ LEARNING PATHS TAB ============ */}
+                        {activeTab === 'paths' && (
+                            <div className="learning-paths-container">
+                                <div className="paths-intro">
+                                    <GraduationCap size={32} />
+                                    <div>
+                                        <h2>Rutas de Aprendizaje</h2>
+                                        <p>Sigue caminos estructurados para dominar Power BI paso a paso</p>
+                                    </div>
+                                </div>
+
+                                <div className="paths-grid">
+                                    {learningPaths.map(path => {
+                                        const progress = getPathProgress(path);
+                                        const isComplete = progress === 100;
+                                        
+                                        return (
+                                            <motion.div 
+                                                key={path.id}
+                                                className={`path-card glass ${isComplete ? 'completed' : ''}`}
+                                                whileHover={{ scale: 1.02, y: -5 }}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                            >
+                                                <div className="path-header" style={{ borderColor: path.color }}>
+                                                    <span className="path-badge" style={{ background: path.color }}>{path.badge}</span>
+                                                    <div className="path-info">
+                                                        <h3>{path.title}</h3>
+                                                        <p>{path.description}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="path-meta">
+                                                    <span><Clock size={14} /> {path.estimatedTime}</span>
+                                                    <span><Star size={14} /> {path.difficulty}</span>
+                                                    <span><Sparkles size={14} /> +{path.xpReward} XP</span>
+                                                </div>
+
+                                                <div className="path-progress">
+                                                    <div className="path-progress-bar">
+                                                        <div 
+                                                            className="path-progress-fill" 
+                                                            style={{ width: `${progress}%`, background: path.color }}
+                                                        />
+                                                    </div>
+                                                    <span>{progress}% completado</span>
+                                                </div>
+
+                                                <div className="path-lessons">
+                                                    {path.lessons.map((lessonId, idx) => {
+                                                        const lesson = academyLessons.find(l => l.id === lessonId);
+                                                        const isLessonComplete = readLessons.includes(lessonId);
+                                                        
+                                                        return lesson ? (
+                                                            <button 
+                                                                key={lessonId}
+                                                                className={`path-lesson-item ${isLessonComplete ? 'completed' : ''}`}
+                                                                onClick={() => handleSelectLesson(lesson)}
+                                                            >
+                                                                <span className="lesson-number">{idx + 1}</span>
+                                                                <span className="lesson-title">{lesson.title}</span>
+                                                                {isLessonComplete ? (
+                                                                    <CheckCircle2 size={16} className="check" />
+                                                                ) : (
+                                                                    <ChevronRight size={16} />
+                                                                )}
+                                                            </button>
+                                                        ) : null;
+                                                    })}
+                                                </div>
+
+                                                {isComplete && (
+                                                    <div className="path-complete-badge">
+                                                        <Trophy size={20} /> ¡Ruta Completada!
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ============ GLOSSARY TAB ============ */}
+                        {activeTab === 'glossary' && (
+                            <div className="glossary-container">
+                                <div className="glossary-intro">
+                                    <BookMarked size={32} />
+                                    <div>
+                                        <h2>Glosario de Términos</h2>
+                                        <p>Referencia rápida de conceptos clave de Power BI</p>
+                                    </div>
+                                </div>
+
+                                <div className="glossary-grid">
+                                    {glossary.map((item) => {
+                                        const category = academyCategories.find(c => c.id === item.category);
+                                        return (
+                                            <motion.div 
+                                                key={item.term}
+                                                className="glossary-card glass"
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                            >
+                                                <div className="glossary-term">
+                                                    <span className="term-icon" style={{ background: category?.gradient }}>
+                                                        {category?.icon || '📖'}
+                                                    </span>
+                                                    <strong>{item.term}</strong>
+                                                </div>
+                                                <p>{item.definition}</p>
+                                                <span className="glossary-category">{category?.title || item.category}</span>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ============ BOOKMARKS TAB ============ */}
+                        {activeTab === 'bookmarks' && (
+                            <div className="bookmarks-container">
+                                <div className="bookmarks-intro">
+                                    <Bookmark size={32} />
+                                    <div>
+                                        <h2>Mis Favoritos</h2>
+                                        <p>Lecciones que has guardado para acceso rápido</p>
+                                    </div>
+                                </div>
+
+                                <motion.div
+                                    className="lessons-grid"
+                                    initial="hidden"
+                                    animate="visible"
+                                    variants={{
+                                        hidden: { opacity: 0 },
+                                        visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+                                    }}
+                                >
+                                    {bookmarkedLessons.length === 0 ? (
+                                        <div className="no-results">
+                                            <Bookmark size={48} />
+                                            <h3>No tienes favoritos</h3>
+                                            <p>Marca lecciones con el ícono de marcador para accederlas rápido</p>
                                         </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </motion.div>
+                                    ) : (
+                                        bookmarkedLessons.map(lessonId => {
+                                            const lesson = academyLessons.find(l => l.id === lessonId);
+                                            if (!lesson) return null;
+                                            
+                                            const category = academyCategories.find(c => c.id === lesson.categoryId);
+                                            const isCompleted = readLessons.includes(lesson.id);
+                                            
+                                            return (
+                                                <motion.div
+                                                    key={lesson.id}
+                                                    className={`lesson-card glass ${isCompleted ? 'completed' : ''}`}
+                                                    onClick={() => handleSelectLesson(lesson)}
+                                                    variants={{
+                                                        hidden: { opacity: 0, y: 20 },
+                                                        visible: { opacity: 1, y: 0 }
+                                                    }}
+                                                    whileHover={{ scale: 1.02, y: -5 }}
+                                                >
+                                                    <div className="lesson-card-header" style={{ background: category?.gradient, height: '6px', width: '100%', position: 'absolute', top: 0, left: 0 }}></div>
+                                                    <div className="lesson-badges">
+                                                        {isCompleted && (
+                                                            <div className="lesson-completed-badge">
+                                                                <CheckCircle2 size={18} />
+                                                            </div>
+                                                        )}
+                                                        <div className="lesson-bookmark-badge active">
+                                                            <BookmarkCheck size={16} />
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ marginTop: '10px' }}>
+                                                        <h3>{lesson.title}</h3>
+                                                        <p>{lesson.description}</p>
+                                                    </div>
+                                                    <div className="lesson-meta">
+                                                        <span className="lesson-duration">⏱️ {lesson.duration}</span>
+                                                        <span className="lesson-level-badge">{lesson.level}</span>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })
+                                    )}
+                                </motion.div>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

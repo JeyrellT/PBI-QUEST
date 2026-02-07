@@ -3,10 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     CheckCircle, XCircle, AlertTriangle, HelpCircle,
     Target, Lightbulb, RotateCcw, Trophy, Sparkles,
-    ChevronDown, ChevronUp, Calculator, TrendingDown
+    ChevronDown, ChevronUp, Calculator, TrendingDown, BookOpen,
+    Skull
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import StepValidator from './StepValidator';
+import PremiumTipsPanel from '../common/PremiumTipsPanel';
+import MissionInsights from '../common/MissionInsights';
+import NeuroLearningPanel from '../common/NeuroLearningPanel';
 import { calculateMissionScore } from '../../utils/calculateMissionScore';
 
 // eslint sometimes misses JSX member usage (<motion.div>)
@@ -26,8 +30,15 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
     const [isExpanded, setIsExpanded] = useState(true);
     const [stepsPassed, setStepsPassed] = useState(false);
 
+    // NUEVO: Estados para paneles premium
+    const [showPremiumTips, setShowPremiumTips] = useState(false);
+    const [showInsights, setShowInsights] = useState(false);
+
     // NUEVO: Trackear respuestas incorrectas acumuladas
     const [totalWrongAnswers, setTotalWrongAnswers] = useState(0);
+
+    // Estado para revelar respuestas después de 3 intentos
+    const [revealedAnswers, setRevealedAnswers] = useState(false);
 
     // Estados para sistema de villano (DataRescue)
     const [corruptionLevel, setCorruptionLevel] = useState(0);
@@ -97,10 +108,13 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
             return verification.map((v, index) => ({
                 id: `q_${index}`,
                 label: v.question,
-                type: v.type === 'number' ? 'number' : 'text',
+                type: v.type === 'number' ? 'number' : (v.options ? 'choice' : 'text'),
                 expected: v.answer,
                 tolerance: v.type === 'number' ? 0.05 : 0, // Default 5% tolerance for numbers
-                hint: v.hint
+                hint: v.hint,
+                options: v.options || null,
+                acceptedAnswers: v.acceptedAnswers || null,
+                academyHint: v.academyHint || null
             }));
         }
 
@@ -191,6 +205,9 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                     const upperBound = field.expected * (1 + tolerance);
                     isCorrect = numValue >= lowerBound && numValue <= upperBound;
                 }
+            } else if (field.type === 'choice') {
+                // Para selección de opciones (case insensitive)
+                isCorrect = userValue?.trim().toLowerCase() === field.expected.toString().toLowerCase();
             } else if (field.type === 'text') {
                 if (Array.isArray(field.expected)) {
                     // Para setMatch antiguo
@@ -199,7 +216,16 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                     isCorrect = expectedCodes.every(code => userCodes.includes(code));
                 } else {
                     // Para verificación simple de texto (case insensitive)
-                    isCorrect = userValue?.trim().toLowerCase() === field.expected.toString().toLowerCase();
+                    const userNorm = (userValue || '').trim().toLowerCase();
+                    const expectedNorm = field.expected.toString().toLowerCase();
+                    isCorrect = userNorm === expectedNorm;
+
+                    // Verificar respuestas alternativas aceptadas
+                    if (!isCorrect && field.acceptedAnswers) {
+                        isCorrect = field.acceptedAnswers.some(alt =>
+                            userNorm === alt.toLowerCase().trim()
+                        );
+                    }
                 }
             }
 
@@ -302,6 +328,7 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
         setTotalWrongAnswers(0);
         setAttempts(0);
         setHintsUsed(0);
+        setRevealedAnswers(false);
     };
 
     // Generar hints basados en los tips de la misión
@@ -423,6 +450,73 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                                 />
                             )}
 
+                            {/* NeuroLearning Panel — técnicas de neurociencia */}
+                            {mission?.neuroLearning && (
+                                <NeuroLearningPanel
+                                    mission={mission}
+                                    onAllComplete={(stats) => {
+                                        // Bonus: students who complete neuro panel get subtle positive reinforcement
+                                        console.log('NeuroLearning complete:', stats);
+                                    }}
+                                />
+                            )}
+
+                            {/* Read-first banner for guided learning */}
+                            {mission?.readFirstMessage && (
+                                <div style={{
+                                    marginBottom: '20px',
+                                    padding: '16px 20px',
+                                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.06))',
+                                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                                    borderRadius: '14px',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '12px',
+                                    backdropFilter: 'blur(8px)',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: 0, left: 0, right: 0, bottom: 0,
+                                        background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.03), transparent)',
+                                        animation: 'neuro-shimmer 4s infinite',
+                                        pointerEvents: 'none'
+                                    }} />
+                                    <div style={{
+                                        background: 'rgba(59, 130, 246, 0.15)',
+                                        borderRadius: '10px',
+                                        padding: '8px',
+                                        display: 'flex',
+                                        flexShrink: 0,
+                                        border: '1px solid rgba(59, 130, 246, 0.2)'
+                                    }}>
+                                        <BookOpen size={18} color="#60a5fa" />
+                                    </div>
+                                    <div>
+                                        <p style={{
+                                            margin: 0,
+                                            fontSize: '0.88rem',
+                                            fontWeight: 700,
+                                            background: 'linear-gradient(135deg, #60a5fa, #a78bfa)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent'
+                                        }}>
+                                            📖 Lee antes de responder
+                                        </p>
+                                        <p style={{
+                                            margin: '4px 0 0 0',
+                                            fontSize: '0.85rem',
+                                            color: 'var(--text-main)',
+                                            lineHeight: 1.55,
+                                            opacity: 0.9
+                                        }}>
+                                            {mission.readFirstMessage}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Required Cards */}
                             {validation?.requiredCards && (
                                 <div style={{ marginBottom: '20px' }}>
@@ -482,54 +576,150 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                                                     </span>
                                                 )}
                                             </label>
-                                            <div style={{ position: 'relative' }}>
-                                                <input
-                                                    type={field.type === 'number' ? 'number' : 'text'}
-                                                    value={userAnswers[field.id] || ''}
-                                                    onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                                    placeholder={field.type === 'number'
-                                                        ? 'Ingresa el valor calculado...'
-                                                        : 'Ingresa los valores separados por coma...'}
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 40px 12px 16px',
-                                                        background: 'var(--bg-main)',
-                                                        border: `2px solid ${hasResult
-                                                            ? (isCorrect ? '#22c55e' : '#ef4444')
-                                                            : 'var(--border)'
-                                                            }`,
-                                                        borderRadius: '10px',
-                                                        color: 'var(--text-main)',
-                                                        fontSize: '1rem',
-                                                        outline: 'none',
-                                                        transition: 'border-color 0.2s'
-                                                    }}
-                                                />
-                                                {hasResult && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        right: '12px',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)'
-                                                    }}>
-                                                        {isCorrect
-                                                            ? <CheckCircle size={20} color="#22c55e" />
-                                                            : <XCircle size={20} color="#ef4444" />
-                                                        }
-                                                    </div>
-                                                )}
-                                            </div>
+                                            {/* Choice buttons */}
+                                            {field.type === 'choice' && field.options ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {field.options.map(option => {
+                                                        const isSelected = userAnswers[field.id] === option;
+                                                        const optionCorrect = hasResult && isSelected && isCorrect;
+                                                        const optionWrong = hasResult && isSelected && !isCorrect;
+                                                        const optionIsAnswer = hasResult && !isCorrect && option === field.expected;
+                                                        return (
+                                            <button
+                                                                key={option}
+                                                                onClick={() => handleInputChange(field.id, option)}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'space-between',
+                                                                    padding: '12px 16px',
+                                                                    background: optionCorrect
+                                                                        ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.06))'
+                                                                        : optionWrong
+                                                                            ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.06))'
+                                                                            : optionIsAnswer
+                                                                                ? 'rgba(34, 197, 94, 0.06)'
+                                                                                : isSelected
+                                                                                    ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(139, 92, 246, 0.08))'
+                                                                                    : 'rgba(255, 255, 255, 0.03)',
+                                                                    border: `1.5px solid ${
+                                                                        optionCorrect ? '#22c55e'
+                                                                        : optionWrong ? '#ef4444'
+                                                                        : optionIsAnswer ? '#22c55e60'
+                                                                        : isSelected ? '#a855f7'
+                                                                        : 'rgba(255, 255, 255, 0.08)'
+                                                                    }`,
+                                                                    borderRadius: '12px',
+                                                                    color: 'var(--text-main)',
+                                                                    fontSize: '0.93rem',
+                                                                    cursor: 'pointer',
+                                                                    textAlign: 'left',
+                                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                                    backdropFilter: 'blur(4px)',
+                                                                    boxShadow: isSelected && !hasResult
+                                                                        ? '0 0 0 3px rgba(168, 85, 247, 0.1)'
+                                                                        : optionCorrect
+                                                                            ? '0 0 12px rgba(34, 197, 94, 0.15)'
+                                                                            : 'none'
+                                                                }}
+                                                            >
+                                                                <span>{option}</span>
+                                                                {optionCorrect && <CheckCircle size={18} color="#22c55e" />}
+                                                                {optionWrong && <XCircle size={18} color="#ef4444" />}
+                                                                {optionIsAnswer && <CheckCircle size={18} color="#22c55e60" />}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                /* Number and text inputs */
+                                                <div style={{ position: 'relative' }}>
+                                                    <input
+                                                        type={field.type === 'number' ? 'number' : 'text'}
+                                                        value={userAnswers[field.id] || ''}
+                                                        onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                                        placeholder={field.type === 'number'
+                                                            ? 'Ingresa el valor calculado...'
+                                                            : 'Escribe tu respuesta...'}
+                                                        style={{
+                                                            width: '100%',
+                                                            padding: '12px 40px 12px 16px',
+                                                            background: 'rgba(255, 255, 255, 0.04)',
+                                                            border: `1.5px solid ${hasResult
+                                                                ? (isCorrect ? '#22c55e' : '#ef4444')
+                                                                : 'rgba(255, 255, 255, 0.1)'
+                                                                }`,
+                                                            borderRadius: '12px',
+                                                            color: 'var(--text-main)',
+                                                            fontSize: '0.95rem',
+                                                            outline: 'none',
+                                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                            backdropFilter: 'blur(4px)',
+                                                            boxShadow: hasResult
+                                                                ? (isCorrect ? '0 0 12px rgba(34, 197, 94, 0.1)' : '0 0 12px rgba(239, 68, 68, 0.1)')
+                                                                : 'none'
+                                                        }}
+                                                    />
+                                                    {hasResult && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            right: '12px',
+                                                            top: '50%',
+                                                            transform: 'translateY(-50%)'
+                                                        }}>
+                                                            {isCorrect
+                                                                ? <CheckCircle size={20} color="#22c55e" />
+                                                                : <XCircle size={20} color="#ef4444" />
+                                                            }
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                             {hasResult && !isCorrect && (
-                                                <p style={{
-                                                    margin: '8px 0 0 0',
-                                                    fontSize: '0.8rem',
-                                                    color: '#ef4444'
-                                                }}>
-                                                    Valor esperado: {Array.isArray(result.expected)
-                                                        ? result.expected.join(', ')
-                                                        : (result.expected?.toLocaleString() || 'N/A')
-                                                    }
-                                                </p>
+                                                <>
+                                                    <p style={{
+                                                        margin: '8px 0 0 0',
+                                                        fontSize: '0.8rem',
+                                                        color: '#ef4444'
+                                                    }}>
+                                                        Valor esperado: {Array.isArray(result.expected)
+                                                            ? result.expected.join(', ')
+                                                            : (result.expected?.toLocaleString() || 'N/A')
+                                                        }
+                                                    </p>
+                                                    {field.hint && (
+                                                        <div style={{
+                                                            margin: '6px 0 0 0',
+                                                            fontSize: '0.8rem',
+                                                            color: '#fbbf24',
+                                                            display: 'flex',
+                                                            alignItems: 'flex-start',
+                                                            gap: '8px',
+                                                            padding: '8px 12px',
+                                                            borderRadius: '10px',
+                                                            background: 'rgba(245, 158, 11, 0.06)',
+                                                            border: '1px solid rgba(245, 158, 11, 0.12)'
+                                                        }}>
+                                                            💡 {field.hint}
+                                                        </div>
+                                                    )}
+                                                    {field.academyHint && (
+                                                        <div style={{
+                                                            margin: '6px 0 0 0',
+                                                            fontSize: '0.8rem',
+                                                            color: '#60a5fa',
+                                                            display: 'flex',
+                                                            alignItems: 'flex-start',
+                                                            gap: '8px',
+                                                            padding: '8px 12px',
+                                                            borderRadius: '10px',
+                                                            background: 'rgba(59, 130, 246, 0.06)',
+                                                            border: '1px solid rgba(59, 130, 246, 0.12)'
+                                                        }}>
+                                                            📖 {field.academyHint}
+                                                        </div>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     );
@@ -686,7 +876,175 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
                                     <RotateCcw size={18} />
                                     Reset
                                 </motion.button>
+
+                                {/* Botón de Tips Premium */}
+                                {mission?.premiumTips && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setShowPremiumTips(!showPremiumTips)}
+                                        style={{
+                                            padding: '14px 20px',
+                                            background: showPremiumTips 
+                                                ? 'linear-gradient(135deg, #ffd700, #f59e0b)'
+                                                : 'rgba(255, 215, 0, 0.1)',
+                                            border: '1px solid rgba(255, 215, 0, 0.3)',
+                                            borderRadius: '10px',
+                                            color: showPremiumTips ? '#000' : '#ffd700',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        <Lightbulb size={18} />
+                                        Ayuda Premium
+                                    </motion.button>
+                                )}
+
+                                {/* Botón de Insights */}
+                                {(mission?.whyItMatters || mission?.selfAssessment) && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setShowInsights(!showInsights)}
+                                        style={{
+                                            padding: '14px 20px',
+                                            background: showInsights 
+                                                ? 'linear-gradient(135deg, #6366f1, #4f46e5)'
+                                                : 'rgba(99, 102, 241, 0.1)',
+                                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                                            borderRadius: '10px',
+                                            color: showInsights ? '#fff' : '#a5b4fc',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        <BookOpen size={18} />
+                                        ¿Por qué?
+                                    </motion.button>
+                                )}
                             </div>
+
+                            {/* Botón "Revelar respuestas" - aparece después de 3 intentos fallidos */}
+                            {attempts >= 3 && !revealedAnswers && !validationResult?.allCorrect && (
+                                <motion.button
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    onClick={() => setRevealedAnswers(true)}
+                                    style={{
+                                        width: '100%',
+                                        marginTop: '12px',
+                                        padding: '12px 24px',
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                        borderRadius: '12px',
+                                        color: '#ef4444',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <HelpCircle size={16} />
+                                    Revelar respuestas (-50% XP)
+                                </motion.button>
+                            )}
+
+                            {/* Panel de respuestas reveladas */}
+                            {revealedAnswers && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    style={{
+                                        marginTop: '16px',
+                                        padding: '16px',
+                                        background: 'rgba(239, 68, 68, 0.05)',
+                                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                                        borderRadius: '12px'
+                                    }}
+                                >
+                                    <p style={{ color: '#f59e0b', fontSize: '0.9rem', marginBottom: '12px', fontWeight: '600' }}>
+                                        No pasa nada, lo importante es aprender. Revisa los conceptos:
+                                    </p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                                        {fields.map(field => (
+                                            <div key={field.id} style={{
+                                                padding: '8px 12px',
+                                                background: 'rgba(255,255,255,0.03)',
+                                                borderRadius: '8px',
+                                                fontSize: '0.85rem'
+                                            }}>
+                                                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{field.label}</span>
+                                                <br />
+                                                <span style={{ color: '#22c55e', fontWeight: '600' }}>
+                                                    Respuesta: {field.options ? field.expected : field.expected.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            if (onValidationComplete) {
+                                                const penalizedXP = Math.round((mission?.xp || 100) * 0.5);
+                                                onValidationComplete({
+                                                    success: true,
+                                                    attempts,
+                                                    hintsUsed: hintsUsed + 1,
+                                                    wrongAnswers: totalWrongAnswers,
+                                                    xpEarned: penalizedXP,
+                                                    bonusMultiplier: 0.5,
+                                                    isPerfect: false,
+                                                    breakdown: { revealPenalty: true },
+                                                    skillsDemo: mission?.skillsDemo || [],
+                                                    revealedAnswer: true
+                                                });
+                                            }
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                                            border: 'none',
+                                            borderRadius: '12px',
+                                            color: '#000',
+                                            fontWeight: 'bold',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Completar misión con respuestas reveladas (+{Math.round((mission?.xp || 100) * 0.5)} XP)
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* Panel de Tips Premium */}
+                            <AnimatePresence>
+                                {showPremiumTips && mission?.premiumTips && (
+                                    <PremiumTipsPanel 
+                                        premiumTips={mission.premiumTips}
+                                        onClose={() => setShowPremiumTips(false)}
+                                    />
+                                )}
+                            </AnimatePresence>
+
+                            {/* Panel de Insights */}
+                            <AnimatePresence>
+                                {showInsights && (
+                                    <MissionInsights
+                                        whyItMatters={mission?.whyItMatters}
+                                        selfAssessment={mission?.selfAssessment}
+                                        interfaceGuide={mission?.interfaceGuide}
+                                        onClose={() => setShowInsights(false)}
+                                    />
+                                )}
+                            </AnimatePresence>
 
                             {/* Attempt Info */}
                             {attempts > 0 && !validationResult?.allCorrect && (

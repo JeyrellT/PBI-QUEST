@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, CheckCircle2, Download, Play, Coins, Layers, Award, BookOpen, Target, Sparkles, TrendingUp, AlertCircle } from 'lucide-react';
@@ -7,7 +7,7 @@ import useSound from '../../hooks/useSound';
 import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 import ParticleBackground from '../common/ParticleBackground';
 import Portal from '../common/Portal';
-import { WORLDS } from '../../data/worlds';
+import { WORLDS, INITIAL_DIAGNOSTIC, CHARACTER_MENTORS, MICRO_VICTORIES } from '../../data/worlds';
 import { getAssetPath } from '../../utils/assetPath';
 import { useDataGenerator } from '../../hooks/useDataGenerator';
 import { MISSION_REQUIRED_CARDS } from '../../data/pdfCards';
@@ -15,6 +15,15 @@ import MissionCardSelector from './MissionCardSelector';
 import CardDeck from './CardDeck';
 import confetti from 'canvas-confetti';
 import MissionValidator from './MissionValidator';
+
+// NUEVO: Componentes pedagógicos del Mundo 1
+import InitialDiagnostic from '../common/InitialDiagnostic';
+import MicroVictoryToast from '../common/MicroVictoryToast';
+import { useMicroVictories } from '../../hooks/useMicroVictories';
+import MissionExpectations from '../common/MissionExpectations';
+import SpacedRepetitionPanel, { ReviewNotification } from '../common/SpacedRepetitionPanel';
+import { registerLearnedConcept } from '../../hooks/useSpacedRepetition';
+import { useABTesting } from '../../hooks/useABTesting';
 
 const WorldMap = () => {
     const {
@@ -24,11 +33,22 @@ const WorldMap = () => {
         recordMissionPerformance,
         unlockWorldSkills,
         completeWorld,
-        getWorldPerformanceSummary
+        getWorldPerformanceSummary,
+        saveDiagnosticResult
     } = useGame();
     const { sounds } = useSound();
     const { canUseHeavyEffects } = useDeviceCapabilities();
     const containerRef = useRef(null);
+    
+    // NUEVO: Hooks para sistemas pedagógicos
+    const { microVictory, currentVictory, clearVictory } = useMicroVictories();
+    const { 
+        trackEvent, 
+        trackMissionStart, 
+        trackMissionComplete, 
+        trackMissionAbandon,
+        getVariant 
+    } = useABTesting();
 
     const {
         generateTreasuryData,
@@ -55,6 +75,17 @@ const WorldMap = () => {
     // Victory Modal State
     const [showVictoryModal, setShowVictoryModal] = useState(false);
     const [missionResults, setMissionResults] = useState(null);
+    
+    // NUEVO: Estados para sistema pedagógico del Mundo 1
+    const [showInitialDiagnostic, setShowInitialDiagnostic] = useState(false);
+    const [showMissionExpectations, setShowMissionExpectations] = useState(false);
+    const [pendingExpectationsMission, setPendingExpectationsMission] = useState(null);
+    const [showSpacedRepetition, setShowSpacedRepetition] = useState(false);
+    const [missionStartTime, setMissionStartTime] = useState(null);
+    
+    // NUEVO: Verificar si el usuario necesita diagnóstico inicial
+    const userDiagnosticRoute = user?.diagnosticRoute || null;
+    const needsDiagnostic = !userDiagnosticRoute && user?.completedMissions?.length === 0;
 
     // NUEVO: Estados para narrativas y epílogo
     const [showNarrativeModal, setShowNarrativeModal] = useState(false);
@@ -114,6 +145,42 @@ const WorldMap = () => {
         return questions;
     };
 
+    // Detectar cuando un mundo se completa (reactivo a cambios en completedMissions)
+    useEffect(() => {
+        if (!user?.completedMissions || user.completedMissions.length === 0) return;
+
+        // Verificar cada mundo para detectar si acaba de completarse
+        WORLDS.forEach(world => {
+            const allMissionIds = world.missions.map(m => m.id);
+            const allMissionsCompleted = allMissionIds.every(
+                id => user.completedMissions.includes(id)
+            );
+
+            // Verificar si el mundo ya fue marcado como completado
+            const worldAlreadyCompleted = user.worldProgress?.[world.id]?.completedAt;
+
+            // Si todas las misiones están completas pero el mundo no está marcado como completado
+            if (allMissionsCompleted && !worldAlreadyCompleted && world.epilogue) {
+                // Marcar mundo como completado
+                completeWorld(world.id);
+
+                // Mostrar epílogo después de un momento
+                setTimeout(() => {
+                    setEpilogueWorld(world);
+                    setShowEpilogueModal(true);
+
+                    // Gran celebración
+                    confetti({
+                        particleCount: 300,
+                        spread: 100,
+                        origin: { y: 0.5 },
+                        colors: [world.color, '#ffd700', '#22c55e', '#ffffff']
+                    });
+                }, 500);
+            }
+        });
+    }, [user?.completedMissions, user?.worldProgress, completeWorld]);
+
     // Iniciar modo repaso
     const handleStartReview = (world) => {
         const questions = generateReviewQuestions(world);
@@ -121,10 +188,108 @@ const WorldMap = () => {
         setShowReviewMode(true);
         setShowEpilogueModal(false);
     };
+    
+    // NUEVO: Handlers para sistema pedagógico
+    // Cuando el usuario entra al primer mundo por primera vez
+    const handleWorld1Entry = (world) => {
+        if (world.id === 'office' && needsDiagnostic) {
+            // Mostrar diagnóstico inicial
+            setShowInitialDiagnostic(true);
+            trackEvent('diagnostic_started', { worldId: world.id });
+        } else {
+            setSelectedWorld(world);
+        }
+    };
+    
+    // Cuando el diagnóstico se completa
+    const handleDiagnosticComplete = (result) => {
+        setShowInitialDiagnostic(false);
+        trackEvent('diagnostic_completed', { 
+            route: result.route, 
+            score: result.score 
+        });
+        
+        // Guardar resultado del diagnóstico en el contexto
+        saveDiagnosticResult(result);
+        
+        // Encontrar el mundo Office
+        const officeWorld = WORLDS.find(w => w.id === 'office');
+        setSelectedWorld(officeWorld);
+        
+        // Mostrar micro-victoria por completar diagnóstico
+        setTimeout(() => {
+            microVictory('onDataLoaded', CHARACTER_MENTORS.find(c => c.id === 'pam'));
+        }, 500);
+    };
+    
+    // Mostrar expectativas antes de iniciar una misión
+    const handleShowExpectations = (mission) => {
+        // Determinar el tipo de misión para las expectativas
+        const missionType = mission.isBoss ? 'boss' : 
+                          mission.chapter === 0 ? 'tutorial' : 
+                          mission.chapter <= 2 ? 'practice' : 'challenge';
+        
+        setPendingExpectationsMission({ ...mission, type: missionType });
+        setShowMissionExpectations(true);
+        trackEvent('expectations_shown', { missionId: mission.id });
+    };
+    
+    // Cuando el usuario confirma que está listo
+    const handleExpectationsReady = () => {
+        setShowMissionExpectations(false);
+        const mission = pendingExpectationsMission;
+        setPendingExpectationsMission(null);
+        
+        // Iniciar tracking de tiempo
+        setMissionStartTime(Date.now());
+        trackMissionStart(mission.id, selectedWorld?.id);
+        
+        // Continuar con el flujo normal de inicio
+        if (missionRequiresCards(mission.id)) {
+            setPendingMission(mission);
+            setShowCardSelector(true);
+        } else {
+            setSelectedMission(mission);
+            setActiveTab('details');
+        }
+        
+        // Mostrar micro-victoria por empezar
+        setTimeout(() => {
+            microVictory('onPowerBIOpen');
+        }, 1000);
+    };
+    
+    // Trigger micro-victorias en descarga de datos
+    const handleDataDownloadWithVictory = (datasetName) => {
+        handleDownloadData(datasetName);
+        
+        // Mostrar micro-victoria después de un momento
+        setTimeout(() => {
+            microVictory('onFileDownload');
+        }, 500);
+    };
 
     // Verificar si la misión requiere selección de cartas (solo DataRescue HQ)
     const missionRequiresCards = (missionId) => {
         return MISSION_REQUIRED_CARDS[missionId] !== undefined;
+    };
+
+    const getNextMissionInOrder = (world, currentMissionId) => {
+        if (!world?.missions?.length || !currentMissionId) return null;
+
+        const missions = world.missions;
+        const currentIndex = missions.findIndex(m => m.id === currentMissionId);
+        if (currentIndex === -1) return null;
+
+        const completed = new Set([...(user?.completedMissions || []), currentMissionId]);
+
+        for (let i = currentIndex + 1; i < missions.length; i += 1) {
+            if (!completed.has(missions[i].id)) {
+                return missions[i];
+            }
+        }
+
+        return missions.find(m => !completed.has(m.id)) || null;
     };
 
     const handleUnlockWorld = (world) => {
@@ -140,6 +305,15 @@ const WorldMap = () => {
     };
 
     const handleStartMission = (mission) => {
+        // NUEVO: Para el primer mundo, mostrar expectativas primero
+        const isWorld1 = selectedWorld?.id === 'office';
+        const variant = getVariant('onboarding-flow');
+        
+        if (isWorld1 && variant === 'with-expectations') {
+            handleShowExpectations(mission);
+            return;
+        }
+        
         // Si es una misión de DataRescue HQ que requiere cartas, mostrar selector
         if (missionRequiresCards(mission.id)) {
             setPendingMission(mission);
@@ -148,6 +322,7 @@ const WorldMap = () => {
             // Misión normal sin requisito de cartas
             setSelectedMission(mission);
             setActiveTab('details');
+            requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }));
         }
     };
 
@@ -157,6 +332,7 @@ const WorldMap = () => {
         setSelectedMission(pendingMission);
         setActiveTab('details');
         setPendingMission(null);
+        requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }));
 
         // Celebrar la selección correcta
         confetti({
@@ -235,6 +411,22 @@ const WorldMap = () => {
             if (selectedMission.skillsDemo?.length > 0) {
                 unlockWorldSkills(selectedWorld.id, selectedMission.skillsDemo);
             }
+            
+            // Registrar conceptos para repaso espaciado
+            if (selectedMission.skillsDemo?.length > 0) {
+                selectedMission.skillsDemo.forEach(skillId => {
+                    registerLearnedConcept({
+                        conceptId: skillId,
+                        conceptName: skillId,
+                        worldId: selectedWorld.id,
+                        missionId: selectedMission.id
+                    });
+                });
+            }
+            
+            // NUEVO: Track A/B testing
+            const duration = missionStartTime ? Date.now() - missionStartTime : 0;
+            trackMissionComplete(selectedMission.id, selectedWorld?.id, results.xpEarned, duration);
         }
 
         // Confetti burst initial
@@ -244,6 +436,11 @@ const WorldMap = () => {
             origin: { y: 0.6 },
             colors: [selectedWorld.color, '#ffffff', '#00d2ff']
         });
+        
+        // NUEVO: Mostrar micro-victoria de finalización
+        setTimeout(() => {
+            microVictory('onFirstVisualization');
+        }, 300);
     };
 
     // Al cerrar el modal de victoria
@@ -259,32 +456,10 @@ const WorldMap = () => {
         // Reset victory modal
         setShowVictoryModal(false);
         setMissionResults(null);
+        setMissionStartTime(null);
 
-        // Verificar si se completó el mundo
-        const allMissionIds = selectedWorld.missions.map(m => m.id);
-        const willCompleteWorld = allMissionIds.every(
-            id => id === selectedMission.id || user.completedMissions.includes(id)
-        );
-
-        if (willCompleteWorld && selectedWorld.epilogue) {
-            // Marcar mundo como completado
-            completeWorld(selectedWorld.id);
-
-            // Mostrar epílogo después de un momento
-            setTimeout(() => {
-                setEpilogueWorld(selectedWorld);
-                setShowEpilogueModal(true);
-
-                // Gran celebración
-                confetti({
-                    particleCount: 300,
-                    spread: 100,
-                    origin: { y: 0.5 },
-                    colors: [selectedWorld.color, '#ffd700', '#22c55e', '#ffffff']
-                });
-            }, 500);
-        } else if (selectedMission.outroNarrative) {
-            // Mostrar narrativa de transición
+        // Mostrar narrativa de transición si existe
+        if (selectedMission.outroNarrative) {
             setCurrentNarrative({
                 type: 'outro',
                 text: selectedMission.outroNarrative,
@@ -295,6 +470,71 @@ const WorldMap = () => {
 
         setSelectedMission(null);
     };
+
+    const formatMeasureLabel = (value = '') => {
+        if (!value) return '';
+        return value
+            .replace(/_/g, ' ')
+            .replace(/([a-z])([A-Z])/g, '$1 $2')
+            .trim();
+    };
+
+    const buildValidationChecklist = (mission) => {
+        const validation = mission?.validation;
+        if (!validation) return [];
+
+        if (validation.type === 'numeric') {
+            return [
+                `Calcula ${formatMeasureLabel(validation.measureId)} con el dataset de esta misión.`,
+                validation.tolerance
+                    ? `El resultado debe quedar dentro de ±${Math.round(validation.tolerance * 100)}%.`
+                    : 'El resultado debe coincidir exactamente con el valor esperado.',
+                'Si no coincide, revisa la limpieza de datos antes de tocar la fórmula.'
+            ];
+        }
+
+        if (validation.type === 'composite') {
+            const measureChecks = (validation.measures || []).map((measure) => {
+                const toleranceText = measure.tolerance
+                    ? ` (±${Math.round(measure.tolerance * 100)}%)`
+                    : ' (exacto)';
+                return `Valida ${formatMeasureLabel(measure.id)}${toleranceText}.`;
+            });
+
+            return [
+                ...measureChecks,
+                'Haz validación una métrica a la vez para aislar errores más rápido.'
+            ];
+        }
+
+        if (validation.type === 'setMatch') {
+            return [
+                'Entrega el conjunto exacto de códigos detectados, separados por coma.',
+                'No basta con “aproximar”: deben estar los IDs correctos.',
+                'Si falta un código, revisa filtros y umbral de detección.'
+            ];
+        }
+
+        if (validation.type === 'confusionMatrix') {
+            return [
+                `Cuenta ${formatMeasureLabel(validation.measureId)} aplicando la regla de negocio.`,
+                validation.tolerance
+                    ? `El conteo acepta una variación máxima de ±${validation.tolerance}.`
+                    : 'El conteo debe ser exacto.',
+                'Valida casos borde para evitar falsos positivos/negativos.'
+            ];
+        }
+
+        return ['Completa la validación definida para esta misión.'];
+    };
+
+    const dataRescueReadFirst = 'Antes de validar, recorre la pestaña "Guía Paso a Paso", completa los checkpoints y verifica cada limpieza en Power Query.';
+
+    const validatorMission = selectedMission?.id?.startsWith('datarescue-') && !selectedMission?.readFirstMessage
+        ? { ...selectedMission, readFirstMessage: dataRescueReadFirst }
+        : selectedMission;
+
+    const guideValidationChecklist = selectedMission ? buildValidationChecklist(selectedMission) : [];
 
     return (
         <div className="world-map-container" ref={containerRef} style={{ width: '100%', position: 'relative' }}>
@@ -422,7 +662,7 @@ const WorldMap = () => {
                                             </div>
 
                                             <MissionValidator
-                                                mission={selectedMission}
+                                                mission={validatorMission}
                                                 datasetSession={datasetSessions[selectedMission.datasets?.[0]]}
                                                 onValidationComplete={handleValidationSuccess}
                                             />
@@ -546,21 +786,69 @@ const WorldMap = () => {
                                                             </div>
                                                         </div>
 
-                                                        <button
-                                                            className="btn btn-primary"
-                                                            style={{
-                                                                width: '100%',
-                                                                fontSize: '1.1rem',
-                                                                padding: '16px',
-                                                                background: 'linear-gradient(135deg, #ffd700 0%, #ffaa00 100%)',
-                                                                color: '#000',
-                                                                border: 'none',
-                                                                fontWeight: 'bold'
-                                                            }}
-                                                            onClick={handleVictoryContinue}
-                                                        >
-                                                            Continuar la Aventura →
-                                                        </button>
+{(() => {
+                                                            const nextMission = getNextMissionInOrder(selectedWorld, selectedMission?.id);
+
+                                                            return (
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                                    {nextMission ? (
+                                                                        <button
+                                                                            className="btn btn-primary"
+                                                                            style={{
+                                                                                width: '100%',
+                                                                                fontSize: '1.1rem',
+                                                                                padding: '16px',
+                                                                                background: 'linear-gradient(135deg, #ffd700 0%, #ffaa00 100%)',
+                                                                                color: '#000',
+                                                                                border: 'none',
+                                                                                fontWeight: 'bold',
+                                                                                borderRadius: '12px'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                handleVictoryContinue();
+                                                                                setTimeout(() => {
+                                                                                    handleStartMission(nextMission);
+                                                                                }, 0);
+                                                                            }}
+                                                                        >
+                                                                            Siguiente Misión: {nextMission.title} →
+                                                                        </button>
+                                                                    ) : (
+                                                                        <button
+                                                                            className="btn btn-primary"
+                                                                            style={{
+                                                                                width: '100%',
+                                                                                fontSize: '1.1rem',
+                                                                                padding: '16px',
+                                                                                background: 'linear-gradient(135deg, #ffd700 0%, #ffaa00 100%)',
+                                                                                color: '#000',
+                                                                                border: 'none',
+                                                                                fontWeight: 'bold',
+                                                                                borderRadius: '12px'
+                                                                            }}
+                                                                            onClick={handleVictoryContinue}
+                                                                        >
+                                                                            Ver Epílogo del Mundo →
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        style={{
+                                                                            width: '100%',
+                                                                            padding: '12px',
+                                                                            background: 'transparent',
+                                                                            border: '1px solid rgba(255,255,255,0.2)',
+                                                                            color: 'rgba(255,255,255,0.7)',
+                                                                            borderRadius: '12px',
+                                                                            fontSize: '0.95rem',
+                                                                            cursor: 'pointer'
+                                                                        }}
+                                                                        onClick={handleVictoryContinue}
+                                                                    >
+                                                                        Volver al Mapa
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </motion.div>
                                                 </motion.div>
                                                 </Portal>
@@ -576,24 +864,98 @@ const WorldMap = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    <div className="guide-section">
-                                        <h3><Play size={20} /> Pasos a Seguir</h3>
-                                        <div className="steps-list">
-                                            {selectedMission.guide?.map((step, i) => (
-                                                <div key={i} className="step-item">
-                                                    <p>{step}</p>
-                                                </div>
-                                            ))}
-                                        </div>
+                                    <div className="guide-brief-grid">
+                                        {selectedMission.prerequisiteKnowledge?.length > 0 && (
+                                            <div className="guide-brief-card">
+                                                <h3><AlertCircle size={18} /> Antes de Empezar</h3>
+                                                <ul className="guide-inline-list">
+                                                    {selectedMission.prerequisiteKnowledge.map((item, i) => (
+                                                        <li key={i}>{item}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {selectedMission.learningObjectives?.length > 0 && (
+                                            <div className="guide-brief-card">
+                                                <h3><Target size={18} /> Qué Vas a Lograr</h3>
+                                                <ul className="guide-inline-list">
+                                                    {selectedMission.learningObjectives.map((item, i) => (
+                                                        <li key={i}>{item}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {selectedMission.realWorldAnalogy && (
+                                            <div className="guide-brief-card guide-analogy">
+                                                <h3><BookOpen size={18} /> Analogía del Mundo Real</h3>
+                                                <p>{selectedMission.realWorldAnalogy}</p>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="tips-section">
-                                        <h3><CheckCircle2 size={20} /> Consejos Pro</h3>
-                                        <ul className="tips-list">
-                                            {selectedMission.tips?.map((tip, i) => (
-                                                <li key={i}>{tip}</li>
-                                            ))}
-                                        </ul>
+                                    {selectedMission.conceptBreakdown?.length > 0 && (
+                                        <div className="guide-concepts-section">
+                                            <h3><BookOpen size={20} /> Explicación Rápida</h3>
+                                            <div className="guide-concepts-grid">
+                                                {selectedMission.conceptBreakdown.map((item, i) => (
+                                                    <div key={i} className="guide-concept-card">
+                                                        <h4>{item.emoji || '📘'} {item.concept}</h4>
+                                                        <p>{item.explanation}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="guide-main-grid">
+                                        <div className="guide-section">
+                                            <h3><Play size={20} /> Pasos a Seguir</h3>
+                                            <div className="steps-list">
+                                                {selectedMission.guide?.map((step, i) => (
+                                                    <div key={i} className="step-item">
+                                                        <p>{step}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="tips-section">
+                                            <h3><CheckCircle2 size={20} /> Consejos Pro</h3>
+                                            <ul className="tips-list">
+                                                {selectedMission.tips?.map((tip, i) => (
+                                                    <li key={i}>{tip}</li>
+                                                ))}
+                                            </ul>
+
+                                            {selectedMission.checkpoints?.length > 0 && (
+                                                <div className="guide-side-section">
+                                                    <h3><Target size={18} /> Checkpoints de Control</h3>
+                                                    <ul className="guide-inline-list">
+                                                        {selectedMission.checkpoints.map((checkpoint, i) => (
+                                                            <li key={i}>
+                                                                <strong>{checkpoint.question}</strong>
+                                                                {checkpoint.failureHint && (
+                                                                    <span className="guide-inline-note">{checkpoint.failureHint}</span>
+                                                                )}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {guideValidationChecklist.length > 0 && (
+                                                <div className="guide-side-section">
+                                                    <h3><CheckCircle2 size={18} /> Checklist de Validación</h3>
+                                                    <ul className="guide-inline-list">
+                                                        {guideValidationChecklist.map((item, i) => (
+                                                            <li key={i}>{item}</li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </motion.div>
                             )}
@@ -759,6 +1121,61 @@ const WorldMap = () => {
                                         </div>
                                     </div>
 
+                                    {/* World Progress Indicator */}
+                                    {selectedWorld && (() => {
+                                        const completedCount = selectedWorld.missions.filter(m => user.completedMissions.includes(m.id)).length;
+                                        const totalCount = selectedWorld.missions.length;
+                                        const progressPercent = Math.round((completedCount / totalCount) * 100);
+
+                                        return (
+                                            <div style={{
+                                                padding: '12px 20px',
+                                                marginBottom: '16px',
+                                                background: 'rgba(255,255,255,0.03)',
+                                                borderRadius: '12px',
+                                                border: '1px solid rgba(255,255,255,0.06)'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    marginBottom: '8px'
+                                                }}>
+                                                    <span style={{
+                                                        color: 'rgba(255,255,255,0.8)',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: '600'
+                                                    }}>
+                                                        {selectedWorld.name}: {completedCount}/{totalCount} misiones
+                                                    </span>
+                                                    <span style={{
+                                                        color: progressPercent === 100 ? '#22c55e' : '#00d2ff',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: '700'
+                                                    }}>
+                                                        {progressPercent}%
+                                                    </span>
+                                                </div>
+                                                <div style={{
+                                                    height: '6px',
+                                                    background: 'rgba(255,255,255,0.1)',
+                                                    borderRadius: '3px',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    <div style={{
+                                                        height: '100%',
+                                                        width: `${progressPercent}%`,
+                                                        background: progressPercent === 100
+                                                            ? 'linear-gradient(90deg, #22c55e, #16a34a)'
+                                                            : `linear-gradient(90deg, ${selectedWorld.color || '#00d2ff'}, ${selectedWorld.color || '#0099ff'})`,
+                                                        borderRadius: '3px',
+                                                        transition: 'width 0.5s ease'
+                                                    }} />
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+
                                     <motion.div
                                         className="missions-timeline"
                                         initial="hidden"
@@ -773,7 +1190,12 @@ const WorldMap = () => {
                                     >
                                         {selectedWorld.missions.map((mission) => {
                                             const isCompleted = user.completedMissions.includes(mission.id);
-                                            const isLocked = user.level < mission.level;
+                                            const isLocked = user.level < mission.level ||
+    (mission.requires && mission.requires.length > 0 && mission.requires.some(reqId => !user.completedMissions.includes(reqId)));
+
+                                            // Get story timeline day for this mission
+                                            const timelineEntry = selectedWorld.storyTimeline?.find(entry => entry.mission === mission.id);
+                                            const storyDay = timelineEntry?.day;
 
                                             return (
                                                 <motion.div
@@ -808,8 +1230,48 @@ const WorldMap = () => {
                                                                     </span>
                                                                 )}
                                                             </div>
-                                                            <h3>{mission.title}</h3>
+                                                            <h3>
+                                                                {mission.title}
+                                                                {storyDay && (
+                                                                    <span style={{
+                                                                        fontSize: '0.65rem',
+                                                                        padding: '2px 8px',
+                                                                        borderRadius: '8px',
+                                                                        background: 'rgba(255, 215, 0, 0.1)',
+                                                                        color: '#ffd700',
+                                                                        border: '1px solid rgba(255, 215, 0, 0.2)',
+                                                                        marginLeft: '8px',
+                                                                        whiteSpace: 'nowrap',
+                                                                        fontWeight: '500'
+                                                                    }}>
+                                                                        {storyDay}
+                                                                    </span>
+                                                                )}
+                                                            </h3>
                                                             <p>{mission.description}</p>
+
+                                                            {isCompleted && mission.skillsDemo && mission.skillsDemo.length > 0 && (
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    flexWrap: 'wrap',
+                                                                    gap: '4px',
+                                                                    marginTop: '6px'
+                                                                }}>
+                                                                    {mission.skillsDemo.map(skill => (
+                                                                        <span key={skill} style={{
+                                                                            fontSize: '0.65rem',
+                                                                            padding: '2px 8px',
+                                                                            borderRadius: '10px',
+                                                                            background: 'rgba(34, 197, 94, 0.15)',
+                                                                            color: '#22c55e',
+                                                                            border: '1px solid rgba(34, 197, 94, 0.3)',
+                                                                            whiteSpace: 'nowrap'
+                                                                        }}>
+                                                                            {skill}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="mission-actions-right">
                                                             <div className="mission-rewards-small">
@@ -857,6 +1319,7 @@ const WorldMap = () => {
             < AnimatePresence >
                 {showCardDeck && (
                     <CardDeck
+                        key="card-deck-modal"
                         isOpen={showCardDeck}
                         onClose={() => setShowCardDeck(false)}
                     />
@@ -867,6 +1330,7 @@ const WorldMap = () => {
             < AnimatePresence >
                 {showCardSelector && pendingMission && (
                     <MissionCardSelector
+                        key="mission-card-selector"
                         missionId={pendingMission.id}
                         onCardsSelected={handleCardsSelected}
                         onCancel={handleCardSelectorCancel}
@@ -878,6 +1342,7 @@ const WorldMap = () => {
             {/* NUEVO: Modal de Narrativa de Transición */}
             <AnimatePresence>
                 {showNarrativeModal && currentNarrative && (
+                    <div key="narrative-modal-wrapper">
                     <Portal>
                     <motion.div
                         className="narrative-modal-overlay"
@@ -957,12 +1422,14 @@ const WorldMap = () => {
                         </motion.div>
                     </motion.div>
                     </Portal>
+                    </div>
                 )}
             </AnimatePresence>
 
             {/* NUEVO: Modal de Epílogo del Mundo */}
             <AnimatePresence>
                 {showEpilogueModal && epilogueWorld && (
+                    <div key="epilogue-modal-wrapper">
                     <Portal>
                     <motion.div
                         className="epilogue-modal-overlay"
@@ -1271,12 +1738,14 @@ const WorldMap = () => {
                         </motion.div>
                     </motion.div>
                     </Portal>
+                    </div>
                 )}
             </AnimatePresence>
 
             {/* NUEVO: Modal de Modo Repaso */}
             <AnimatePresence>
                 {showReviewMode && reviewQuestions.length > 0 && (
+                    <div key="review-modal-wrapper">
                     <Portal>
                     <motion.div
                         className="review-modal-overlay"
@@ -1472,8 +1941,56 @@ const WorldMap = () => {
                         </motion.div>
                     </motion.div>
                     </Portal>
+                    </div>
+                )}
+                
+                {/* NUEVO: Modal de Diagnóstico Inicial */}
+                {showInitialDiagnostic && (
+                    <InitialDiagnostic
+                        key="initial-diagnostic"
+                        onComplete={handleDiagnosticComplete}
+                        onSkip={() => {
+                            setShowInitialDiagnostic(false);
+                            const officeWorld = WORLDS.find(w => w.id === 'office');
+                            setSelectedWorld(officeWorld);
+                        }}
+                    />
+                )}
+                
+                {/* NUEVO: Modal de Expectativas de Misión */}
+                {showMissionExpectations && pendingExpectationsMission && (
+                    <MissionExpectations
+                        key="mission-expectations"
+                        mission={pendingExpectationsMission}
+                        missionType={pendingExpectationsMission.type}
+                        onStart={handleExpectationsReady}
+                        onCancel={() => {
+                            setShowMissionExpectations(false);
+                            setPendingExpectationsMission(null);
+                        }}
+                    />
+                )}
+                
+                {/* NUEVO: Panel de Repaso Espaciado */}
+                {showSpacedRepetition && (
+                    <SpacedRepetitionPanel
+                        key="spaced-repetition-panel"
+                        onClose={() => setShowSpacedRepetition(false)}
+                    />
                 )}
             </AnimatePresence>
+                
+            {/* NUEVO: Notificación de Repasos Pendientes */}
+            <ReviewNotification
+                onStartReview={() => setShowSpacedRepetition(true)}
+                onDismiss={() => {}}
+            />
+            
+            {/* NUEVO: Toast de Micro-Victorias */}
+            <MicroVictoryToast
+                victory={currentVictory}
+                onComplete={clearVictory}
+            />
         </div >
     );
 };

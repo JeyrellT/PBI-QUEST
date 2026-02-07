@@ -69,6 +69,11 @@ export const GameProvider = ({ children }) => {
             viewedCards: [],           // IDs de cartas que el jugador ha visto
             cardsUsedInMissions: {},   // { missionId: [cardIds] }
 
+            // NUEVO: Resultado del diagnóstico inicial
+            diagnosticRoute: null,     // 'novice', 'basic', o 'intermediate'
+            diagnosticScore: 0,        // Puntaje del diagnóstico (0-4)
+            diagnosticCompletedAt: null,
+
             // NUEVO: Tracking de rendimiento por mundo
             worldProgress: {
                 // office: { 
@@ -684,6 +689,19 @@ export const GameProvider = ({ children }) => {
         });
     };
 
+    // NUEVO: Guardar resultado del diagnóstico inicial
+    const saveDiagnosticResult = (result) => {
+        setUser(prev => ({
+            ...prev,
+            diagnosticRoute: result.route,
+            diagnosticScore: result.score,
+            diagnosticCompletedAt: new Date().toISOString()
+        }));
+        
+        // Dar pequeña recompensa por completar el diagnóstico
+        showToast('🎯 ¡Diagnóstico completado! Ruta personalizada activada', 'success');
+    };
+
     return (
         <GameContext.Provider value={{
             user,
@@ -709,6 +727,8 @@ export const GameProvider = ({ children }) => {
             getWorldSkills,
             isWorldCompleted,
             getWorldPerformanceSummary,
+            // NUEVO: Sistema de diagnóstico inicial
+            saveDiagnosticResult,
             // Referencia a perfiles de scoring
             SCORING_PROFILES
         }}>

@@ -8,7 +8,6 @@ import { HERO_CARDS, VILLAIN_CARDS, SPECIAL_CARDS, COVER_CARD, getUnlockedCards 
 import { getAssetPath } from '../../utils/assetPath';
 import Portal from '../common/Portal';
 import '../../styles/CardDeck.css';
-import '../../styles/premium-cards.css';
 
 // Componente de partículas para cartas
 const CardParticles = () => (

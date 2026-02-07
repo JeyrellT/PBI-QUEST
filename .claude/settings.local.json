@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"D:\\\\Documents\\\\Visual\\\\Aprender PB\\\\src\\\\components\\\\game\"\" && echo \"---\" && ls -la \"D:DocumentsVisualAprender PBsrccomponentscommon\"\")",
+      "Bash(ls -la \"D:\\\\Documents\\\\Visual\\\\Aprender PB\\\\src\\\\data\"\" && echo \"---\" && ls -la \"D:DocumentsVisualAprender PBsrchooks\"\")"
+    ]
+  }
+}

@@ -1,52 +1,339 @@
+// =========================================================================
+// LEARNING PATHS - Rutas de aprendizaje guiadas
+// =========================================================================
+export const learningPaths = [
+  {
+    id: 'beginner-essentials',
+    title: '🚀 Inicio Rápido',
+    description: 'De cero a tu primer dashboard en 30 minutos',
+    difficulty: 'Principiante',
+    estimatedTime: '30 min',
+    xpReward: 100,
+    lessons: ['pbi-intro', 'pbi-interface', 'first-report', 'get-data'],
+    badge: '🎯',
+    color: '#10b981'
+  },
+  {
+    id: 'data-ninja',
+    title: '🥷 Ninja de Datos',
+    description: 'Domina Power Query y la limpieza de datos',
+    difficulty: 'Intermedio',
+    estimatedTime: '45 min',
+    xpReward: 150,
+    lessons: ['power-query-basics', 'column-from-examples', 'handle-errors', 'datarescue-survival'],
+    badge: '🧹',
+    color: '#3b82f6'
+  },
+  {
+    id: 'dax-master',
+    title: '🧙 Maestro DAX',
+    description: 'Las fórmulas que transforman datos en insights',
+    difficulty: 'Intermedio',
+    estimatedTime: '60 min',
+    xpReward: 200,
+    lessons: ['dax-intro', 'sum-average-count', 'calculate-filter', 'if-switch', 'divide-safe'],
+    badge: '🧮',
+    color: '#8b5cf6'
+  },
+  {
+    id: 'viz-pro',
+    title: '🎨 Pro de Visualización',
+    description: 'Dashboards que cuentan historias',
+    difficulty: 'Intermedio',
+    estimatedTime: '35 min',
+    xpReward: 120,
+    lessons: ['chart-types', 'card-kpi', 'filters-slicers', 'video-dashboard-design-historia-datos'],
+    badge: '📊',
+    color: '#f59e0b'
+  }
+];
+
+// =========================================================================
+// QUICK TIPS - Tips contextuales por categoría
+// =========================================================================
+export const quickTips = {
+  basics: [
+    { icon: '💡', tip: 'Power BI Desktop es gratuito - descárgalo desde powerbi.microsoft.com' },
+    { icon: '⌨️', tip: 'Ctrl+S para guardar, F5 para actualizar datos' },
+    { icon: '🔄', tip: 'La Vista de Modelo te muestra las relaciones entre tablas' }
+  ],
+  data: [
+    { icon: '🔗', tip: 'Arrastra un archivo directamente a Power BI para importarlo' },
+    { icon: '🧹', tip: 'Siempre limpia datos en Power Query ANTES de cargar' },
+    { icon: '📋', tip: '"Pasos aplicados" es tu historial - puedes volver atrás en cualquier momento' }
+  ],
+  modeling: [
+    { icon: '📐', tip: 'Medidas = cálculos dinámicos, Columnas = valores fijos por fila' },
+    { icon: '⚡', tip: 'Usa DIVIDE() en lugar de / para evitar errores de división por cero' },
+    { icon: '🎯', tip: 'Siempre especifica Tabla[Columna] en DAX, nunca solo el nombre de columna' }
+  ],
+  viz: [
+    { icon: '📊', tip: 'Tarjetas (Cards) son perfectas para mostrar KPIs principales' },
+    { icon: '🎨', tip: 'Menos de 6 colores por dashboard = mejor legibilidad' },
+    { icon: '🔍', tip: 'Segmentadores permiten al usuario filtrar datos interactivamente' }
+  ],
+  tips: [
+    { icon: '🏆', tip: 'Completa las lecciones para ganar XP bonus' },
+    { icon: '📁', tip: 'Organiza tus archivos .pbix por mundo/misión' },
+    { icon: '🎮', tip: 'Usa una Tarjeta para verificar tus respuestas antes de validar' }
+  ],
+  'advanced-tips': [
+    { icon: '⭐', tip: 'Esquema estrella = mejor rendimiento y claridad' },
+    { icon: '📈', tip: 'Performance Analyzer te dice qué visual es lento' },
+    { icon: '🔧', tip: 'Tabular Editor + BPA = estándares profesionales' }
+  ],
+  videos: [
+    { icon: '▶️', tip: 'Los videos complementan las lecciones escritas' },
+    { icon: '📝', tip: 'Toma notas mientras ves - practica después' },
+    { icon: '🔁', tip: 'Repite las partes difíciles hasta dominarlas' }
+  ]
+};
+
+// =========================================================================
+// GLOSSARY - Glosario rápido de términos
+// =========================================================================
+export const glossary = [
+  { term: 'DAX', definition: 'Data Analysis Expressions - lenguaje de fórmulas de Power BI', category: 'modeling' },
+  { term: 'Medida', definition: 'Cálculo dinámico que se evalúa según el contexto de filtros', category: 'modeling' },
+  { term: 'Columna Calculada', definition: 'Columna con valor fijo calculado al cargar datos', category: 'modeling' },
+  { term: 'Power Query', definition: 'Motor ETL para transformar y limpiar datos', category: 'data' },
+  { term: 'ETL', definition: 'Extract, Transform, Load - proceso de preparación de datos', category: 'data' },
+  { term: 'Segmentador', definition: 'Filtro visual interactivo para dashboards', category: 'viz' },
+  { term: 'KPI', definition: 'Key Performance Indicator - métrica clave del negocio', category: 'viz' },
+  { term: 'Contexto de Filtro', definition: 'Conjunto de filtros activos que afectan un cálculo', category: 'modeling' },
+  { term: 'Cardinalidad', definition: 'Número de valores únicos en una columna', category: 'data' },
+  { term: 'Esquema Estrella', definition: 'Modelo con una tabla de hechos central y dimensiones', category: 'advanced-tips' },
+  { term: 'CALCULATE', definition: 'Función DAX que modifica el contexto de filtro', category: 'modeling' },
+  { term: 'DirectQuery', definition: 'Modo de conexión en tiempo real sin importar datos', category: 'data' }
+];
+
+// =========================================================================
+// QUIZZES - Preguntas por lección (opcionales, dan XP bonus)
+// =========================================================================
+export const lessonQuizzes = {
+  'pbi-intro': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Cuál es el límite de filas de Power BI comparado con Excel?',
+        options: ['1 millón', '100 mil', 'Millones sin problema', '500 mil'],
+        correctIndex: 2,
+        explanation: 'Power BI puede manejar millones de filas gracias a su motor de compresión columnar.'
+      },
+      {
+        id: 'q2',
+        question: '¿Dónde creas tus reportes de Power BI?',
+        options: ['Power BI Service', 'Power BI Mobile', 'Power BI Desktop', 'Excel'],
+        correctIndex: 2,
+        explanation: 'Power BI Desktop es la aplicación gratuita donde creas y diseñas tus reportes.'
+      }
+    ],
+    xpBonus: 15
+  },
+  'pbi-interface': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Cuántas vistas principales tiene Power BI Desktop?',
+        options: ['2', '3', '4', '5'],
+        correctIndex: 1,
+        explanation: 'Las 3 vistas son: Reporte, Datos y Modelo.'
+      },
+      {
+        id: 'q2',
+        question: '¿Qué atajo ejecuta una medida DAX?',
+        options: ['F5', 'Ctrl + S', 'Ctrl + Enter', 'Alt + Enter'],
+        correctIndex: 2,
+        explanation: 'Ctrl + Enter confirma y ejecuta la medida DAX que estás escribiendo.'
+      }
+    ],
+    xpBonus: 15
+  },
+  'dax-intro': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Cuál es la diferencia principal entre Medida y Columna Calculada?',
+        options: [
+          'No hay diferencia',
+          'Medida se calcula al visualizar, Columna al cargar',
+          'Columna se calcula al visualizar, Medida al cargar',
+          'Ambas se calculan al cargar'
+        ],
+        correctIndex: 1,
+        explanation: 'Las medidas son dinámicas y se recalculan según filtros. Las columnas calculadas se evalúan una vez al cargar.'
+      },
+      {
+        id: 'q2',
+        question: '¿Cuál es la sintaxis correcta para sumar una columna?',
+        options: ['SUM(Amount)', 'SUM(Sales.Amount)', 'SUM(Sales[Amount])', 'SUMA(Sales[Amount])'],
+        correctIndex: 2,
+        explanation: 'En DAX siempre usamos Tabla[Columna] para referenciar columnas.'
+      }
+    ],
+    xpBonus: 20
+  },
+  'calculate-filter': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Qué hace la función CALCULATE?',
+        options: [
+          'Suma valores',
+          'Calcula promedios',
+          'Evalúa una expresión modificando el contexto de filtro',
+          'Cuenta filas'
+        ],
+        correctIndex: 2,
+        explanation: 'CALCULATE es la función más poderosa de DAX porque permite modificar qué datos se incluyen en un cálculo.'
+      },
+      {
+        id: 'q2',
+        question: 'Si tienes múltiples filtros en CALCULATE, ¿cómo se combinan por defecto?',
+        options: ['Con OR', 'Con AND', 'Se ignora el segundo', 'Da error'],
+        correctIndex: 1,
+        explanation: 'Los filtros en CALCULATE se combinan con AND implícito - todos deben cumplirse.'
+      }
+    ],
+    xpBonus: 25
+  },
+  'power-query-basics': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Qué botón debes presionar para guardar los cambios de Power Query?',
+        options: ['Guardar', 'Aplicar', 'Cerrar y aplicar', 'Confirmar'],
+        correctIndex: 2,
+        explanation: 'Siempre debes hacer click en "Cerrar y aplicar" para que los cambios surtan efecto.'
+      },
+      {
+        id: 'q2',
+        question: '¿Para qué sirve el panel "Pasos aplicados"?',
+        options: [
+          'Ver errores',
+          'Historial de transformaciones que puedes editar o eliminar',
+          'Lista de columnas',
+          'Mostrar tipos de datos'
+        ],
+        correctIndex: 1,
+        explanation: 'Pasos aplicados es como un historial de deshacer permanente - puedes volver atrás en cualquier momento.'
+      }
+    ],
+    xpBonus: 20
+  },
+  'sum-average-count': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Cuál es la diferencia entre COUNT y COUNTROWS?',
+        options: [
+          'No hay diferencia',
+          'COUNT cuenta números en una columna, COUNTROWS cuenta todas las filas',
+          'COUNTROWS es más lento',
+          'COUNT incluye nulos'
+        ],
+        correctIndex: 1,
+        explanation: 'COUNT cuenta celdas con números (ignora nulos), COUNTROWS cuenta TODAS las filas de una tabla.'
+      }
+    ],
+    xpBonus: 15
+  },
+  'divide-safe': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Qué retorna DIVIDE(10, 0, 999)?',
+        options: ['Error', '0', '999', 'Infinito'],
+        correctIndex: 2,
+        explanation: 'El tercer parámetro de DIVIDE es el valor a retornar cuando hay división por cero.'
+      }
+    ],
+    xpBonus: 10
+  },
+  'chart-types': {
+    questions: [
+      {
+        id: 'q1',
+        question: '¿Qué tipo de gráfico es mejor para mostrar tendencia en el tiempo?',
+        options: ['Barras', 'Pie', 'Líneas', 'Donut'],
+        correctIndex: 2,
+        explanation: 'Los gráficos de líneas son ideales para mostrar evolución y tendencias temporales.'
+      },
+      {
+        id: 'q2',
+        question: '¿Cuántos visuales máximo recomienda la regla de oro por página?',
+        options: ['3-4', '5-6', '8-10', 'Sin límite'],
+        correctIndex: 1,
+        explanation: 'Máximo 5-6 visuales por página para mantener la claridad y evitar sobrecarga cognitiva.'
+      }
+    ],
+    xpBonus: 15
+  }
+};
+
 export const academyCategories = [
   {
     id: 'basics',
     title: 'Fundamentos',
     icon: '📊',
     description: 'Primeros pasos esenciales.',
-    gradient: 'linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%)'
+    gradient: 'linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%)',
+    lessonCount: 3,
+    estimatedTime: '23 min'
   },
   {
     id: 'data',
     title: 'Datos',
     icon: '🔌',
     description: 'Conexión y limpieza de datos.',
-    gradient: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)'
+    gradient: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
+    lessonCount: 4,
+    estimatedTime: '38 min'
   },
   {
     id: 'advanced-tips',
     title: 'Tips Avanzados',
     icon: '🚀',
     description: 'Buenas prácticas pro (junior → senior).',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    lessonCount: 6,
+    estimatedTime: '45 min'
   },
   {
     id: 'modeling',
     title: 'DAX',
     icon: '🧮',
     description: 'Fórmulas y cálculos poderosos.',
-    gradient: 'linear-gradient(135deg, #be93c5 0%, #7bc6cc 100%)'
+    gradient: 'linear-gradient(135deg, #be93c5 0%, #7bc6cc 100%)',
+    lessonCount: 5,
+    estimatedTime: '48 min'
   },
   {
     id: 'viz',
     title: 'Visualización',
     icon: '🎨',
     description: 'Gráficos y dashboards.',
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    lessonCount: 3,
+    estimatedTime: '21 min'
   },
   {
     id: 'tips',
     title: 'Tips del Juego',
     icon: '🎮',
     description: 'Atajos para completar misiones.',
-    gradient: 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)'
+    gradient: 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)',
+    lessonCount: 5,
+    estimatedTime: '31 min'
   },
   {
     id: 'videos',
     title: 'Videos',
     icon: '🎬',
     description: 'Tutoriales en video de YouTube.',
-    gradient: 'linear-gradient(135deg, #FF0000 0%, #CC0000 100%)'
+    gradient: 'linear-gradient(135deg, #FF0000 0%, #CC0000 100%)',
+    lessonCount: 4,
+    estimatedTime: '40 min'
   }
 ];
 
