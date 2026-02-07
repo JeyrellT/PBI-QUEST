@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Brain, Eye, Zap, Target,
@@ -198,12 +198,23 @@ const PrimingSection = ({ priming, onComplete, savedState, onSaveState }) => {
 
 // ─── Componente: Chunking Visual ──────────────────────────────
 const ChunkingSection = ({ chunks, savedState, onSaveState, onChunkComplete }) => {
-    const [activeChunk, setActiveChunk] = useState(savedState?.activeChunk || 0);
+    const [activeChunk, setActiveChunk] = useState(() => {
+        const fallback = 0;
+        const idx = savedState?.activeChunk ?? fallback;
+        const maxIndex = Math.max(0, (chunks?.length || 0) - 1);
+        return Math.max(0, Math.min(idx, maxIndex));
+    });
     const [completedChunks, setCompletedChunks] = useState(
         new Set(savedState?.completedChunks || [])
     );
 
     if (!chunks?.length) return null;
+
+    useEffect(() => {
+        if (activeChunk >= chunks.length) {
+            setActiveChunk(0);
+        }
+    }, [activeChunk, chunks.length]);
 
     const markDone = (idx) => {
         const newCompleted = new Set([...completedChunks, idx]);
@@ -228,6 +239,9 @@ const ChunkingSection = ({ chunks, savedState, onSaveState, onChunkComplete }) =
     };
 
     const allComplete = completedChunks.size === chunks.length;
+
+    const activeChunkData = chunks[activeChunk] || chunks[0];
+    if (!activeChunkData) return null;
 
     return (
         <div className="neuro-section chunking neuro-fade-in">
@@ -267,28 +281,28 @@ const ChunkingSection = ({ chunks, savedState, onSaveState, onChunkComplete }) =
                 >
                     <div className="neuro-chunk-card">
                         <div className="neuro-chunk-title">
-                            <span className="emoji">{chunks[activeChunk].emoji}</span>
-                            <h5>{chunks[activeChunk].title}</h5>
+                            <span className="emoji">{activeChunkData.emoji}</span>
+                            <h5>{activeChunkData.title}</h5>
                             <span className="neuro-chunk-badge">
                                 {activeChunk + 1}/{chunks.length}
                             </span>
                         </div>
 
                         <p className="neuro-chunk-content">
-                            {chunks[activeChunk].content}
+                            {activeChunkData.content}
                         </p>
 
-                        {chunks[activeChunk].visualHint && (
+                        {activeChunkData.visualHint && (
                             <div className="neuro-insight-box visual">
                                 <Eye size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
-                                <span>{chunks[activeChunk].visualHint}</span>
+                                <span>{activeChunkData.visualHint}</span>
                             </div>
                         )}
 
-                        {chunks[activeChunk].analogy && (
+                        {activeChunkData.analogy && (
                             <div className="neuro-insight-box analogy">
                                 <Lightbulb size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
-                                <span>Analogía: {chunks[activeChunk].analogy}</span>
+                                <span>Analogía: {activeChunkData.analogy}</span>
                             </div>
                         )}
                     </div>

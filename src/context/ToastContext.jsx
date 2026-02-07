@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { getAssetPath } from '../utils/assetPath';
 
 const ToastContext = createContext({
     showToast: (message, type, options) => console.log('Toast:', message, type, options)
@@ -10,12 +11,12 @@ export const useToast = () => useContext(ToastContext);
 
 // Mapeo de tipos a imágenes predeterminadas
 const DEFAULT_IMAGES = {
-    success: '/images/ui/toast-success.png',
-    error: '/images/ui/toast-error.png',
-    info: '/images/ui/toast-info.png',
-    levelup: '/images/ui/toast-levelup.png',
-    streak: '/images/ui/toast-streak.png',
-    achievement: '/images/ui/toast-achievement.png'
+    success: getAssetPath('/images/ui/toast-success.png'),
+    error: getAssetPath('/images/ui/toast-error.png'),
+    info: getAssetPath('/images/ui/toast-info.png'),
+    levelup: getAssetPath('/images/ui/toast-levelup.png'),
+    streak: getAssetPath('/images/ui/toast-streak.png'),
+    achievement: getAssetPath('/images/ui/toast-achievement.png')
 };
 
 const DEFAULT_TITLES = {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CheckCircle, XCircle, AlertTriangle, HelpCircle,
@@ -330,6 +330,10 @@ const MissionValidator = ({ mission, datasetSession, onValidationComplete }) => 
         setHintsUsed(0);
         setRevealedAnswers(false);
     };
+
+    useEffect(() => {
+        resetValidation();
+    }, [mission?.id]);
 
     // Generar hints basados en los tips de la misión
     const hints = mission?.tips || [];
